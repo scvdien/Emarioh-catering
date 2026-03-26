@@ -1,12 +1,18 @@
-# Emarioh Catering Services UI
+# Emarioh-catering
 
-Simple static UI lang ito.
+Admin dashboard UI for Emarioh Catering Services.
 
 ## Current structure
 
 ```text
 emarioh-catering-services/
 |-- index.html
+|-- clients.html
+|-- events.html
+|-- invoices.html
+|-- menus.html
+|-- messages.html
+|-- settings.html
 |-- assets/
 |   |-- css/
 |   |   `-- style.css
@@ -19,7 +25,8 @@ emarioh-catering-services/
 ## Notes
 
 - `index.html` is the admin dashboard UI.
-- `assets/css/style.css` contains the styles.
+- Additional modules are available for events, invoices, clients, menus, messages, and settings.
+- `assets/css/style.css` contains the shared styles.
 - `assets/js/index.js` contains simple frontend interactions.
-- `assets/images/` is reserved for logos, icons, and photos.
+- `assets/images/` stores logos, icons, and profile images.
 - No backend files for now.
