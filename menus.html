@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emarioh Catering Services Menus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-shell container-fluid">
+        <div class="dashboard-frame">
+            <aside class="dashboard-sidebar offcanvas-xl offcanvas-start border-0" tabindex="-1" id="dashboardSidebar" aria-labelledby="dashboardSidebarLabel">
+                <div class="offcanvas-header d-xl-none sidebar-mobile-header">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+
+                <div class="offcanvas-body p-0">
+                    <div class="sidebar-inner d-flex flex-column h-100">
+                        <div class="sidebar-brand">
+                            <a href="index.html" class="sidebar-brand__link text-decoration-none" id="dashboardSidebarLabel" aria-label="Emarioh Catering Services Menus">
+                                <span class="sidebar-brand__frame">
+                                    <img src="assets/images/logo.jpg" alt="Emarioh Catering Services" class="sidebar-brand__logo">
+                                </span>
+                                <span class="sidebar-brand__copy">
+                                    <span class="sidebar-brand__name">Emarioh</span>
+                                    <span class="sidebar-brand__sub">Catering Services</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <div class="sidebar-divider" aria-hidden="true"></div>
+                        <nav class="dashboard-nav nav flex-column" aria-label="Sidebar navigation">
+                            <a class="nav-link" href="index.html">
+                                <span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span>
+                                <span>Dashboard</span>
+                            </a>
+                            <a class="nav-link" href="events.html">
+                                <span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span>
+                                <span>Events</span>
+                            </a>
+                            <a class="nav-link" href="invoices.html">
+                                <span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span>
+                                <span>Invoices</span>
+                            </a>
+                            <a class="nav-link" href="clients.html">
+                                <span class="nav-link__icon"><i class="bi bi-people"></i></span>
+                                <span>Clients</span>
+                            </a>
+                            <a class="nav-link active" href="menus.html">
+                                <span class="nav-link__icon"><i class="bi bi-journal-text"></i></span>
+                                <span>Menus</span>
+                            </a>
+                            <a class="nav-link" href="#">
+                                <span class="nav-link__icon"><i class="bi bi-person-badge"></i></span>
+                                <span>Staff</span>
+                            </a>
+                            <a class="nav-link" href="messages.html">
+                                <span class="nav-link__icon"><i class="bi bi-chat-left-text"></i></span>
+                                <span>Messages</span>
+                            </a>
+                            <a class="nav-link" href="settings.html">
+                                <span class="nav-link__icon"><i class="bi bi-gear"></i></span>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+
+                        <div class="sidebar-footer mt-auto">
+                            <div class="sidebar-account">
+                                <span class="avatar avatar--photo">
+                                    <img src="assets/images/admin-profile.svg" alt="Juan Dela Cruz profile picture" class="avatar__image">
+                                </span>
+
+                                <div class="sidebar-account__body">
+                                    <p class="sidebar-account__name">Juan Dela Cruz</p>
+                                    <p class="sidebar-account__role">Administrator</p>
+                                </div>
+                            </div>
+
+                            <a class="sidebar-logout" href="#">
+                                <span class="sidebar-logout__icon">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                </span>
+                                <span class="sidebar-logout__label">Log out</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="dashboard-main">
+                <header class="dashboard-topbar">
+                    <div class="topbar-leading">
+                        <button class="btn mobile-menu-button d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashboardSidebar" aria-controls="dashboardSidebar" aria-label="Open navigation">
+                            <i class="bi bi-list"></i>
+                        </button>
+
+                        <div class="topbar-copy">
+                            <h1 class="topbar-copy__title">Menus Module</h1>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="dashboard-content">
+                    <section class="metrics-grid">
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--slate">
+                                <i class="bi bi-journal-richtext"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Active Menus</p>
+                                <p class="metric-card__value">28</p>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--olive">
+                                <i class="bi bi-stars"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Signature Packages</p>
+                                <p class="metric-card__value">12</p>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--amber">
+                                <i class="bi bi-flower1"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Seasonal Specials</p>
+                                <p class="metric-card__value">4</p>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--gold">
+                                <i class="bi bi-fire"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Best Sellers</p>
+                                <p class="metric-card__value">9</p>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="content-grid">
+                        <div class="content-main">
+                            <section class="surface-card">
+                                <div class="panel-heading">
+                                    <div>
+                                        <p class="panel-heading__eyebrow">Catalog</p>
+                                        <h2>Menu Catalog</h2>
+                                    </div>
+                                    <a href="#">Add menu</a>
+                                </div>
+
+                                <div class="table-responsive dashboard-table-wrap">
+                                    <table class="admin-table admin-table--menus">
+                                        <thead>
+                                            <tr>
+                                                <th>Package</th>
+                                                <th>Category</th>
+                                                <th>Serving Size</th>
+                                                <th>Price Range</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Premium Buffet</td>
+                                                <td>Buffet</td>
+                                                <td>80-100 pax</td>
+                                                <td>PHP 45,000</td>
+                                                <td><span class="menu-badge menu-badge--featured">Featured</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Classic Celebration</td>
+                                                <td>Party Package</td>
+                                                <td>50-70 pax</td>
+                                                <td>PHP 28,000</td>
+                                                <td><span class="menu-badge menu-badge--active">Active</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Executive Lunch</td>
+                                                <td>Corporate</td>
+                                                <td>30-50 pax</td>
+                                                <td>PHP 18,500</td>
+                                                <td><span class="menu-badge menu-badge--active">Active</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Signature Wedding</td>
+                                                <td>Wedding</td>
+                                                <td>120-150 pax</td>
+                                                <td>PHP 95,000</td>
+                                                <td><span class="menu-badge menu-badge--seasonal">Seasonal</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+
+                            <section class="surface-card">
+                                <div class="panel-heading">
+                                    <div>
+                                        <p class="panel-heading__eyebrow">Highlights</p>
+                                        <h2>Package Highlights</h2>
+                                    </div>
+                                    <a href="#">View all menus</a>
+                                </div>
+
+                                <div class="menu-highlights">
+                                    <article class="menu-highlight">
+                                        <div class="menu-highlight__top">
+                                            <div>
+                                                <h3>Premium Buffet</h3>
+                                                <p>Best for birthdays, debuts, and weekend celebrations with crowd-favorite dishes.</p>
+                                            </div>
+                                            <span class="menu-badge menu-badge--featured">Featured</span>
+                                        </div>
+                                        <div class="menu-highlight__meta">
+                                            <span>Roast beef</span>
+                                            <span>Pasta station</span>
+                                            <span>Dessert bar</span>
+                                        </div>
+                                    </article>
+
+                                    <article class="menu-highlight">
+                                        <div class="menu-highlight__top">
+                                            <div>
+                                                <h3>Executive Lunch</h3>
+                                                <p>Simple but polished menu lineup for corporate meetings and office celebrations.</p>
+                                            </div>
+                                            <span class="menu-badge menu-badge--active">Active</span>
+                                        </div>
+                                        <div class="menu-highlight__meta">
+                                            <span>Plated meals</span>
+                                            <span>Fast setup</span>
+                                            <span>Coffee add-on</span>
+                                        </div>
+                                    </article>
+
+                                    <article class="menu-highlight">
+                                        <div class="menu-highlight__top">
+                                            <div>
+                                                <h3>Signature Wedding</h3>
+                                                <p>Elevated wedding package with grazing table, premium mains, and elegant dessert options.</p>
+                                            </div>
+                                            <span class="menu-badge menu-badge--seasonal">Seasonal</span>
+                                        </div>
+                                        <div class="menu-highlight__meta">
+                                            <span>Grazing table</span>
+                                            <span>Carving station</span>
+                                            <span>Mocktail bar</span>
+                                        </div>
+                                    </article>
+                                </div>
+                            </section>
+                        </div>
+
+                        <aside class="screen-message-panel surface-card" id="screenMessagesPanel" hidden aria-labelledby="screenMessagesTitle">
+                            <div class="screen-message-panel__header">
+                                <div>
+                                    <p class="screen-message-panel__eyebrow">Messages</p>
+                                    <h2 id="screenMessagesTitle">Kitchen Notes</h2>
+                                </div>
+                                <div class="screen-message-panel__actions">
+                                    <a href="#">View all</a>
+                                    <button type="button" class="screen-message-close" id="screenMessagesClose" aria-label="Close messages">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="screen-message-list">
+                                <article class="screen-message-item">
+                                    <span class="avatar avatar--person-one">CP</span>
+                                    <div class="screen-message-item__content">
+                                        <div class="screen-message-item__header">
+                                            <div>
+                                                <h3>Chef Paolo</h3>
+                                                <p>Kitchen Lead</p>
+                                            </div>
+                                            <span>08:10 AM</span>
+                                        </div>
+                                        <p>Premium Buffet needs updated seafood option pricing before the next inquiry batch.</p>
+                                    </div>
+                                </article>
+
+                                <article class="screen-message-item">
+                                    <span class="avatar avatar--person-two">MA</span>
+                                    <div class="screen-message-item__content">
+                                        <div class="screen-message-item__header">
+                                            <div>
+                                                <h3>Maria</h3>
+                                                <p>Operations</p>
+                                            </div>
+                                            <span>09:35 AM</span>
+                                        </div>
+                                        <p>Please tag Signature Wedding as seasonal while the premium dessert set is available.</p>
+                                    </div>
+                                </article>
+
+                                <article class="screen-message-item">
+                                    <span class="avatar avatar--person-three">JR</span>
+                                    <div class="screen-message-item__content">
+                                        <div class="screen-message-item__header">
+                                            <div>
+                                                <h3>Jessa</h3>
+                                                <p>Sales Coordinator</p>
+                                            </div>
+                                            <span>11:20 AM</span>
+                                        </div>
+                                        <p>Executive Lunch is getting more inquiries this week, so we may want a pinned quick quote option.</p>
+                                    </div>
+                                </article>
+                            </div>
+                        </aside>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="assets/js/index.js"></script>
+</body>
+</html>

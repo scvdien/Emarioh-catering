@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emarioh Catering Services Events</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="dashboard-page">
+    <div class="dashboard-shell container-fluid">
+        <div class="dashboard-frame">
+            <aside class="dashboard-sidebar offcanvas-xl offcanvas-start border-0" tabindex="-1" id="dashboardSidebar" aria-labelledby="dashboardSidebarLabel">
+                <div class="offcanvas-header d-xl-none sidebar-mobile-header">
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+
+                <div class="offcanvas-body p-0">
+                    <div class="sidebar-inner d-flex flex-column h-100">
+                        <div class="sidebar-brand">
+                            <a href="index.html" class="sidebar-brand__link text-decoration-none" id="dashboardSidebarLabel" aria-label="Emarioh Catering Services Events">
+                                <span class="sidebar-brand__frame">
+                                    <img src="assets/images/logo.jpg" alt="Emarioh Catering Services" class="sidebar-brand__logo">
+                                </span>
+                                <span class="sidebar-brand__copy">
+                                    <span class="sidebar-brand__name">Emarioh</span>
+                                    <span class="sidebar-brand__sub">Catering Services</span>
+                                </span>
+                            </a>
+                        </div>
+
+                        <div class="sidebar-divider" aria-hidden="true"></div>
+                        <nav class="dashboard-nav nav flex-column" aria-label="Sidebar navigation">
+                            <a class="nav-link" href="index.html">
+                                <span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span>
+                                <span>Dashboard</span>
+                            </a>
+                            <a class="nav-link active" href="events.html">
+                                <span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span>
+                                <span>Events</span>
+                            </a>
+                            <a class="nav-link" href="invoices.html">
+                                <span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span>
+                                <span>Invoices</span>
+                            </a>
+                            <a class="nav-link" href="clients.html">
+                                <span class="nav-link__icon"><i class="bi bi-people"></i></span>
+                                <span>Clients</span>
+                            </a>
+                            <a class="nav-link" href="menus.html">
+                                <span class="nav-link__icon"><i class="bi bi-journal-text"></i></span>
+                                <span>Menus</span>
+                            </a>
+                            <a class="nav-link" href="#">
+                                <span class="nav-link__icon"><i class="bi bi-person-badge"></i></span>
+                                <span>Staff</span>
+                            </a>
+                            <a class="nav-link" href="messages.html">
+                                <span class="nav-link__icon"><i class="bi bi-chat-left-text"></i></span>
+                                <span>Messages</span>
+                            </a>
+                            <a class="nav-link" href="settings.html">
+                                <span class="nav-link__icon"><i class="bi bi-gear"></i></span>
+                                <span>Settings</span>
+                            </a>
+                        </nav>
+
+                        <div class="sidebar-footer mt-auto">
+                            <div class="sidebar-account">
+                                <span class="avatar avatar--photo">
+                                    <img src="assets/images/admin-profile.svg" alt="Juan Dela Cruz profile picture" class="avatar__image">
+                                </span>
+
+                                <div class="sidebar-account__body">
+                                    <p class="sidebar-account__name">Juan Dela Cruz</p>
+                                    <p class="sidebar-account__role">Administrator</p>
+                                </div>
+                            </div>
+
+                            <a class="sidebar-logout" href="#">
+                                <span class="sidebar-logout__icon">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                </span>
+                                <span class="sidebar-logout__label">Log out</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="dashboard-main">
+                <header class="dashboard-topbar">
+                    <div class="topbar-leading">
+                        <button class="btn mobile-menu-button d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashboardSidebar" aria-controls="dashboardSidebar" aria-label="Open navigation">
+                            <i class="bi bi-list"></i>
+                        </button>
+
+                        <div class="topbar-copy">
+                            <h1 class="topbar-copy__title">Events Module</h1>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="dashboard-content">
+                    <section class="metrics-grid">
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--olive">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Total Events</p>
+                                <p class="metric-card__value">28</p>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--slate">
+                                <i class="bi bi-check2-circle"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Confirmed Dates</p>
+                                <p class="metric-card__value">18</p>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--amber">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Pending Approval</p>
+                                <p class="metric-card__value">4</p>
+                            </div>
+                        </article>
+
+                        <article class="metric-card">
+                            <div class="metric-card__icon metric-card__icon--gold">
+                                <i class="bi bi-stars"></i>
+                            </div>
+                            <div>
+                                <p class="metric-card__label">Open Dates</p>
+                                <p class="metric-card__value">9</p>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="content-grid">
+                        <div class="content-main">
+                            <section class="surface-card">
+                                <div class="panel-heading">
+                                    <div>
+                                        <p class="panel-heading__eyebrow">Calendar</p>
+                                        <h2>March 2026 Events</h2>
+                                    </div>
+                                    <a href="#">Monthly view</a>
+                                </div>
+
+                                <div class="event-legend">
+                                    <span class="event-legend__item">
+                                        <span class="event-legend__dot event-legend__dot--booked"></span>
+                                        Booked
+                                    </span>
+                                    <span class="event-legend__item">
+                                        <span class="event-legend__dot event-legend__dot--pending"></span>
+                                        Pending
+                                    </span>
+                                    <span class="event-legend__item">
+                                        <span class="event-legend__dot event-legend__dot--open"></span>
+                                        Available
+                                    </span>
+                                </div>
+
+                                <div class="event-calendar-scroll">
+                                    <div class="event-calendar">
+                                        <div class="event-calendar__weekdays">
+                                            <span class="event-calendar__weekday">Sun</span>
+                                            <span class="event-calendar__weekday">Mon</span>
+                                            <span class="event-calendar__weekday">Tue</span>
+                                            <span class="event-calendar__weekday">Wed</span>
+                                            <span class="event-calendar__weekday">Thu</span>
+                                            <span class="event-calendar__weekday">Fri</span>
+                                            <span class="event-calendar__weekday">Sat</span>
+                                        </div>
+
+                                        <div class="event-calendar__days">
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">1</span>
+                                                <span class="event-calendar__pill event-calendar__pill--open">Open</span>
+                                                <p class="event-calendar__note">No booking yet</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">2</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">3</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--pending">
+                                                <span class="event-calendar__date">4</span>
+                                                <span class="event-calendar__pill event-calendar__pill--pending">Pending</span>
+                                                <p class="event-calendar__note">Wedding reception</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">5</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">6</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--booked">
+                                                <span class="event-calendar__date">7</span>
+                                                <span class="event-calendar__pill event-calendar__pill--booked">Booked</span>
+                                                <p class="event-calendar__note">Corporate lunch</p>
+                                            </article>
+
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">8</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">9</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">10</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--pending">
+                                                <span class="event-calendar__date">11</span>
+                                                <span class="event-calendar__pill event-calendar__pill--pending">Pending</span>
+                                                <p class="event-calendar__note">Birthday inquiry</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">12</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">13</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--booked">
+                                                <span class="event-calendar__date">14</span>
+                                                <span class="event-calendar__pill event-calendar__pill--booked">Booked</span>
+                                                <p class="event-calendar__note">Debut celebration</p>
+                                            </article>
+
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">15</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">16</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--booked">
+                                                <span class="event-calendar__date">17</span>
+                                                <span class="event-calendar__pill event-calendar__pill--booked">Booked</span>
+                                                <p class="event-calendar__note">Baptism reception</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">18</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">19</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--pending">
+                                                <span class="event-calendar__date">20</span>
+                                                <span class="event-calendar__pill event-calendar__pill--pending">Pending</span>
+                                                <p class="event-calendar__note">Family reunion</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--booked">
+                                                <span class="event-calendar__date">21</span>
+                                                <span class="event-calendar__pill event-calendar__pill--booked">Booked</span>
+                                                <p class="event-calendar__note">Wedding day</p>
+                                            </article>
+
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">22</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">23</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">24</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">25</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--booked">
+                                                <span class="event-calendar__date">26</span>
+                                                <span class="event-calendar__pill event-calendar__pill--booked">Booked</span>
+                                                <p class="event-calendar__note">Launch event</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--pending">
+                                                <span class="event-calendar__date">27</span>
+                                                <span class="event-calendar__pill event-calendar__pill--pending">Pending</span>
+                                                <p class="event-calendar__note">Corporate dinner</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--booked">
+                                                <span class="event-calendar__date">28</span>
+                                                <span class="event-calendar__pill event-calendar__pill--booked">Booked</span>
+                                                <p class="event-calendar__note">Birthday party</p>
+                                            </article>
+
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">29</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--pending">
+                                                <span class="event-calendar__date">30</span>
+                                                <span class="event-calendar__pill event-calendar__pill--pending">Pending</span>
+                                                <p class="event-calendar__note">Christening</p>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--open">
+                                                <span class="event-calendar__date">31</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--muted">
+                                                <span class="event-calendar__date">1</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--muted">
+                                                <span class="event-calendar__date">2</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--muted">
+                                                <span class="event-calendar__date">3</span>
+                                            </article>
+                                            <article class="event-calendar__day event-calendar__day--muted">
+                                                <span class="event-calendar__date">4</span>
+                                            </article>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="surface-card">
+                                <div class="panel-heading">
+                                    <div>
+                                        <p class="panel-heading__eyebrow">Schedule</p>
+                                        <h2>Upcoming Event Lineup</h2>
+                                    </div>
+                                    <a href="#">View all events</a>
+                                </div>
+
+                                <div class="table-responsive dashboard-table-wrap">
+                                    <table class="admin-table admin-table--events">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Client</th>
+                                                <th>Occasion</th>
+                                                <th>Venue</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Mar 28</td>
+                                                <td>James Bautista</td>
+                                                <td>Birthday Party</td>
+                                                <td>Garden Pavilion</td>
+                                                <td><span class="status-pill status-pill--confirmed">Booked</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Mar 30</td>
+                                                <td>Sarah Reyes</td>
+                                                <td>Christening</td>
+                                                <td>Reyes Residence</td>
+                                                <td><span class="status-pill status-pill--pending">Pending</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Apr 02</td>
+                                                <td>David Tan</td>
+                                                <td>Corporate Lunch</td>
+                                                <td>Tan Office Hall</td>
+                                                <td><span class="status-pill status-pill--confirmed">Booked</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Apr 04</td>
+                                                <td>Angela Cruz</td>
+                                                <td>Wedding Reception</td>
+                                                <td>Grand Atrium</td>
+                                                <td><span class="status-pill status-pill--pending">Pending</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </div>
+
+                        <aside class="screen-message-panel surface-card" id="screenMessagesPanel" hidden aria-labelledby="screenMessagesTitle">
+                            <div class="screen-message-panel__header">
+                                <div>
+                                    <p class="screen-message-panel__eyebrow">Messages</p>
+                                    <h2 id="screenMessagesTitle">Event Notes</h2>
+                                </div>
+                                <div class="screen-message-panel__actions">
+                                    <a href="#">View all</a>
+                                    <button type="button" class="screen-message-close" id="screenMessagesClose" aria-label="Close messages">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="screen-message-list">
+                                <article class="screen-message-item">
+                                    <span class="avatar avatar--person-one">JB</span>
+                                    <div class="screen-message-item__body">
+                                        <div class="screen-message-head">
+                                            <h3>James Bautista</h3>
+                                            <span>Today</span>
+                                        </div>
+                                        <p class="screen-message-tag">Setup Request <span>Birthday party</span></p>
+                                        <p class="screen-message-text">Asked for balloon arch setup before 2:00 PM arrival time.</p>
+                                    </div>
+                                </article>
+
+                                <article class="screen-message-item">
+                                    <span class="avatar avatar--person-two">SR</span>
+                                    <div class="screen-message-item__body">
+                                        <div class="screen-message-head">
+                                            <h3>Sarah Reyes</h3>
+                                            <span>Yesterday</span>
+                                        </div>
+                                        <p class="screen-message-tag">Guest Update <span>Christening</span></p>
+                                        <p class="screen-message-text">Revised guest count from 70 to 85 and requested extra dessert trays.</p>
+                                    </div>
+                                </article>
+
+                                <article class="screen-message-item">
+                                    <span class="avatar avatar--person-three">DT</span>
+                                    <div class="screen-message-item__body">
+                                        <div class="screen-message-head">
+                                            <h3>David Tan</h3>
+                                            <span>2 days ago</span>
+                                        </div>
+                                        <p class="screen-message-tag">Logistics <span>Corporate lunch</span></p>
+                                        <p class="screen-message-text">Requested loading bay access for the catering team by 9:30 AM.</p>
+                                    </div>
+                                </article>
+                            </div>
+                        </aside>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="assets/js/index.js"></script>
+</body>
+</html>
