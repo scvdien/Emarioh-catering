@@ -1,0 +1,750 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Luxurious and professional public page for Emarioh Catering Services with packages, menu highlights, gallery, and online booking access.">
+    <title>Emarioh Catering Services | Public Page</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="assets/css/public-page.css?v=20260331au">
+    <style>
+        @media (min-width: 992px) {
+            .hero {
+                min-height: calc(100vh - 6.4rem);
+            }
+
+            .hero > .public-shell {
+                min-height: inherit;
+                display: flex;
+                align-items: stretch;
+            }
+
+            .hero__panel {
+                width: 100%;
+                min-height: inherit;
+                padding-bottom: 5.9rem;
+            }
+
+            .public-header__actions {
+                gap: 0.6rem;
+            }
+        }
+
+        .public-proof--hero-cards {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-column: 1 / -1;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0;
+            margin-top: 0.82rem;
+            padding: 0.22rem 0.32rem;
+            border: 1px solid rgba(255, 231, 189, 0.18);
+            border-radius: 1.15rem;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .public-proof--hero-cards::before {
+            content: "";
+            position: absolute;
+            inset: 0.22rem;
+            border: 1px solid rgba(255, 231, 189, 0.06);
+            border-radius: 0.94rem;
+            pointer-events: none;
+        }
+
+        .public-proof--hero-cards .public-proof__item {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            gap: 0.62rem;
+            min-height: 4.25rem;
+            padding: 0.52rem 0.88rem;
+            background: transparent;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .public-proof--hero-cards .public-proof__item:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 0.78rem;
+            right: 0;
+            width: 1px;
+            height: calc(100% - 1.56rem);
+            background: linear-gradient(180deg, rgba(255, 231, 189, 0), rgba(255, 231, 189, 0.2), rgba(255, 231, 189, 0));
+        }
+
+        .public-proof--hero-cards .public-proof__item i {
+            width: 2rem;
+            height: 2rem;
+            color: #f0cf83;
+            font-size: 0.84rem;
+            background: linear-gradient(135deg, rgba(240, 207, 131, 0.08), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(240, 207, 131, 0.1);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        .public-proof--hero-cards .public-proof__item strong {
+            color: #fff8ec;
+            font-family: "Manrope", sans-serif;
+            font-size: 0.86rem;
+            font-weight: 700;
+            line-height: 1.16;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .public-proof--hero-cards .public-proof__item span {
+            display: block;
+            margin-top: 0.14rem;
+            color: rgba(255, 244, 229, 0.76);
+            font-size: 0.74rem;
+            line-height: 1.22;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 1199.98px) {
+            .public-proof--hero-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.62rem;
+                padding: 0;
+                border: 0;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .public-proof--hero-cards::before {
+                content: none;
+            }
+
+            .public-proof--hero-cards .public-proof__item {
+                min-height: 0;
+                padding: 0.82rem 0.92rem;
+                border: 1px solid rgba(255, 231, 189, 0.14);
+                border-radius: 1.18rem;
+                background: rgba(255, 255, 255, 0.02);
+                box-shadow: none;
+            }
+
+            .public-proof--hero-cards .public-proof__item:not(:last-child)::after {
+                content: none;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .public-proof--hero-cards {
+                grid-template-columns: 1fr;
+                gap: 0.72rem;
+                margin-top: 0.75rem;
+            }
+
+            .public-proof--hero-cards .public-proof__item {
+                padding: 0.8rem 0.85rem;
+                border-radius: 1.12rem;
+            }
+
+            .public-proof--hero-cards .public-proof__item strong {
+                font-size: 0.94rem;
+            }
+
+            .public-proof--hero-cards .public-proof__item span {
+                font-size: 0.78rem;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .public-proof--hero-cards {
+                position: absolute;
+                right: 2.35rem;
+                bottom: 1.2rem;
+                left: 2.35rem;
+                margin-top: 0;
+                padding: 0.72rem 0.38rem 0.14rem;
+                border: 0;
+                border-top: 1px solid rgba(231, 196, 112, 0.5);
+                border-radius: 0;
+                background: transparent;
+                box-shadow: none;
+            }
+
+            .public-proof--hero-cards::before {
+                content: none;
+            }
+
+            .public-proof--hero-cards .public-proof__item {
+                gap: 0.68rem;
+                min-height: 0;
+                padding: 0.3rem 1.05rem 0.42rem;
+            }
+
+            .public-proof--hero-cards .public-proof__item:not(:last-child)::after {
+                top: 0.18rem;
+                height: calc(100% - 0.36rem);
+                background: linear-gradient(180deg, rgba(255, 231, 189, 0), rgba(255, 231, 189, 0.18), rgba(255, 231, 189, 0));
+            }
+
+            .public-proof--hero-cards .public-proof__item i {
+                width: 1.95rem;
+                height: 1.95rem;
+                font-size: 0.82rem;
+                background: linear-gradient(135deg, rgba(240, 207, 131, 0.06), rgba(255, 255, 255, 0.02));
+                border-color: rgba(240, 207, 131, 0.08);
+                box-shadow: none;
+            }
+
+            .public-proof--hero-cards .public-proof__item strong {
+                font-size: 0.9rem;
+            }
+
+            .public-proof--hero-cards .public-proof__item span {
+                margin-top: 0.12rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="public-page">
+    <header class="public-header">
+        <div class="public-shell public-header__bar">
+            <a href="public-page.html" class="public-brand" aria-label="Emarioh Catering Services home">
+                <span class="public-brand__frame">
+                    <img src="assets/images/logo.jpg" alt="Emarioh Catering Services logo" class="public-brand__logo">
+                </span>
+                <span class="public-brand__copy">
+                    <span class="public-brand__name">Emarioh</span>
+                    <span class="public-brand__sub">Catering Services</span>
+                </span>
+            </a>
+
+            <nav class="public-nav" aria-label="Primary navigation">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#services">Services</a>
+                <a href="#packages">Packages</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#contact">Contact</a>
+            </nav>
+
+            <div class="public-header__actions">
+                <nav class="public-header__socials" aria-label="Contact and social links">
+                    <a class="public-header__social" href="#" aria-label="Facebook page link placeholder" title="Facebook">
+                        <i class="bi bi-facebook" aria-hidden="true"></i>
+                    </a>
+                    <a class="public-header__social" href="mailto:emariohcafeandrestaurant@gmail.com" aria-label="Email Emarioh Cafe and Restaurant" title="Email">
+                        <i class="bi bi-envelope" aria-hidden="true"></i>
+                    </a>
+                    <a class="public-header__social" href="#" aria-label="Messenger page link placeholder" title="Messenger">
+                        <i class="bi bi-messenger" aria-hidden="true"></i>
+                    </a>
+                </nav>
+                <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="publicMobileNav" aria-label="Open navigation menu">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="public-mobile-nav" id="publicMobileNav" hidden>
+            <div class="public-shell public-mobile-nav__inner">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#services">Services</a>
+                <a href="#packages">Packages</a>
+                <a href="#gallery">Gallery</a>
+                <a href="#contact">Contact</a>
+                <a href="login.html">Client Portal</a>
+                <a href="registration.html">Book an Event</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="public-shell">
+                <div class="hero__panel" data-reveal>
+                    <div class="hero__copy">
+                        <p class="section-kicker section-kicker--light">For Weddings, Birthdays, and Special Events</p>
+                        <h1 class="hero__headline">
+                            <span class="hero__headline-script">Emarioh</span>
+                            <span class="hero__headline-brand">Catering Services</span>
+                        </h1>
+                        <p class="hero__lead">Delicious food, elegant presentation, and hassle-free booking for every celebration.</p>
+
+                        <div class="hero__actions">
+                            <a class="public-button public-button--gold" href="registration.html">Book An Event</a>
+                            <a class="public-button public-button--outline" href="#packages">View Packages</a>
+                        </div>
+                    </div>
+
+                    <div class="hero__visual" aria-hidden="true">
+                        <div class="hero__image-card"></div>
+                    </div>
+
+                    <div class="public-proof public-proof--hero-cards" data-reveal>
+                        <article class="public-proof__item">
+                            <i class="bi bi-balloon-heart"></i>
+                            <div>
+                                <strong>Weddings &amp; Birthdays</strong>
+                                <span>Weddings &amp; Birthdays</span>
+                            </div>
+                        </article>
+                        <article class="public-proof__item">
+                            <i class="bi bi-briefcase"></i>
+                            <div>
+                                <strong>Corporate Catering</strong>
+                                <span>Corporate Catering</span>
+                            </div>
+                        </article>
+                        <article class="public-proof__item">
+                            <i class="bi bi-journal-check"></i>
+                            <div>
+                                <strong>Flexible Packages</strong>
+                                <span>Flexible Packages</span>
+                            </div>
+                        </article>
+                        <article class="public-proof__item">
+                            <i class="bi bi-stars"></i>
+                            <div>
+                                <strong>Elegant Presentation</strong>
+                                <span>Elegant Presentation</span>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="public-section" id="about">
+            <div class="public-shell">
+                <div class="about-board" data-reveal>
+                    <div class="about-board__header">
+                        <p class="section-kicker about-board__kicker">About Emarioh</p>
+                        <h2>About Emarioh</h2>
+                        <p>Professional catering for weddings, birthdays, corporate events, and special occasions with reliable service, elegant setup, flexible menus, and easy online booking.</p>
+                    </div>
+
+                    <div class="about-board__lead" data-reveal>
+                        <p>We create polished celebrations with coordinated service, curated food selections, and refined presentation designed to make every gathering feel special from planning to final setup.</p>
+                    </div>
+
+                    <div class="about-board__grid">
+                        <article class="about-feature-card" data-reveal>
+                            <span class="about-feature-card__icon" aria-hidden="true">
+                                <i class="bi bi-people"></i>
+                            </span>
+                            <h3>Reliable Service</h3>
+                            <p>Coordinated support before, during, and after your event for a smoother celebration experience.</p>
+                        </article>
+                        <article class="about-feature-card" data-reveal>
+                            <span class="about-feature-card__icon" aria-hidden="true">
+                                <i class="bi bi-journal-check"></i>
+                            </span>
+                            <h3>Flexible Menu</h3>
+                            <p>Food selections tailored to your package, guest count, and preferred dining style.</p>
+                        </article>
+                        <article class="about-feature-card" data-reveal>
+                            <span class="about-feature-card__icon" aria-hidden="true">
+                                <i class="bi bi-stars"></i>
+                            </span>
+                            <h3>Elegant Setup</h3>
+                            <p>Refined buffet styling and polished presentation that elevate weddings, birthdays, and formal events.</p>
+                        </article>
+                        <article class="about-feature-card" data-reveal>
+                            <span class="about-feature-card__icon" aria-hidden="true">
+                                <i class="bi bi-calendar2-check"></i>
+                            </span>
+                            <h3>Easy Booking</h3>
+                            <p>Reserve online, review your options clearly, and receive updates throughout your booking process.</p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="public-section public-section--soft" id="services">
+            <div class="public-shell">
+                <div class="services-board" data-reveal>
+                    <div class="services-board__header">
+                        <p class="section-kicker services-board__kicker">Services</p>
+                        <h2>Our Services</h2>
+                        <p>Discover how we can make your event truly special with elegant setups, polished catering, and celebration-ready support.</p>
+                    </div>
+
+                    <div class="services-board__grid">
+                        <article class="services-card" data-reveal>
+                            <div class="services-card__inner">
+                                <h3 class="services-card__top-title">Weddings &amp; Birthdays</h3>
+                                <figure class="services-card__visual">
+                                    <img src="assets/images/room1.jpg" alt="Elegant wedding and birthday catering setup" loading="lazy">
+                                </figure>
+                                <div class="services-card__body">
+                                    <p class="services-card__body-title">Weddings &amp; Birthdays</p>
+                                    <p class="services-card__description">Exquisite setups, curated menus, and polished catering service for weddings, birthdays, and meaningful family celebrations.</p>
+                                    <a class="public-button services-card__button" href="#packages">Learn More</a>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="services-card" data-reveal>
+                            <div class="services-card__inner">
+                                <h3 class="services-card__top-title">Corporate Catering</h3>
+                                <figure class="services-card__visual">
+                                    <img src="assets/images/food3.jpg" alt="Professional corporate catering buffet service" loading="lazy">
+                                </figure>
+                                <div class="services-card__body">
+                                    <p class="services-card__body-title">Corporate Catering</p>
+                                    <p class="services-card__description">Professional catering support for meetings, seminars, trainings, company gatherings, and formal corporate events.</p>
+                                    <a class="public-button services-card__button" href="#packages">Learn More</a>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="services-card" data-reveal>
+                            <div class="services-card__inner">
+                                <h3 class="services-card__top-title">Debut &amp; Social Events</h3>
+                                <figure class="services-card__visual">
+                                    <img src="assets/images/room2.jpg" alt="Styled setup for debut and social events" loading="lazy">
+                                </figure>
+                                <div class="services-card__body">
+                                    <p class="services-card__body-title">Debut &amp; Social Events</p>
+                                    <p class="services-card__description">Memorable styling, buffet presentation, and guest-ready service for debuts, anniversaries, reunions, and special occasions.</p>
+                                    <a class="public-button services-card__button" href="#packages">Learn More</a>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="public-section public-section--accent" id="packages">
+            <div class="public-shell">
+                <div class="packages-board" data-reveal>
+                    <div class="packages-board__header">
+                        <p class="section-kicker packages-board__kicker">Packages</p>
+                        <h2>Our Packages</h2>
+                        <p>Discover the perfect catering package for your event. Choose from per-head offers or complete celebration packages for weddings, birthdays, and milestone gatherings.</p>
+                    </div>
+
+                    <div class="packages-board__body">
+                        <article class="packages-panel packages-panel--per-head" data-reveal>
+                            <div class="packages-panel__heading">
+                                <h3>Per-Head Packages</h3>
+                                <p>Minimum of 50 persons</p>
+                            </div>
+
+                            <div class="packages-tier-grid">
+                                <article class="packages-tier-card" data-reveal>
+                                    <p class="packages-tier-card__price">PHP 350/HEAD</p>
+                                    <ul class="packages-tier-card__list">
+                                        <li>Rice</li>
+                                        <li>Chicken</li>
+                                        <li>Pork</li>
+                                        <li>Noodles or Pasta (Choose 1)</li>
+                                        <li>Vegetables or Salad (Choose 1)</li>
+                                        <li>Beverage</li>
+                                    </ul>
+                                </article>
+
+                                <article class="packages-tier-card" data-reveal>
+                                    <p class="packages-tier-card__price">PHP 400/HEAD</p>
+                                    <ul class="packages-tier-card__list">
+                                        <li>Rice</li>
+                                        <li>Chicken</li>
+                                        <li>Pork</li>
+                                        <li>Fish</li>
+                                        <li>Vegetables or Salad (Choose 1)</li>
+                                        <li>Beverage</li>
+                                    </ul>
+                                </article>
+
+                                <article class="packages-tier-card" data-reveal>
+                                    <p class="packages-tier-card__price">PHP 500/HEAD</p>
+                                    <ul class="packages-tier-card__list">
+                                        <li>Rice</li>
+                                        <li>Soup</li>
+                                        <li>Chicken</li>
+                                        <li>Pork</li>
+                                        <li>Fish</li>
+                                        <li>Vegetables or Salad (Choose 1)</li>
+                                        <li>Beverage</li>
+                                    </ul>
+                                </article>
+
+                                <article class="packages-tier-card" data-reveal>
+                                    <p class="packages-tier-card__price">PHP 600/HEAD</p>
+                                    <ul class="packages-tier-card__list">
+                                        <li>Rice</li>
+                                        <li>Soup</li>
+                                        <li>Chicken</li>
+                                        <li>Pork</li>
+                                        <li>Fish</li>
+                                        <li>Noodles or Pasta (Choose 1)</li>
+                                        <li>Vegetables or Salad (Choose 1)</li>
+                                        <li>Beverage</li>
+                                        <li>Dessert</li>
+                                    </ul>
+                                </article>
+                            </div>
+                        </article>
+
+                        <article class="packages-panel packages-panel--event" data-reveal>
+                            <div class="packages-panel__heading">
+                                <h3>Wedding &amp; Birthday Packages</h3>
+                                <p>Complete event-ready setup for milestone celebrations</p>
+                            </div>
+
+                            <div class="packages-event-card">
+                                <div class="packages-event-card__rates" aria-label="Wedding and birthday package sizes">
+                                    <span class="packages-event-card__pill">50 pax</span>
+                                    <span class="packages-event-card__pill">100 pax</span>
+                                    <span class="packages-event-card__pill">150 pax</span>
+                                </div>
+
+                                <div class="packages-event-card__prices" aria-label="Wedding and birthday package prices">
+                                    <p class="packages-event-card__price">PHP 50,000</p>
+                                    <p class="packages-event-card__price">PHP 85,000</p>
+                                    <p class="packages-event-card__price">PHP 120,000</p>
+                                </div>
+
+                                <div class="packages-event-card__content">
+                                    <ul class="packages-event-card__list">
+                                        <li>Three main dishes: pork, chicken, and fish</li>
+                                        <li>Vegetables, soup, dessert, and one beverage choice</li>
+                                        <li>Unlimited rice, water, and ice for the full event</li>
+                                        <li>Full buffet setup and complete dining arrangement</li>
+                                        <li>Two-tier wedding or celebration cake</li>
+                                        <li>Tiffany chairs, couple couch, and styled centerpiece setup</li>
+                                        <li>Themed event styling with polished on-site service support</li>
+                                    </ul>
+
+                                    <div class="packages-event-card__actions">
+                                        <p>Ideal for weddings, debuts, birthdays, anniversaries, and elegant family celebrations.</p>
+                                        <a class="public-button public-button--gold" href="registration.html">Request This Package</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <p class="packages-board__note">Package inclusions may vary depending on the selected event type, guest count, final arrangement, and menu availability.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="public-section public-section--soft" id="gallery">
+            <div class="public-shell">
+                <div class="gallery-board" data-reveal>
+                    <div class="gallery-board__header">
+                        <p class="section-kicker gallery-board__kicker">Gallery</p>
+                        <h2>Gallery</h2>
+                        <p class="gallery-board__eyebrow">Moments We&apos;ve Made Memorable</p>
+                        <p>A glimpse of our catering setups and the beautiful events we&apos;ve been part of.</p>
+                    </div>
+
+                    <div class="gallery-toolbar" data-reveal>
+                        <button class="gallery-filter is-active" type="button" data-filter="all">All Events</button>
+                        <button class="gallery-filter" type="button" data-filter="wedding">Weddings</button>
+                        <button class="gallery-filter" type="button" data-filter="birthday">Birthdays</button>
+                        <button class="gallery-filter" type="button" data-filter="corporate">Corporate</button>
+                        <button class="gallery-filter" type="button" data-filter="social">Socials</button>
+                    </div>
+
+                    <div class="gallery-grid">
+                        <article class="gallery-card" data-category="wedding social" data-reveal>
+                            <img src="assets/images/room1.jpg" alt="Elegant wedding reception styling" loading="lazy">
+                            <span class="gallery-card__tag">Wedding Reception</span>
+                        </article>
+                        <article class="gallery-card" data-category="wedding social" data-reveal>
+                            <img src="assets/images/food3.jpg" alt="Wedding buffet spread" loading="lazy">
+                            <span class="gallery-card__tag">Wedding Buffet</span>
+                        </article>
+                        <article class="gallery-card" data-category="birthday social" data-reveal>
+                            <img src="assets/images/room2.jpg" alt="Birthday celebration styling" loading="lazy">
+                            <span class="gallery-card__tag">Birthday Celebration</span>
+                        </article>
+                        <article class="gallery-card" data-category="wedding social" data-reveal>
+                            <img src="assets/images/food1.jpg" alt="Wedding cake setup" loading="lazy">
+                            <span class="gallery-card__tag">Wedding Cake Setup</span>
+                        </article>
+                        <article class="gallery-card" data-category="corporate" data-reveal>
+                            <img src="assets/images/room3.jpg" alt="Corporate event catering setup" loading="lazy">
+                            <span class="gallery-card__tag">Corporate Event</span>
+                        </article>
+                        <article class="gallery-card" data-category="birthday social" data-reveal>
+                            <img src="assets/images/food.jpg" alt="Dessert station for social events" loading="lazy">
+                            <span class="gallery-card__tag">Dessert Station</span>
+                        </article>
+                    </div>
+
+                    <p class="gallery-board__footer" data-reveal>Every Detail. Every Occasion. Beautifully Served.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="public-section public-section--contact" id="contact">
+            <div class="public-shell">
+                <div class="contact-showcase">
+                    <div class="contact-showcase__intro" data-reveal>
+                        <h2>Get in Touch</h2>
+                        <p>Reach out for package guidance, booking questions, and event planning support.</p>
+                    </div>
+
+                    <div class="contact-highlights">
+                        <article class="contact-highlight" data-reveal>
+                            <span class="contact-highlight__icon" aria-hidden="true">
+                                <i class="bi bi-geo-alt"></i>
+                            </span>
+                            <h3>Service Area</h3>
+                            <p>Metro Manila and nearby service areas.</p>
+                        </article>
+                        <article class="contact-highlight" data-reveal>
+                            <span class="contact-highlight__icon" aria-hidden="true">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <h3>Email Us</h3>
+                            <p>portal@emarioh.local</p>
+                        </article>
+                        <article class="contact-highlight" data-reveal>
+                            <span class="contact-highlight__icon" aria-hidden="true">
+                                <i class="bi bi-telephone"></i>
+                            </span>
+                            <h3>Call Us</h3>
+                            <p>0917 555 2481</p>
+                        </article>
+                        <article class="contact-highlight" data-reveal>
+                            <span class="contact-highlight__icon" aria-hidden="true">
+                                <i class="bi bi-clock"></i>
+                            </span>
+                            <h3>Business Hours</h3>
+                            <p>Mon-Sat, 9:00 AM to 6:00 PM</p>
+                        </article>
+                    </div>
+
+                    <div class="contact-layout">
+                        <article class="contact-card contact-card--form" data-reveal>
+                            <div class="contact-card__header">
+                                <h3>Send Us A Message</h3>
+                                <p>Share your event details or package questions and our team can guide you.</p>
+                            </div>
+
+                            <form class="contact-form" action="mailto:portal@emarioh.local" method="post" enctype="text/plain">
+                                <div class="contact-form__row">
+                                    <label class="contact-field">
+                                        <span>Name</span>
+                                        <input type="text" name="Name" placeholder="Your name" autocomplete="name" required>
+                                    </label>
+
+                                    <label class="contact-field">
+                                        <span>Email</span>
+                                        <input type="email" name="Email" placeholder="Your email address" autocomplete="email" required>
+                                    </label>
+                                </div>
+
+                                <label class="contact-field contact-field--message">
+                                    <span>Message</span>
+                                    <textarea name="Message" rows="4" placeholder="Tell us about your event or reservation inquiry." required></textarea>
+                                </label>
+
+                                <div class="contact-form__actions">
+                                    <button class="public-button public-button--gold contact-form__submit" type="submit">Send Message</button>
+                                    <p class="contact-form__note">Or go straight to online booking.</p>
+                                </div>
+                            </form>
+                        </article>
+
+                        <aside class="contact-card contact-card--info" data-reveal>
+                            <div class="contact-direct">
+                                <article class="contact-direct__item">
+                                    <span class="contact-direct__icon" aria-hidden="true">
+                                        <i class="bi bi-geo-alt"></i>
+                                    </span>
+                                    <div>
+                                        <span class="contact-direct__label">Service Area</span>
+                                        <strong>Weddings, birthdays, debuts, and corporate catering in scheduled service areas</strong>
+                                    </div>
+                                </article>
+
+                                <article class="contact-direct__item">
+                                    <span class="contact-direct__icon" aria-hidden="true">
+                                        <i class="bi bi-envelope"></i>
+                                    </span>
+                                    <div>
+                                        <span class="contact-direct__label">Email Address</span>
+                                        <a href="mailto:portal@emarioh.local">portal@emarioh.local</a>
+                                    </div>
+                                </article>
+
+                                <article class="contact-direct__item">
+                                    <span class="contact-direct__icon" aria-hidden="true">
+                                        <i class="bi bi-telephone"></i>
+                                    </span>
+                                    <div>
+                                        <span class="contact-direct__label">Mobile Number</span>
+                                        <a href="tel:09175552481">0917 555 2481</a>
+                                    </div>
+                                </article>
+
+                                <article class="contact-direct__item">
+                                    <span class="contact-direct__icon" aria-hidden="true">
+                                        <i class="bi bi-calendar2-check"></i>
+                                    </span>
+                                    <div>
+                                        <span class="contact-direct__label">Booking Support</span>
+                                        <strong>Online reservation and booking updates</strong>
+                                    </div>
+                                </article>
+                            </div>
+
+                            <div class="contact-portal">
+                                <div class="contact-portal__copy">
+                                    <span>Online Booking Available</span>
+                                    <strong>Reserve online and track your booking updates.</strong>
+                                </div>
+
+                                <div class="contact-portal__actions">
+                                    <a class="public-button public-button--gold" href="registration.html">Reserve Your Event</a>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="public-footer">
+        <div class="public-shell public-footer__bar">
+            <div class="public-footer__top">
+                <div class="public-footer__brand">
+                    <strong>Emarioh Catering Services</strong>
+                    <p>Catering for weddings, birthdays, and special celebrations.</p>
+                </div>
+
+                <nav class="public-footer__nav" aria-label="Footer navigation">
+                    <a href="#about">About</a>
+                    <a href="#packages">Packages</a>
+                    <a href="#gallery">Gallery</a>
+                    <a href="#contact">Contact</a>
+                </nav>
+            </div>
+
+            <div class="public-footer__bottom">
+                <p class="public-footer__copy">&copy; <span data-current-year></span> Emarioh Catering Services</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="assets/js/public-page.js?v=20260331am"></script>
+</body>
+</html>
