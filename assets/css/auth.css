@@ -59,8 +59,7 @@ body.auth-page {
     justify-content: space-between;
     background:
         linear-gradient(180deg, rgba(43, 33, 28, 0.88), rgba(43, 33, 28, 0.78)),
-        radial-gradient(circle at top right, rgba(179, 138, 82, 0.22), transparent 18%),
-        url("../images/food1.jpg") center center / cover no-repeat;
+        radial-gradient(circle at top right, rgba(179, 138, 82, 0.22), transparent 18%);
     color: #fff8ef;
     box-shadow: 0 28px 58px rgba(43, 33, 28, 0.16);
 }
@@ -1562,14 +1561,15 @@ body.auth-page--register .auth-panel--register-simple .auth-input-wrap--select s
 }
 
 body.auth-page--register .auth-panel--register-simple .auth-input-wrap--select::after {
-    content: "\F282";
+    content: "";
     position: absolute;
     top: 50%;
     right: 1rem;
-    transform: translateY(-50%);
-    color: #7e857d;
-    font-family: "bootstrap-icons";
-    font-size: 0.95rem;
+    width: 0.58rem;
+    height: 0.58rem;
+    border-right: 2px solid #7e857d;
+    border-bottom: 2px solid #7e857d;
+    transform: translateY(-65%) rotate(45deg);
     pointer-events: none;
 }
 

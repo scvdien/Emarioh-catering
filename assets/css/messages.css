@@ -271,20 +271,23 @@ button {
     gap: 0.68rem;
     width: 100%;
     padding: 0.6rem 0.8rem;
-    border: 0;
+    border: 1px solid rgba(255, 234, 194, 0.1);
     border-radius: 1rem;
-    background: transparent;
+    background: rgba(255, 248, 234, 0.04);
     color: rgba(250, 242, 233, 0.9);
     font-size: 0.86rem;
     font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     transition:
         transform 0.2s ease,
+        border-color 0.2s ease,
         background-color 0.2s ease;
 }
 
 .sidebar-logout:hover {
     color: #fff;
     background: rgba(200, 164, 107, 0.18);
+    border-color: rgba(255, 234, 194, 0.16);
     transform: translateX(4px);
 }
 
@@ -2609,4 +2612,128 @@ button {
     .client-profile-panel__row strong {
         text-align: left;
     }
+}
+
+/* Sidebar theme aligned to admin dashboard */
+.dashboard-sidebar,
+.sidebar-mobile-header {
+    background:
+        radial-gradient(circle at top, rgba(221, 178, 77, 0.18), transparent 18%),
+        linear-gradient(180deg, #153624 0%, #0e2418 100%);
+}
+
+.dashboard-sidebar {
+    border-right: 1px solid rgba(255, 248, 234, 0.08);
+}
+
+.sidebar-mobile-header {
+    border-bottom: 1px solid rgba(255, 248, 234, 0.08);
+}
+
+.sidebar-inner {
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 26%),
+        linear-gradient(180deg, #153624 0%, #0e2418 100%);
+}
+
+.sidebar-brand__frame {
+    border: 1px solid rgba(255, 233, 193, 0.14);
+    background:
+        linear-gradient(180deg, rgba(255, 244, 225, 0.08), rgba(255, 255, 255, 0.02)),
+        rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-brand__name,
+.sidebar-messages__heading h2,
+.sidebar-message-head h3 {
+    color: #fff8ea;
+}
+
+.sidebar-brand__sub,
+.sidebar-messages__eyebrow,
+.sidebar-message-tag {
+    color: rgba(243, 218, 162, 0.9);
+}
+
+.sidebar-divider {
+    background: linear-gradient(90deg, rgba(243, 218, 162, 0.36), rgba(243, 218, 162, 0.06));
+}
+
+.dashboard-nav .nav-link {
+    color: rgba(255, 246, 232, 0.92);
+}
+
+.dashboard-nav .nav-link:hover,
+.dashboard-nav .nav-link.active,
+.dashboard-nav .nav-link--toggle.is-open {
+    color: #fffdf5;
+    background: linear-gradient(90deg, rgba(198, 154, 51, 0.34), rgba(31, 90, 55, 0.4));
+    box-shadow: 0 12px 24px rgba(8, 26, 17, 0.2);
+}
+
+.nav-link__icon,
+.sidebar-logout__icon {
+    background: rgba(255, 250, 241, 0.08);
+    color: rgba(255, 246, 232, 0.96);
+}
+
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 241, 214, 0.1);
+}
+
+.sidebar-account {
+    border: 1px solid rgba(255, 234, 194, 0.14);
+    background: rgba(255, 248, 234, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-account__name {
+    color: #fff8ee;
+}
+
+.sidebar-account__role,
+.sidebar-messages__heading a,
+.sidebar-message-head span,
+.sidebar-message-text {
+    color: rgba(255, 236, 201, 0.72);
+}
+
+.sidebar-logout {
+    border: 1px solid rgba(255, 234, 194, 0.1);
+    background: rgba(255, 248, 234, 0.04);
+    color: rgba(255, 246, 232, 0.92);
+}
+
+.sidebar-logout:hover {
+    color: #fffdf5;
+    background: rgba(198, 154, 51, 0.18);
+}
+
+.avatar--photo {
+    border: 1px solid rgba(255, 231, 189, 0.3);
+    box-shadow: 0 10px 22px rgba(9, 27, 17, 0.2);
+}
+
+.avatar--admin,
+.avatar--topbar {
+    background: linear-gradient(135deg, #e6bf62 0%, #c69a33 100%);
+    color: #0e2418;
+}
+
+.avatar--person-one {
+    background: #c79f59;
+}
+
+.avatar--person-two {
+    background: #2f7a4a;
+}
+
+.avatar--person-three {
+    background: #7c6437;
+}
+
+.sidebar-message-item {
+    border: 1px solid rgba(255, 239, 209, 0.08);
+    background: rgba(255, 248, 234, 0.04);
 }

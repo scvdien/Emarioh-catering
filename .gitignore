@@ -1,0 +1,19 @@
+# Per-environment runtime config. Copy from app/config.local.php.example.
+/app/config.local.php
+/app/config.local.*.php
+
+# Environment variable files.
+.env
+.env.*
+!.env.example
+
+# Local editor settings.
+.vscode/
+
+# Runtime-generated storage data.
+/storage/*
+!/storage/.gitignore
+!/storage/.htaccess
+/storage/sessions/*
+!/storage/sessions/.gitignore
+!/storage/sessions/.htaccess

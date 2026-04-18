@@ -1,0 +1,19 @@
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule ^(?:app|database|storage)(?:/|$) - [F,L,NC]
+</IfModule>
+
+<FilesMatch "^(README|DEPLOYMENT)\.md$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

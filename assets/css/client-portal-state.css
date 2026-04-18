@@ -1,0 +1,21 @@
+.booking-submit-feedback {
+    margin: 0.72rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+.booking-submit-feedback:empty {
+    display: none;
+}
+
+.booking-submit-feedback--info {
+    color: #7a6a5c;
+}
+
+.booking-submit-feedback--success {
+    color: #4c6a52;
+}
+
+.booking-submit-feedback--error {
+    color: #9d4b3d;
+}

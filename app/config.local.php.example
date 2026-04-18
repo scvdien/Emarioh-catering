@@ -1,0 +1,58 @@
+<?php
+declare(strict_types=1);
+
+/*
+Copy this file to app/config.local.php for each environment.
+The real app/config.local.php is git-ignored, so create it manually on Hostinger
+or provide the matching EMARIOH_* environment variables before going live.
+*/
+
+return [
+    'development_mode' => false,
+    'app' => [
+        // Required on live hosting: set the full public HTTPS URL, including any subfolder.
+        // Examples: https://your-domain.com or https://your-domain.com/emarioh-catering-services
+        'url' => '',
+        // Set this to true on Hostinger after SSL is active so redirects and cookies stay on HTTPS.
+        'force_https' => false,
+    ],
+    'storage' => [
+        // Prefer a writable path outside public_html on live hosting.
+        // Public uploads are stored under this storage path and served through media.php.
+        'path' => dirname(__DIR__) . '/../storage',
+        'session_path' => dirname(__DIR__) . '/../storage/sessions',
+    ],
+    'database' => [
+        'host' => 'localhost',
+        'port' => 3306,
+        'name' => 'u123456789_emarioh_catering_db',
+        'user' => 'u123456789_emarioh_user',
+        'password' => 'replace-with-your-database-password',
+        'auto_create' => false,
+        // Keep this false on Hostinger after importing the SQL dump.
+        // Only turn it on temporarily for a one-time bootstrap when your DB user
+        // is allowed to run CREATE/ALTER statements.
+        'manage_schema' => false,
+    ],
+    'sms' => [
+        'enabled' => true,
+        'booking_status_enabled' => true,
+        'provider' => 'semaphore',
+        'semaphore' => [
+            'api_key' => 'paste-your-semaphore-api-key-here',
+            'endpoint' => 'https://api.semaphore.co/api/v4/otp',
+            'messages_endpoint' => 'https://api.semaphore.co/api/v4/messages',
+            // Leave blank to use Semaphore's default sender name.
+            'sender_name' => '',
+            'timeout_seconds' => 15,
+        ],
+    ],
+    'paymongo' => [
+        'enabled' => false,
+        'secret_key' => 'paste-your-paymongo-secret-key-here',
+        'public_key' => 'paste-your-paymongo-public-key-here',
+        'webhook_secret' => 'paste-your-paymongo-webhook-secret-here',
+        'api_base' => 'https://api.paymongo.com/v1',
+        'timeout_seconds' => 20,
+    ],
+];
