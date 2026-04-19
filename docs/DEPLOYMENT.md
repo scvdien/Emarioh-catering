@@ -2,6 +2,14 @@
 
 ## Hostinger
 
+Before uploading, you can create a deployment zip from the project root with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\create-hostinger-zip.ps1
+```
+
+This package includes hidden files such as `.htaccess` and your local `app/config.local.php`, while excluding `.git`, `.vscode`, session files, and local SQL backups.
+
 1. Set the website PHP version to `8.2` or newer in hPanel.
 2. Create a MySQL database and user in hPanel.
 3. Upload the project into `public_html` or your chosen web root.

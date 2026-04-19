@@ -10,6 +10,9 @@
 # Local editor settings.
 .vscode/
 
+# Generated deployment archives.
+/dist/
+
 # Runtime-generated storage data.
 /storage/*
 !/storage/.gitignore

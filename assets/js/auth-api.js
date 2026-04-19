@@ -3,6 +3,14 @@
     const CLIENT_PORTAL_STORAGE_KEY = "emariohClientPortalState";
     let statusPromise = null;
 
+    function resolveUrl(path) {
+        if (window.EmariohRuntime && typeof window.EmariohRuntime.resolveUrl === "function") {
+            return window.EmariohRuntime.resolveUrl(path);
+        }
+
+        return path;
+    }
+
     function buildError(message, payload) {
         const error = new Error(message || "Something went wrong.");
         error.payload = payload || null;
@@ -18,7 +26,7 @@
             }
         }, options || {});
 
-        const response = await fetch(API_BASE + endpoint, requestOptions);
+        const response = await fetch(resolveUrl(API_BASE + endpoint), requestOptions);
         const rawText = await response.text();
         let payload = {};
 

@@ -286,7 +286,7 @@ $packageCatalogJson = json_encode(
     </div>
 
     <?= emarioh_render_vendor_runtime_assets(true); ?>
-    <script src="assets/js/auth-api.js?v=20260419a"></script>
+    <script src="assets/js/auth-api.js?v=20260419c"></script>
     <script src="assets/js/logout-confirmation.js?v=20260418a"></script>
     <script>
         window.EmariohServerClientPortalState = <?= $clientPortalStateJson ?>;
@@ -296,7 +296,7 @@ $packageCatalogJson = json_encode(
     </script>
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/payment-settings-store.js?v=20260412a"></script>
-    <script src="assets/js/client-portal-state.js?v=20260419a"></script>
+    <script src="assets/js/client-portal-state.js?v=20260419c"></script>
     <script src="assets/js/pages/client-dashboard.js?v=20260419a"></script>
 </body>
 </html>

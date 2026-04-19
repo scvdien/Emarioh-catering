@@ -109,8 +109,23 @@ try {
 
     $checkout = emarioh_create_paymongo_checkout_session($db, $invoice, $booking, $paymentPlan);
 } catch (RuntimeException $exception) {
+    emarioh_write_runtime_log('paymongo-checkout', 'Checkout creation failed with runtime error.', [
+        'booking_id' => $bookingId,
+        'user_id' => (int) ($currentUser['id'] ?? 0),
+        'payment_option' => $paymentOption,
+        'message' => $exception->getMessage(),
+        'code' => (int) $exception->getCode(),
+    ]);
     emarioh_fail($exception->getMessage(), 502);
 } catch (Throwable $throwable) {
+    emarioh_write_runtime_log('paymongo-checkout', 'Checkout creation failed with unexpected error.', [
+        'booking_id' => $bookingId,
+        'user_id' => (int) ($currentUser['id'] ?? 0),
+        'payment_option' => $paymentOption,
+        'message' => $throwable->getMessage(),
+        'file' => $throwable->getFile(),
+        'line' => $throwable->getLine(),
+    ]);
     emarioh_fail('The PayMongo QRPh checkout could not be opened right now. Please try again in a moment.', 500);
 }
 

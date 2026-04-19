@@ -1456,6 +1456,41 @@ function emarioh_fail(string $message, int $statusCode = 422, array $payload = [
     ], $payload), $statusCode);
 }
 
+function emarioh_runtime_log_path(string $fileName = 'app-runtime.log'): string
+{
+    $storagePath = emarioh_storage_path();
+
+    if (!is_dir($storagePath)) {
+        @mkdir($storagePath, 0775, true);
+    }
+
+    $logsPath = $storagePath . DIRECTORY_SEPARATOR . 'logs';
+
+    if (!is_dir($logsPath)) {
+        @mkdir($logsPath, 0775, true);
+    }
+
+    return $logsPath . DIRECTORY_SEPARATOR . ltrim($fileName, DIRECTORY_SEPARATOR);
+}
+
+function emarioh_write_runtime_log(string $channel, string $message, array $context = []): void
+{
+    $timestamp = date('Y-m-d H:i:s');
+    $normalizedChannel = trim($channel) !== '' ? trim($channel) : 'app';
+    $line = '[' . $timestamp . '] [' . $normalizedChannel . '] ' . trim($message);
+
+    if ($context !== []) {
+        $encodedContext = json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        if (is_string($encodedContext) && $encodedContext !== '') {
+            $line .= ' ' . $encodedContext;
+        }
+    }
+
+    $line .= PHP_EOL;
+    @file_put_contents(emarioh_runtime_log_path(), $line, FILE_APPEND | LOCK_EX);
+}
+
 function emarioh_normalize_name(string $value): string
 {
     $normalized = preg_replace('/\s+/', ' ', trim($value));
@@ -4776,25 +4811,21 @@ function emarioh_app_force_https(): bool
 
 function emarioh_should_ignore_configured_app_url_for_local_runtime(string $configuredAppUrl): bool
 {
-    if (!emarioh_runtime_looks_local()) {
-        return false;
-    }
-
     $configuredHost = strtolower(trim((string) parse_url($configuredAppUrl, PHP_URL_HOST)));
 
     if ($configuredHost === '') {
         return false;
     }
 
-    if (in_array($configuredHost, ['localhost', '127.0.0.1', '::1'], true)) {
-        return false;
+    $configuredLooksLocal = in_array($configuredHost, ['localhost', '127.0.0.1', '::1'], true)
+        || preg_match('/(?:^|\.)((test|local|localhost))$/', $configuredHost) === 1
+        || emarioh_ip_is_local_or_private($configuredHost);
+
+    if (emarioh_runtime_looks_local()) {
+        return !$configuredLooksLocal;
     }
 
-    if (preg_match('/(?:^|\.)((test|local|localhost))$/', $configuredHost) === 1) {
-        return false;
-    }
-
-    return !emarioh_ip_is_local_or_private($configuredHost);
+    return $configuredLooksLocal;
 }
 
 function emarioh_transport_is_https(): bool
@@ -4992,6 +5023,9 @@ function emarioh_render_vendor_head_assets(bool $includeBootstrapCss = true, boo
 {
     $tags = [];
     $tags[] = '<base href="' . htmlspecialchars(rtrim(emarioh_app_base_url(), '/') . '/', ENT_QUOTES, 'UTF-8') . '">';
+    $faviconHref = htmlspecialchars(emarioh_app_url('favicon.svg?v=20260419a'), ENT_QUOTES, 'UTF-8');
+    $tags[] = '<link rel="icon" type="image/svg+xml" href="' . $faviconHref . '">';
+    $tags[] = '<link rel="shortcut icon" href="' . $faviconHref . '">';
 
     $tags[] = '<link rel="preconnect" href="https://fonts.googleapis.com">';
     $tags[] = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
@@ -5018,7 +5052,7 @@ function emarioh_render_vendor_runtime_assets(bool $includeBootstrapBundle = fal
         $tags[] = '<script src="' . htmlspecialchars(emarioh_app_url('assets/vendor/bootstrap/bootstrap.bundle.min.js'), ENT_QUOTES, 'UTF-8') . '"></script>';
     }
 
-    $tags[] = '<script src="' . htmlspecialchars(emarioh_app_url('assets/js/vendor-runtime.js?v=20260419a'), ENT_QUOTES, 'UTF-8') . '"></script>';
+    $tags[] = '<script src="' . htmlspecialchars(emarioh_app_url('assets/js/vendor-runtime.js?v=20260419b'), ENT_QUOTES, 'UTF-8') . '"></script>';
 
     return implode(PHP_EOL . '    ', $tags);
 }

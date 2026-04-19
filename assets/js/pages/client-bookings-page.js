@@ -645,7 +645,10 @@ function buildMergedBookingNotes(eventNotes, bookingNotes) {
 }
 
 async function postBookingJson(url, payload) {
-    const response = await fetch(url, {
+    const resolvedUrl = window.EmariohRuntime?.resolveUrl
+        ? window.EmariohRuntime.resolveUrl(url)
+        : url;
+    const response = await fetch(resolvedUrl, {
         method: "POST",
         headers: {
             Accept: "application/json",

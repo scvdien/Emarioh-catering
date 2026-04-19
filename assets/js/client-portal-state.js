@@ -394,7 +394,10 @@ function initializeBillingPaymentActions() {
 }
 
 async function postPortalJson(url, payload) {
-    const response = await fetch(url, {
+    const resolvedUrl = window.EmariohRuntime?.resolveUrl
+        ? window.EmariohRuntime.resolveUrl(url)
+        : url;
+    const response = await fetch(resolvedUrl, {
         method: "POST",
         headers: {
             Accept: "application/json",
@@ -413,7 +416,9 @@ async function postPortalJson(url, payload) {
     }
 
     if (!response.ok || parsedPayload.ok === false) {
-        throw new Error(parsedPayload.message || "Request failed.");
+        const statusLabel = response.status ? `HTTP ${response.status}` : "Request failed";
+        const detailLabel = parsedPayload.message || rawText || "Request failed.";
+        throw new Error(`${statusLabel}: ${detailLabel}`);
     }
 
     return parsedPayload;

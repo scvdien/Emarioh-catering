@@ -1269,7 +1269,11 @@ document.addEventListener("DOMContentLoaded", () => {
         setAsyncButtonState(paymentDetailsConfirmButton, true, "Refreshing...");
 
         try {
-            const response = await window.fetch("api/payments/admin-sync-status.php", {
+            const response = await window.fetch(
+                window.EmariohRuntime?.resolveUrl
+                    ? window.EmariohRuntime.resolveUrl("api/payments/admin-sync-status.php")
+                    : "api/payments/admin-sync-status.php",
+                {
                 method: "POST",
                 headers: {
                     "Accept": "application/json",
@@ -1278,7 +1282,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify({
                     invoice_number: invoiceNumber
                 })
-            });
+                }
+            );
             const payload = await response.json().catch(() => ({}));
 
             if (!response.ok || payload?.success === false) {
@@ -1307,7 +1312,11 @@ document.addEventListener("DOMContentLoaded", () => {
         setAsyncButtonState(paymentDetailsReminderButton, true, "Sending...");
 
         try {
-            const response = await window.fetch("api/messages/send-booking-sms.php", {
+            const response = await window.fetch(
+                window.EmariohRuntime?.resolveUrl
+                    ? window.EmariohRuntime.resolveUrl("api/messages/send-booking-sms.php")
+                    : "api/messages/send-booking-sms.php",
+                {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
@@ -1318,7 +1327,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     booking_id: bookingId,
                     template_key: templateKey
                 })
-            });
+                }
+            );
             const payload = await response.json().catch(() => ({}));
 
             if (!response.ok || payload?.ok === false) {

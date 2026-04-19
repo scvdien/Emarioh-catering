@@ -1,4 +1,18 @@
 (function () {
+    function resolveAppUrl(path) {
+        const normalizedPath = String(path || "").trim();
+
+        if (!normalizedPath) {
+            return window.location.href;
+        }
+
+        try {
+            return new URL(normalizedPath, document.baseURI || window.location.href).toString();
+        } catch (error) {
+            return normalizedPath;
+        }
+    }
+
     const iconGlyphs = {
         "bi-arrow-clockwise": "\u21BB",
         "bi-arrow-left": "\u2190",
@@ -170,6 +184,10 @@
         element.dispatchEvent(bootstrapEvent);
         return bootstrapEvent;
     }
+
+    window.EmariohRuntime = Object.assign({}, window.EmariohRuntime, {
+        resolveUrl: resolveAppUrl
+    });
 
     const needsBootstrapRuntime = !window.bootstrap;
 
