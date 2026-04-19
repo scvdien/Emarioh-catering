@@ -135,6 +135,42 @@
         }
     }
 
+    function dispatchBootstrapEvent(element, name, relatedTarget) {
+        if (!element) {
+            return null;
+        }
+
+        let bootstrapEvent;
+
+        if (typeof CustomEvent === "function") {
+            bootstrapEvent = new CustomEvent(name, {
+                bubbles: true,
+                cancelable: true,
+                detail: {
+                    relatedTarget: relatedTarget || null
+                }
+            });
+        } else {
+            bootstrapEvent = document.createEvent("CustomEvent");
+            bootstrapEvent.initCustomEvent(name, true, true, {
+                relatedTarget: relatedTarget || null
+            });
+        }
+
+        try {
+            Object.defineProperty(bootstrapEvent, "relatedTarget", {
+                configurable: true,
+                enumerable: true,
+                value: relatedTarget || null
+            });
+        } catch (error) {
+            bootstrapEvent.relatedTarget = relatedTarget || null;
+        }
+
+        element.dispatchEvent(bootstrapEvent);
+        return bootstrapEvent;
+    }
+
     const needsBootstrapRuntime = !window.bootstrap;
 
     if (needsBootstrapRuntime) {
@@ -165,8 +201,18 @@
                 return Modal.getInstance(element) || new Modal(element, options);
             }
 
-            show() {
+            show(relatedTarget) {
                 if (!this._element) {
+                    return;
+                }
+
+                if (this._element.classList.contains("show")) {
+                    return;
+                }
+
+                const showEvent = dispatchBootstrapEvent(this._element, "show.bs.modal", relatedTarget);
+
+                if (showEvent && showEvent.defaultPrevented) {
                     return;
                 }
 
@@ -179,10 +225,22 @@
                 if (this._options.backdrop) {
                     this._backdrop = createBackdrop("modal", () => this.hide());
                 }
+
+                dispatchBootstrapEvent(this._element, "shown.bs.modal", relatedTarget);
             }
 
-            hide() {
+            hide(relatedTarget) {
                 if (!this._element) {
+                    return;
+                }
+
+                if (!this._element.classList.contains("show")) {
+                    return;
+                }
+
+                const hideEvent = dispatchBootstrapEvent(this._element, "hide.bs.modal", relatedTarget);
+
+                if (hideEvent && hideEvent.defaultPrevented) {
                     return;
                 }
 
@@ -196,6 +254,8 @@
                 if (!document.querySelector(".modal.show")) {
                     document.body.classList.remove("modal-open");
                 }
+
+                dispatchBootstrapEvent(this._element, "hidden.bs.modal", relatedTarget);
             }
 
             toggle() {
@@ -227,8 +287,18 @@
                 return Offcanvas.getInstance(element) || new Offcanvas(element, options);
             }
 
-            show() {
+            show(relatedTarget) {
                 if (!this._element) {
+                    return;
+                }
+
+                if (this._element.classList.contains("show")) {
+                    return;
+                }
+
+                const showEvent = dispatchBootstrapEvent(this._element, "show.bs.offcanvas", relatedTarget);
+
+                if (showEvent && showEvent.defaultPrevented) {
                     return;
                 }
 
@@ -240,10 +310,22 @@
                 if (this._options.backdrop) {
                     this._backdrop = createBackdrop("offcanvas", () => this.hide());
                 }
+
+                dispatchBootstrapEvent(this._element, "shown.bs.offcanvas", relatedTarget);
             }
 
-            hide() {
+            hide(relatedTarget) {
                 if (!this._element) {
+                    return;
+                }
+
+                if (!this._element.classList.contains("show")) {
+                    return;
+                }
+
+                const hideEvent = dispatchBootstrapEvent(this._element, "hide.bs.offcanvas", relatedTarget);
+
+                if (hideEvent && hideEvent.defaultPrevented) {
                     return;
                 }
 
@@ -256,6 +338,8 @@
                 if (!document.querySelector(".offcanvas.show")) {
                     document.body.classList.remove("offcanvas-open");
                 }
+
+                dispatchBootstrapEvent(this._element, "hidden.bs.offcanvas", relatedTarget);
             }
 
             toggle() {
@@ -288,6 +372,20 @@
                 }
 
                 const navRoot = this._element.closest(".nav");
+                const activeButton = navRoot
+                    ? navRoot.querySelector("[data-bs-toggle=\"pill\"].active, [data-bs-toggle=\"tab\"].active, .nav-link.active")
+                    : null;
+
+                if (activeButton === this._element) {
+                    return;
+                }
+
+                const hideEvent = activeButton ? dispatchBootstrapEvent(activeButton, "hide.bs.tab", this._element) : null;
+                const showEvent = dispatchBootstrapEvent(this._element, "show.bs.tab", activeButton);
+
+                if ((hideEvent && hideEvent.defaultPrevented) || (showEvent && showEvent.defaultPrevented)) {
+                    return;
+                }
 
                 if (navRoot) {
                     navRoot.querySelectorAll("[data-bs-toggle=\"pill\"], [data-bs-toggle=\"tab\"], .nav-link").forEach((button) => {
@@ -308,6 +406,12 @@
 
                 this._element.classList.add("active");
                 this._element.setAttribute("aria-selected", "true");
+
+                if (activeButton) {
+                    dispatchBootstrapEvent(activeButton, "hidden.bs.tab", this._element);
+                }
+
+                dispatchBootstrapEvent(this._element, "shown.bs.tab", activeButton);
             }
         }
 
@@ -355,7 +459,7 @@
 
                 if (modalTarget) {
                     event.preventDefault();
-                    window.bootstrap.Modal.getOrCreateInstance(modalTarget).show();
+                    window.bootstrap.Modal.getOrCreateInstance(modalTarget).show(toggleTrigger);
                 }
 
                 return;
@@ -366,7 +470,13 @@
 
                 if (offcanvasTarget) {
                     event.preventDefault();
-                    window.bootstrap.Offcanvas.getOrCreateInstance(offcanvasTarget).toggle();
+                    const offcanvasInstance = window.bootstrap.Offcanvas.getOrCreateInstance(offcanvasTarget);
+
+                    if (offcanvasTarget.classList.contains("show")) {
+                        offcanvasInstance.hide(toggleTrigger);
+                    } else {
+                        offcanvasInstance.show(toggleTrigger);
+                    }
                 }
 
                 return;

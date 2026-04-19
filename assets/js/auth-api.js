@@ -12,6 +12,7 @@
     async function requestJson(endpoint, options) {
         const requestOptions = Object.assign({
             credentials: "same-origin",
+            cache: "no-store",
             headers: {
                 Accept: "application/json"
             }
@@ -55,7 +56,7 @@
             return statusPromise;
         }
 
-        statusPromise = requestJson("status.php")
+        statusPromise = requestJson("status.php?ts=" + Date.now())
             .then(function (payload) {
                 window.EmariohAuth.state = payload;
                 applyUserContext(payload.user || null);
@@ -151,8 +152,11 @@
             return status.user.role === "admin" ? "index.php" : "client-dashboard.php";
         }
 
-        const reason = requiredRole === "admin" ? "admin_only" : "client_only";
-        return "login.php?reason=" + encodeURIComponent(reason);
+        if (requiredRole === "admin") {
+            return "login.php?reason=admin_only";
+        }
+
+        return "login.php";
     }
 
     async function handlePageGuard() {

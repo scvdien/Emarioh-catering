@@ -74,24 +74,34 @@ if ((string) ($invoice['status'] ?? '') === 'approved' && (float) ($invoice['bal
 }
 
 try {
-    $syncedInvoice = emarioh_sync_paymongo_invoice_status($db, $invoice);
-    $invoice = is_array($syncedInvoice) ? $syncedInvoice : $invoice;
+    if ($paymentOption === 'remaining_balance' || emarioh_payment_invoice_should_skip_checkout_sync($invoice)) {
+        $paymentPlan = emarioh_resolve_booking_payment_plan(
+            $booking,
+            $package,
+            $invoice,
+            (bool) ($paymentSettings['allow_full_payment'] ?? true),
+            $paymentOption
+        );
+    } else {
+        $syncedInvoice = emarioh_sync_paymongo_invoice_status($db, $invoice);
+        $invoice = is_array($syncedInvoice) ? $syncedInvoice : $invoice;
 
-    if ((string) ($invoice['status'] ?? '') === 'approved' && (float) ($invoice['balance_due'] ?? 0) <= 0.00001) {
-        emarioh_success([
-            'message' => 'This invoice is already marked as paid.',
-            'already_paid' => true,
-            'invoice_number' => (string) ($invoice['invoice_number'] ?? ''),
-        ]);
+        if ((string) ($invoice['status'] ?? '') === 'approved' && (float) ($invoice['balance_due'] ?? 0) <= 0.00001) {
+            emarioh_success([
+                'message' => 'This invoice is already marked as paid.',
+                'already_paid' => true,
+                'invoice_number' => (string) ($invoice['invoice_number'] ?? ''),
+            ]);
+        }
+
+        $paymentPlan = emarioh_resolve_booking_payment_plan(
+            $booking,
+            $package,
+            $invoice,
+            (bool) ($paymentSettings['allow_full_payment'] ?? true),
+            $paymentOption
+        );
     }
-
-    $paymentPlan = emarioh_resolve_booking_payment_plan(
-        $booking,
-        $package,
-        $invoice,
-        (bool) ($paymentSettings['allow_full_payment'] ?? true),
-        $paymentOption
-    );
 
     if ($paymentOption !== '' && $paymentPlan['selected_option'] !== $paymentOption) {
         emarioh_fail('The selected payment option is not available anymore. Please refresh the page and try again.', 422);

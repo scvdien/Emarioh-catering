@@ -2,18 +2,40 @@
     Options -Indexes
 </IfModule>
 
+DirectoryIndex public/index.php
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule (^|/)\.(?!well-known/) - [F,L]
-    RewriteRule ^(?:app|database|storage)(?:/|$) - [F,L,NC]
-</IfModule>
+    RewriteRule ^(?:app|database|storage|docs)(?:/|$) - [F,L,NC]
 
-<FilesMatch "^(README|DEPLOYMENT)\.md$">
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-    </IfModule>
-</FilesMatch>
+    RewriteRule ^$ public/index.php [L]
+    RewriteRule ^index\.php$ public/admin/dashboard.php [L,QSA]
+    RewriteRule ^public-page\.php$ public/index.php [L,QSA]
+    RewriteRule ^login\.php$ public/login.php [L,QSA]
+    RewriteRule ^registration\.php$ public/registration.php [L,QSA]
+    RewriteRule ^forgot-password\.php$ public/forgot-password.php [L,QSA]
+    RewriteRule ^logout\.php$ public/logout.php [L,QSA]
+    RewriteRule ^media\.php$ public/media.php [L,QSA]
+
+    RewriteRule ^admin-bookings\.php$ public/admin/bookings.php [L,QSA]
+    RewriteRule ^admin-clients\.php$ public/admin/clients.php [L,QSA]
+    RewriteRule ^admin-events\.php$ public/admin/events.php [L,QSA]
+    RewriteRule ^admin-inquiries\.php$ public/admin/inquiries.php [L,QSA]
+    RewriteRule ^admin-otp\.php$ public/admin/otp.php [L,QSA]
+    RewriteRule ^admin-payments\.php$ public/admin/payments.php [L,QSA]
+    RewriteRule ^admin-setup\.php$ public/admin/setup.php [L,QSA]
+    RewriteRule ^admin-settings-menu\.php$ public/admin/settings/index.php [L,QSA]
+    RewriteRule ^admin-settings-account\.php$ public/admin/settings/account.php [L,QSA]
+    RewriteRule ^admin-settings-payment\.php$ public/admin/settings/payment.php [L,QSA]
+    RewriteRule ^admin-settings-public-page\.php$ public/admin/settings/public-page.php [L,QSA]
+    RewriteRule ^admin-settings-sms\.php$ public/admin/settings/sms.php [L,QSA]
+    RewriteRule ^admin-settings\.php$ public/admin/settings/_base.php [L,QSA]
+
+    RewriteRule ^client-dashboard\.php$ public/client/dashboard.php [L,QSA]
+    RewriteRule ^client-bookings\.php$ public/client/bookings.php [L,QSA]
+    RewriteRule ^client-billing\.php$ public/client/billing.php [L,QSA]
+    RewriteRule ^client-preferences\.php$ public/client/preferences.php [L,QSA]
+    RewriteRule ^client-my-bookings\.php$ public/client/my-bookings.php [L,QSA]
+    RewriteRule ^client-payment-receipt\.php$ public/client/payment-receipt.php [L,QSA]
+</IfModule>

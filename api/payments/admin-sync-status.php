@@ -43,7 +43,9 @@ if (!emarioh_paymongo_has_secret_key()) {
 }
 
 try {
-    $updatedInvoice = emarioh_sync_paymongo_invoice_status($db, $invoice) ?? $invoice;
+    $updatedInvoice = emarioh_payment_invoice_should_skip_checkout_sync($invoice)
+        ? $invoice
+        : (emarioh_sync_paymongo_invoice_status($db, $invoice) ?? $invoice);
 } catch (RuntimeException $exception) {
     emarioh_fail($exception->getMessage(), 502);
 } catch (Throwable $throwable) {

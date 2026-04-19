@@ -36,7 +36,9 @@ if ($invoice === null) {
 }
 
 try {
-    $invoice = emarioh_sync_paymongo_invoice_status($db, $invoice) ?? $invoice;
+    if (!emarioh_payment_invoice_should_skip_checkout_sync($invoice)) {
+        $invoice = emarioh_sync_paymongo_invoice_status($db, $invoice) ?? $invoice;
+    }
 } catch (RuntimeException $exception) {
     emarioh_fail($exception->getMessage(), 502);
 } catch (Throwable $throwable) {

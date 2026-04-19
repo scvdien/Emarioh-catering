@@ -17,10 +17,28 @@ const EMARIOH_DEVELOPMENT_MODE = false;
 date_default_timezone_set('Asia/Manila');
 
 emarioh_enforce_https_request();
+emarioh_send_dynamic_no_cache_headers();
 
 if (!defined('EMARIOH_SKIP_SESSION_BOOTSTRAP') || EMARIOH_SKIP_SESSION_BOOTSTRAP !== true) {
     emarioh_prepare_storage_paths();
     emarioh_start_session();
+}
+
+function emarioh_send_dynamic_no_cache_headers(): void
+{
+    if (PHP_SAPI === 'cli' || headers_sent()) {
+        return;
+    }
+
+    $scriptName = strtolower(trim((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+
+    if ($scriptName !== '' && str_ends_with($scriptName, '/media.php')) {
+        return;
+    }
+
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 }
 
 function emarioh_config(): array
@@ -694,7 +712,7 @@ function emarioh_assert_schema_is_ready(PDO $db): void
     if ($missingTables !== []) {
         throw new RuntimeException(
             'Database schema is not installed for this environment. '
-            . 'Import database/emarioh_catering_db.sql before going live, '
+            . 'Import database/schema/emarioh_catering_db.sql before going live, '
             . 'or temporarily enable database.manage_schema / EMARIOH_DB_MANAGE_SCHEMA '
             . 'for a one-time bootstrap if your database user has CREATE and ALTER privileges. '
             . 'Missing tables: ' . implode(', ', $missingTables) . '.'
@@ -714,7 +732,7 @@ function emarioh_assert_schema_is_ready(PDO $db): void
     if ($missingColumns !== []) {
         throw new RuntimeException(
             'Database schema is out of date for this environment. '
-            . 'Import the latest database/emarioh_catering_db.sql, '
+            . 'Import the latest database/schema/emarioh_catering_db.sql, '
             . 'or temporarily enable database.manage_schema / EMARIOH_DB_MANAGE_SCHEMA '
             . 'for a one-time schema update if your database user has ALTER privileges. '
             . 'Missing columns: ' . implode(', ', $missingColumns) . '.'
@@ -2624,6 +2642,19 @@ function emarioh_map_sms_queue_status(string $providerStatus): string
     };
 }
 
+function emarioh_release_curl_handle($curl): void
+{
+    if ($curl === null || $curl === false || PHP_VERSION_ID >= 80000) {
+        return;
+    }
+
+    if (!function_exists('curl_close')) {
+        return;
+    }
+
+    call_user_func('curl_close', $curl);
+}
+
 function emarioh_http_post_form(string $url, array $payload, int $timeoutSeconds): array
 {
     $body = http_build_query($payload);
@@ -2653,7 +2684,7 @@ function emarioh_http_post_form(string $url, array $payload, int $timeoutSeconds
         $responseBody = curl_exec($curl);
         $error = curl_error($curl);
         $statusCode = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-        curl_close($curl);
+        emarioh_release_curl_handle($curl);
 
         return [
             'status_code' => $statusCode,
@@ -2746,7 +2777,7 @@ function emarioh_http_request_json(
         $responseBody = curl_exec($curl);
         $error = curl_error($curl);
         $statusCode = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
-        curl_close($curl);
+        emarioh_release_curl_handle($curl);
 
         return [
             'status_code' => $statusCode,
@@ -3127,8 +3158,11 @@ function emarioh_require_page_role(string $role): array
     $currentUser = emarioh_current_user();
 
     if ($currentUser === null) {
-        $reason = $role === 'admin' ? 'admin_only' : 'client_only';
-        emarioh_redirect('login.php?reason=' . urlencode($reason));
+        if ($role === 'admin') {
+            emarioh_redirect('login.php?reason=admin_only');
+        }
+
+        emarioh_redirect('login.php');
     }
 
     if ((string) ($currentUser['role'] ?? '') !== $role) {
@@ -4716,12 +4750,51 @@ function emarioh_resolve_payment_due_date(?string $eventDateValue, string $balan
 
 function emarioh_configured_app_url(): string
 {
-    return rtrim(trim((string) (emarioh_config()['app']['url'] ?? '')), '/');
+    $configuredAppUrl = rtrim(trim((string) (emarioh_config()['app']['url'] ?? '')), '/');
+
+    if ($configuredAppUrl === '') {
+        return '';
+    }
+
+    if (emarioh_should_ignore_configured_app_url_for_local_runtime($configuredAppUrl)) {
+        return '';
+    }
+
+    return $configuredAppUrl;
 }
 
 function emarioh_app_force_https(): bool
 {
-    return (bool) (emarioh_config()['app']['force_https'] ?? false);
+    $forceHttps = (bool) (emarioh_config()['app']['force_https'] ?? false);
+
+    if (!$forceHttps) {
+        return false;
+    }
+
+    return emarioh_configured_app_url() !== '';
+}
+
+function emarioh_should_ignore_configured_app_url_for_local_runtime(string $configuredAppUrl): bool
+{
+    if (!emarioh_runtime_looks_local()) {
+        return false;
+    }
+
+    $configuredHost = strtolower(trim((string) parse_url($configuredAppUrl, PHP_URL_HOST)));
+
+    if ($configuredHost === '') {
+        return false;
+    }
+
+    if (in_array($configuredHost, ['localhost', '127.0.0.1', '::1'], true)) {
+        return false;
+    }
+
+    if (preg_match('/(?:^|\.)((test|local|localhost))$/', $configuredHost) === 1) {
+        return false;
+    }
+
+    return !emarioh_ip_is_local_or_private($configuredHost);
 }
 
 function emarioh_transport_is_https(): bool
@@ -4903,19 +4976,36 @@ function emarioh_app_url(string $path = ''): string
     return $baseUrl . '/' . $normalizedPath;
 }
 
+function emarioh_should_use_vendor_cdn(): bool
+{
+    static $shouldUseVendorCdn = null;
+
+    if (is_bool($shouldUseVendorCdn)) {
+        return $shouldUseVendorCdn;
+    }
+
+    $shouldUseVendorCdn = emarioh_env_bool('EMARIOH_USE_VENDOR_CDN', false);
+    return $shouldUseVendorCdn;
+}
+
 function emarioh_render_vendor_head_assets(bool $includeBootstrapCss = true, bool $includeBootstrapIcons = true): string
 {
     $tags = [];
+    $tags[] = '<base href="' . htmlspecialchars(rtrim(emarioh_app_base_url(), '/') . '/', ENT_QUOTES, 'UTF-8') . '">';
+
+    $tags[] = '<link rel="preconnect" href="https://fonts.googleapis.com">';
+    $tags[] = '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
+    $tags[] = '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">';
 
     if ($includeBootstrapCss) {
-        $tags[] = '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">';
+        $tags[] = '<link rel="stylesheet" href="' . htmlspecialchars(emarioh_app_url('assets/vendor/bootstrap/bootstrap.min.css'), ENT_QUOTES, 'UTF-8') . '">';
     }
 
     if ($includeBootstrapIcons) {
-        $tags[] = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">';
+        $tags[] = '<link rel="stylesheet" href="' . htmlspecialchars(emarioh_app_url('assets/vendor/bootstrap-icons/bootstrap-icons.css'), ENT_QUOTES, 'UTF-8') . '">';
     }
 
-    $tags[] = '<link rel="stylesheet" href="' . htmlspecialchars(emarioh_app_url('assets/css/vendor-fallback.css?v=20260418a'), ENT_QUOTES, 'UTF-8') . '">';
+    $tags[] = '<link rel="stylesheet" href="' . htmlspecialchars(emarioh_app_url('assets/css/vendor-fallback.css?v=20260419c'), ENT_QUOTES, 'UTF-8') . '">';
 
     return implode(PHP_EOL . '    ', $tags);
 }
@@ -4925,10 +5015,10 @@ function emarioh_render_vendor_runtime_assets(bool $includeBootstrapBundle = fal
     $tags = [];
 
     if ($includeBootstrapBundle) {
-        $tags[] = '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>';
+        $tags[] = '<script src="' . htmlspecialchars(emarioh_app_url('assets/vendor/bootstrap/bootstrap.bundle.min.js'), ENT_QUOTES, 'UTF-8') . '"></script>';
     }
 
-    $tags[] = '<script src="' . htmlspecialchars(emarioh_app_url('assets/js/vendor-runtime.js?v=20260418a'), ENT_QUOTES, 'UTF-8') . '"></script>';
+    $tags[] = '<script src="' . htmlspecialchars(emarioh_app_url('assets/js/vendor-runtime.js?v=20260419a'), ENT_QUOTES, 'UTF-8') . '"></script>';
 
     return implode(PHP_EOL . '    ', $tags);
 }
@@ -5022,13 +5112,13 @@ function emarioh_paymongo_request(string $method, string $path, ?array $payload 
 
     if ($statusCode < 200 || $statusCode >= 300) {
         if (!empty($response['error'])) {
-            throw new RuntimeException((string) $response['error']);
+            throw new RuntimeException((string) $response['error'], $statusCode);
         }
 
         throw new RuntimeException(emarioh_paymongo_error_message(
             $decodedBody,
             'PayMongo request failed. Please try again in a moment.'
-        ));
+        ), $statusCode);
     }
 
     return $decodedBody;
@@ -5592,6 +5682,9 @@ function emarioh_mark_payment_invoice_checkout_ready(
             gateway_checkout_reference = :gateway_checkout_reference,
             gateway_checkout_url = :gateway_checkout_url,
             gateway_checkout_status = :gateway_checkout_status,
+            gateway_payment_id = NULL,
+            gateway_payment_intent_id = NULL,
+            gateway_paid_at = NULL,
             stage_label = :stage_label
         WHERE id = :id
     ')->execute([
@@ -5618,6 +5711,97 @@ function emarioh_mark_payment_invoice_checkout_ready(
     );
 
     return emarioh_find_payment_invoice_by_booking($db, (int) ($invoice['booking_id'] ?? 0));
+}
+
+function emarioh_paymongo_checkout_session_is_missing(Throwable $throwable): bool
+{
+    $statusCode = (int) $throwable->getCode();
+
+    if ($statusCode === 404) {
+        return true;
+    }
+
+    $message = strtolower(trim($throwable->getMessage()));
+
+    if ($message === '') {
+        return false;
+    }
+
+    return str_contains($message, '404')
+        || str_contains($message, 'not found')
+        || str_contains($message, 'no such');
+}
+
+function emarioh_clear_payment_invoice_checkout_state(PDO $db, array $invoice): ?array
+{
+    $invoiceId = (int) ($invoice['id'] ?? 0);
+    $bookingId = (int) ($invoice['booking_id'] ?? 0);
+
+    if ($invoiceId < 1 || $bookingId < 1) {
+        return null;
+    }
+
+    $status = strtolower(trim((string) ($invoice['status'] ?? 'pending')));
+    $amountPaidValue = max(0, (float) ($invoice['amount_paid'] ?? 0));
+    $balanceDueValue = max(0, (float) ($invoice['balance_due'] ?? 0));
+    $stageLabel = $status === 'approved' && $balanceDueValue <= 0.00001
+        ? 'Paid via PayMongo QRPh'
+        : ($amountPaidValue > 0 && $balanceDueValue > 0.00001
+            ? 'Awaiting remaining balance payment'
+            : ($status === 'cancelled'
+                ? 'Invoice Closed'
+                : 'Awaiting PayMongo QRPh payment'));
+
+    $db->prepare('
+        UPDATE payment_invoices
+        SET gateway_checkout_session_id = NULL,
+            gateway_checkout_reference = NULL,
+            gateway_checkout_url = NULL,
+            gateway_checkout_status = NULL,
+            stage_label = :stage_label
+        WHERE id = :id
+    ')->execute([
+        ':stage_label' => $stageLabel,
+        ':id' => $invoiceId,
+    ]);
+
+    return emarioh_find_payment_invoice_by_booking($db, $bookingId);
+}
+
+function emarioh_paymongo_checkout_status_is_open(?string $status): bool
+{
+    $normalizedStatus = strtolower(trim((string) $status));
+
+    if ($normalizedStatus === '') {
+        return false;
+    }
+
+    return in_array($normalizedStatus, [
+        'active',
+        'open',
+        'pending',
+        'processing',
+        'awaiting_payment',
+        'unpaid',
+    ], true);
+}
+
+function emarioh_payment_invoice_has_remaining_balance(array $invoice): bool
+{
+    return max(0, (float) ($invoice['amount_paid'] ?? 0)) > 0.00001
+        && max(0, (float) ($invoice['balance_due'] ?? 0)) > 0.00001;
+}
+
+function emarioh_payment_invoice_has_recorded_payment(array $invoice): bool
+{
+    return trim((string) ($invoice['gateway_payment_id'] ?? '')) !== ''
+        || trim((string) ($invoice['gateway_paid_at'] ?? '')) !== '';
+}
+
+function emarioh_payment_invoice_should_skip_checkout_sync(array $invoice): bool
+{
+    return emarioh_payment_invoice_has_remaining_balance($invoice)
+        && emarioh_payment_invoice_has_recorded_payment($invoice);
 }
 
 function emarioh_extract_paymongo_payment_summary(array $checkoutSession): array
@@ -5770,7 +5954,18 @@ function emarioh_sync_paymongo_invoice_status(PDO $db, array $invoice): ?array
         return $invoice;
     }
 
-    $checkoutSession = emarioh_paymongo_request('GET', 'checkout_sessions/' . rawurlencode($checkoutSessionId));
+    try {
+        $checkoutSession = emarioh_paymongo_request('GET', 'checkout_sessions/' . rawurlencode($checkoutSessionId));
+    } catch (RuntimeException $exception) {
+        // Some older or already-consumed sessions can disappear upstream; clear the stale reference
+        // so the client can continue to open a fresh checkout for any remaining balance.
+        if (emarioh_paymongo_checkout_session_is_missing($exception)) {
+            return emarioh_clear_payment_invoice_checkout_state($db, $invoice) ?? $invoice;
+        }
+
+        throw $exception;
+    }
+
     $paymentSummary = emarioh_extract_paymongo_payment_summary($checkoutSession);
 
     if (trim((string) ($paymentSummary['payment_status'] ?? '')) === 'paid') {
