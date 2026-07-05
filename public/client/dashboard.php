@@ -13,13 +13,20 @@ $clientPortalState = emarioh_fetch_client_portal_state(
 $clientPortalStateJson = json_encode(
     $clientPortalState,
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-) ?: '{"clientName":"","bookingRequest":null,"billingDetails":null}';
+) ?: '{"clientName":"","bookingRequest":null,"billingDetails":null,"bookingNotification":null}';
 $packageCatalogJson = json_encode(
     emarioh_fetch_service_package_catalog($db),
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
 ) ?: '[]';
 
 $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+$clientDisplayName = trim((string) ($clientPortalState['clientName'] ?? ''));
+if ($clientDisplayName === '') {
+    $clientDisplayName = trim((string) ($currentUser['full_name'] ?? ''));
+}
+if ($clientDisplayName === '') {
+    $clientDisplayName = 'Client';
+}
 $clientHeroImagePath = '';
 
 try {
@@ -51,8 +58,8 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
     <title>Emarioh Catering Services Client Dashboard</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
-    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20260418d">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418e">
+    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20260706d">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418i">
 </head>
 <body class="dashboard-page client-dashboard-page client-dashboard-home" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -99,6 +106,10 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
                                 <span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span>
                                 <span>My Bookings</span>
                             </a>
+                            <a class="nav-link" href="client-notifications.php">
+                                <span class="nav-link__icon"><i class="bi bi-bell"></i></span>
+                                <span>Notifications</span>
+                            </a>
                             <a class="nav-link" href="client-billing.php">
                                 <span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span>
                                 <span>Billing</span>
@@ -122,171 +133,29 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
             </aside>
 
             <div class="dashboard-main">
-                <header class="dashboard-topbar client-dashboard-topbar">
-                    <div class="topbar-leading">
-                        <div class="topbar-copy">
-                            <h1 class="topbar-copy__title" id="dashboardHeaderTitle">Welcome back, Client</h1>
-                            <p class="topbar-copy__text" id="dashboardHeaderSubtitle">Plan, manage, and track your catering events in one place.</p>
-                        </div>
-                    </div>
-                </header>
-
                 <main class="dashboard-content client-dashboard-content">
-                    <section class="summary-grid client-summary-grid" aria-label="Client portal overview">
-                        <article class="summary-card">
-                            <span class="summary-card__icon" aria-hidden="true"><i class="bi bi-clipboard-check"></i></span>
-                            <div class="summary-card__body">
-                                <p class="summary-card__label">Booking Status</p>
-                                <p class="summary-card__value" id="dashboardBookingStatusValueSummary">No active booking yet</p>
-                                <p class="summary-card__note" id="dashboardBookingStatusNoteSummary">Start by creating your event request.</p>
-                            </div>
-                        </article>
-                        <article class="summary-card">
-                            <span class="summary-card__icon" aria-hidden="true"><i class="bi bi-wallet2"></i></span>
-                            <div class="summary-card__body">
-                                <p class="summary-card__label">Payment Status</p>
-                                <p class="summary-card__value" id="dashboardPaymentStatusValueSummary">No invoice available</p>
-                                <p class="summary-card__note" id="dashboardPaymentStatusNoteSummary">Invoices will appear after booking confirmation.</p>
-                            </div>
-                        </article>
-                        <article class="summary-card">
-                            <span class="summary-card__icon" aria-hidden="true"><i class="bi bi-calendar-event"></i></span>
-                            <div class="summary-card__body">
-                                <p class="summary-card__label">Event Schedule</p>
-                                <p class="summary-card__value" id="dashboardEventScheduleValueSummary">No schedule set</p>
-                                <p class="summary-card__note" id="dashboardEventScheduleNoteSummary">Choose your preferred date and time.</p>
-                            </div>
-                        </article>
-                    </section>
-
                     <section class="dashboard-primary">
                         <section class="surface-card client-hero-card"<?= $clientHeroCardStyle !== '' ? ' style="' . $escape($clientHeroCardStyle) . '"' : '' ?>>
                             <div class="client-hero-card__content">
-                                <p class="panel-heading__eyebrow">Current Booking</p>
+                                <p class="panel-heading__eyebrow" id="dashboardOverviewEyebrow">Event Planning</p>
+                                <p class="client-hero-card__client" id="dashboardClientName"><?= $escape($clientDisplayName) ?></p>
                                 <h2 id="dashboardOverviewTitle">Ready to plan your event?</h2>
-                                <p class="client-hero-card__intro" id="dashboardOverviewIntro">Submit your event details and let our team handle the rest, from preparation to execution.</p>
+                                <p class="client-hero-card__intro" id="dashboardOverviewIntro">Start a booking request and choose your preferred event date.</p>
 
                                 <div class="client-hero-card__actions">
-                                    <a class="action-btn action-btn--primary" href="client-bookings.php" id="dashboardPrimaryAction">Book New Event</a>
                                     <span class="status-pill status-pill--pending" id="dashboardOverviewStatusPill">Ready to start</span>
+                                    <a class="client-hero-card__action" href="client-bookings.php" id="dashboardPrimaryAction">Book Event</a>
                                 </div>
 
-                                <p class="client-hero-card__note" id="dashboardOverviewFootnote">You can track every update from My Bookings after submission.</p>
+                                <p class="client-hero-card__next-step">
+                                    <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
+                                    <span id="dashboardOverviewNextStep">Next step: Choose your date and package</span>
+                                </p>
+
+                                <p class="client-hero-card__note" id="dashboardOverviewFootnote">Next step: Book Event.</p>
                             </div>
 
                             <div class="client-hero-card__media" aria-hidden="true"></div>
-                        </section>
-
-                        <section class="surface-card client-quick-actions-card" aria-labelledby="dashboardQuickActionsTitle">
-                            <div class="client-quick-actions-card__heading">
-                                <p class="panel-heading__eyebrow">Quick Actions</p>
-                                <h2 id="dashboardQuickActionsTitle">Everything you need, right away</h2>
-                            </div>
-                            <div class="client-quick-actions-list">
-                                <a class="client-quick-action" href="client-bookings.php">
-                                    <span class="client-quick-action__icon" aria-hidden="true"><i class="bi bi-calendar2-plus"></i></span>
-                                    <span class="client-quick-action__content">
-                                        <strong>Book Event</strong>
-                                        <span>Start a new request in minutes.</span>
-                                    </span>
-                                </a>
-                                <a class="client-quick-action" href="client-my-bookings.php">
-                                    <span class="client-quick-action__icon" aria-hidden="true"><i class="bi bi-journal-check"></i></span>
-                                    <span class="client-quick-action__content">
-                                        <strong>My Bookings</strong>
-                                        <span>Track updates and approval status.</span>
-                                    </span>
-                                </a>
-                                <a class="client-quick-action" href="client-billing.php">
-                                    <span class="client-quick-action__icon" aria-hidden="true"><i class="bi bi-receipt"></i></span>
-                                    <span class="client-quick-action__content">
-                                        <strong>Billing</strong>
-                                        <span>Review invoices and payments.</span>
-                                    </span>
-                                </a>
-                                <a class="client-quick-action" href="client-preferences.php">
-                                    <span class="client-quick-action__icon" aria-hidden="true"><i class="bi bi-person-gear"></i></span>
-                                    <span class="client-quick-action__content">
-                                        <strong>Profile</strong>
-                                        <span>Update your account details.</span>
-                                    </span>
-                                </a>
-                            </div>
-                        </section>
-
-                        <section class="client-dashboard-secondary-grid">
-                            <section class="surface-card client-details-card" aria-labelledby="dashboardSnapshotTitle">
-                                <div class="client-details-card__heading">
-                                    <p class="panel-heading__eyebrow">Upcoming Event</p>
-                                    <h2 id="dashboardSnapshotTitle">Booking snapshot</h2>
-                                </div>
-
-                                <div class="client-details-list">
-                                    <article class="client-details-item">
-                                        <span class="client-details-item__icon" aria-hidden="true"><i class="bi bi-stars"></i></span>
-                                        <div class="client-details-item__text">
-                                            <span class="client-details-item__label">Event</span>
-                                            <strong id="dashboardOverviewEvent">Not selected</strong>
-                                        </div>
-                                    </article>
-                                    <article class="client-details-item">
-                                        <span class="client-details-item__icon" aria-hidden="true"><i class="bi bi-calendar-week"></i></span>
-                                        <div class="client-details-item__text">
-                                            <span class="client-details-item__label">Schedule</span>
-                                            <strong id="dashboardOverviewSchedule">Not scheduled</strong>
-                                        </div>
-                                    </article>
-                                    <article class="client-details-item">
-                                        <span class="client-details-item__icon" aria-hidden="true"><i class="bi bi-geo-alt"></i></span>
-                                        <div class="client-details-item__text">
-                                            <span class="client-details-item__label">Venue</span>
-                                            <strong id="dashboardOverviewVenue">To be decided</strong>
-                                        </div>
-                                    </article>
-                                </div>
-
-                                <div class="client-details-meta">
-                                    <article class="client-details-meta__item">
-                                        <span>Guests</span>
-                                        <strong id="dashboardOverviewGuests">Not specified</strong>
-                                    </article>
-                                    <article class="client-details-meta__item">
-                                        <span>Reference</span>
-                                        <strong id="dashboardOverviewReference">Not available yet</strong>
-                                    </article>
-                                    <article class="client-details-meta__item client-details-meta__item--full">
-                                        <span>Stage</span>
-                                        <strong id="dashboardOverviewStage">Pre-booking</strong>
-                                    </article>
-                                </div>
-
-                                <p class="client-details-card__note" id="dashboardOverviewFootnoteSecondary">You can track every update from My Bookings after submission.</p>
-                            </section>
-
-                            <aside class="surface-card client-mobile-status-card" aria-labelledby="dashboardMobileStatusTitle">
-                                <div class="client-mobile-status-card__heading">
-                                    <p class="panel-heading__eyebrow">At A Glance</p>
-                                    <h2 id="dashboardMobileStatusTitle">Current status</h2>
-                                </div>
-
-                                <div class="client-mobile-status-list">
-                                    <article class="client-mobile-status-item">
-                                        <span class="client-mobile-status-item__label">Booking</span>
-                                        <strong id="dashboardBookingStatusValue">No active booking yet</strong>
-                                        <p id="dashboardBookingStatusNote">Start by creating your event request.</p>
-                                    </article>
-                                    <article class="client-mobile-status-item">
-                                        <span class="client-mobile-status-item__label">Payment</span>
-                                        <strong id="dashboardPaymentStatusValue">No invoice available</strong>
-                                        <p id="dashboardPaymentStatusNote">Invoices will appear after booking confirmation.</p>
-                                    </article>
-                                    <article class="client-mobile-status-item">
-                                        <span class="client-mobile-status-item__label">Schedule</span>
-                                        <strong id="dashboardEventScheduleValue">No schedule set</strong>
-                                        <p id="dashboardEventScheduleNote">Choose your preferred date and time.</p>
-                                    </article>
-                                </div>
-                            </aside>
                         </section>
                     </section>
                 </main>
@@ -298,7 +167,7 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
 
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js?v=20260419c"></script>
-    <script src="assets/js/logout-confirmation.js?v=20260418a"></script>
+    <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
     <script>
         window.EmariohServerClientPortalState = <?= $clientPortalStateJson ?>;
     </script>
@@ -307,7 +176,7 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
     </script>
     <script src="assets/js/package-catalog.js?v=20260412c"></script>
     <script src="assets/js/payment-settings-store.js?v=20260412a"></script>
-    <script src="assets/js/client-portal-state.js?v=20260419c"></script>
+    <script src="assets/js/client-portal-state.js?v=20260706b"></script>
     <script src="assets/js/pages/client-dashboard.js?v=20260419a"></script>
 </body>
 </html>

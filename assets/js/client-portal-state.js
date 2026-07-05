@@ -92,6 +92,9 @@ function mergeClientPortalState(storedState, serverState) {
     const serverBillingDetails = serverState.billingDetails && typeof serverState.billingDetails === "object"
         ? clonePortalStateValue(serverState.billingDetails)
         : null;
+    const serverBookingNotification = serverState.bookingNotification && typeof serverState.bookingNotification === "object"
+        ? clonePortalStateValue(serverState.bookingNotification)
+        : null;
 
     if (serverClientName) {
         nextState.clientName = serverClientName;
@@ -100,6 +103,7 @@ function mergeClientPortalState(storedState, serverState) {
     if (!serverBookingRequest) {
         delete nextState.bookingRequest;
         delete nextState.billingDetails;
+        delete nextState.bookingNotification;
         return nextState;
     }
 
@@ -130,6 +134,12 @@ function mergeClientPortalState(storedState, serverState) {
 
     if (!["approved", "completed"].includes(String(serverBookingRequest.status || "").trim().toLowerCase())) {
         delete nextState.billingDetails;
+    }
+
+    if (serverBookingNotification) {
+        nextState.bookingNotification = serverBookingNotification;
+    } else {
+        delete nextState.bookingNotification;
     }
 
     return nextState;
@@ -835,6 +845,12 @@ function applyDashboardState(state) {
     const eventScheduleNote = bookingRequest
         ? billingMeta?.venue || bookingRequest.venue || "Venue to be confirmed"
         : "Choose your preferred date and time.";
+    const bookingNotification = buildDashboardBookingNotification(
+        bookingRequest,
+        bookingMeta,
+        billingMeta,
+        state?.bookingNotification
+    );
     const headerSubtitle = !bookingRequest
         ? "Plan, manage, and track your catering events in one place."
         : isApproved
@@ -863,22 +879,22 @@ function applyDashboardState(state) {
                 ? "Ready to start a new booking?"
                 : selectedPackageLabel || bookingRequest.eventType || "Your booking request is being reviewed";
     const overviewIntro = !bookingRequest
-        ? "Submit your event details and let our team handle the rest, from preparation to execution."
+        ? "Start a booking request and choose your preferred event date."
         : isApproved
             ? isFullyPaid
-                ? "Your approved event is fully paid and ready for final coordination."
-                : "Your booking is approved. Review the invoice and settle the remaining amount to keep everything on schedule."
+                ? "Confirmed and fully paid."
+                : "Approved. Please settle your invoice to keep the schedule confirmed."
             : isClosedBooking
-                ? "Your previous request is already closed. You can start a new booking anytime from the portal."
-                : "Your request is under review while the team checks availability, schedule, and event details.";
+                ? "Your previous request is closed."
+                : "Under review by the admin team.";
     const primaryActionLabel = !bookingRequest
-        ? "Book New Event"
+        ? "Book Event"
         : isApproved
             ? isFullyPaid
                 ? "View My Booking"
                 : "Open Billing"
             : isClosedBooking
-                ? "Book New Event"
+                ? "Book Again"
                 : "View My Booking";
     const primaryActionHref = !bookingRequest
         ? "client-bookings.php"
@@ -890,17 +906,33 @@ function applyDashboardState(state) {
                 ? "client-bookings.php"
                 : "client-my-bookings.php";
     const overviewFootnote = !bookingRequest
-        ? "You can track every update from My Bookings after submission."
+        ? "Next step: Book Event."
         : isApproved
             ? isFullyPaid
-                ? "Payment is confirmed. Keep your schedule and venue details updated if needed."
-                : "Open Billing to review the invoice, due date, and payment instructions."
+                ? "Next step: Final coordination."
+                : "Next step: Open Billing."
             : isClosedBooking
-                ? "Use Book Event when you are ready to submit a new request."
-                : "The team will update your status once availability has been reviewed.";
+                ? "Next step: Book Event."
+            : "Next step: Wait for booking update.";
+    const overviewNextStep = !bookingRequest
+        ? "Next step: Choose your date and package"
+        : isApproved
+            ? isFullyPaid
+                ? "Next step: Wait for final coordination"
+                : "Next step: Review invoice and payment instructions"
+            : isClosedBooking
+                ? "Next step: Start a new booking request"
+            : "Next step: Wait for admin update";
+    const overviewEyebrow = !bookingRequest
+        ? "Event Planning"
+        : isClosedBooking
+            ? "Previous Booking"
+            : "Current Booking";
 
     setText("dashboardHeaderTitle", `Welcome back, ${clientFirstName}`);
     setText("dashboardHeaderSubtitle", headerSubtitle);
+    setText("dashboardOverviewEyebrow", overviewEyebrow);
+    setText("dashboardClientName", state?.clientName || clientFirstName || "Client");
     setText("dashboardBookingStatusValue", bookingStatusLabel);
     setText("dashboardBookingStatusValueSummary", bookingStatusLabel);
     setText("dashboardBookingStatusNote", bookingStatusNote);
@@ -923,9 +955,110 @@ function applyDashboardState(state) {
     setText("dashboardOverviewReference", bookingRequest?.reference || "Not available yet");
     setText("dashboardOverviewStage", bookingRequest ? bookingMeta.stageValue : "Pre-booking");
     setAction("dashboardPrimaryAction", primaryActionLabel, primaryActionHref);
+    setText("dashboardOverviewNextStep", overviewNextStep);
     setText("dashboardOverviewFootnote", overviewFootnote);
     setText("dashboardOverviewFootnoteSecondary", overviewFootnote);
+    renderDashboardBookingNotification(bookingNotification);
+}
 
+function buildDashboardBookingNotification(bookingRequest, bookingMeta, billingMeta, serverNotification) {
+    if (!bookingRequest) {
+        return {
+            title: "No booking notifications yet",
+            message: "Submit a reservation request and updates will appear here in your customer account.",
+            statusLabel: "No booking yet",
+            statusClass: "pending",
+            reference: "Reference pending",
+            timeLabel: "Waiting for your first booking",
+            actionLabel: "Book Event",
+            href: "client-bookings.php",
+            icon: "bi-bell"
+        };
+    }
+
+    const status = String(bookingRequest.status || "pending_review");
+    const eventLabel = billingMeta?.eventName || bookingRequest.packageLabel || bookingRequest.eventType || "your booking";
+    const fallback = status === "approved"
+        ? {
+            title: "Booking approved",
+            message: `Your reservation for ${eventLabel} has been approved. Review Billing to settle the reservation payment.`,
+            actionLabel: "Open Billing",
+            href: "client-billing.php",
+            icon: "bi-check-circle-fill"
+        }
+        : status === "completed"
+            ? {
+                title: "Booking completed",
+                message: `Your reservation for ${eventLabel} is marked completed. Thank you for choosing Emarioh Catering Services.`,
+                actionLabel: "View Booking",
+                href: "client-my-bookings.php",
+                icon: "bi-check2-circle"
+            }
+            : status === "cancelled"
+                ? {
+                    title: "Booking cancelled",
+                    message: `Your reservation for ${eventLabel} has been cancelled. You can submit a new booking request anytime.`,
+                    actionLabel: "Book Again",
+                    href: "client-bookings.php",
+                    icon: "bi-x-circle-fill"
+                }
+                : status === "rejected"
+                    ? {
+                        title: "Booking request rejected",
+                        message: `Your reservation request for ${eventLabel} was not approved. You can submit a new request with updated details.`,
+                        actionLabel: "Book Again",
+                        href: "client-bookings.php",
+                        icon: "bi-exclamation-triangle-fill"
+                    }
+                    : {
+                        title: "Booking request received",
+                        message: `Your reservation request for ${eventLabel} is pending review. We will update this account once availability is checked.`,
+                        actionLabel: "Track Booking",
+                        href: "client-my-bookings.php",
+                        icon: "bi-hourglass-split"
+                    };
+    const timeLabel = serverNotification?.timeLabel
+        || (serverNotification?.time ? formatDateTimeLabel(serverNotification.time) : "")
+        || (bookingRequest.submittedAt ? formatDateTimeLabel(bookingRequest.submittedAt) : "Date not provided");
+
+    return {
+        title: serverNotification?.title || fallback.title,
+        message: serverNotification?.message || fallback.message,
+        statusLabel: serverNotification?.statusLabel || bookingMeta.label,
+        statusClass: serverNotification?.statusClass || bookingMeta.pillClass,
+        reference: serverNotification?.reference || bookingRequest.reference || "Reference pending",
+        timeLabel,
+        actionLabel: serverNotification?.actionLabel || fallback.actionLabel,
+        href: serverNotification?.href || fallback.href,
+        icon: serverNotification?.icon || fallback.icon
+    };
+}
+
+function renderDashboardBookingNotification(notification) {
+    const icon = document.getElementById("dashboardBookingNotificationIcon");
+    const iconClass = String(notification.icon || "bi-bell-fill")
+        .split(/\s+/)
+        .filter((className) => className && className !== "bi")
+        .join(" ");
+
+    if (icon) {
+        icon.className = `bi ${iconClass || "bi-bell-fill"}`;
+    }
+
+    setText("dashboardBookingNotificationTitle", notification.title);
+    setText("dashboardBookingNotificationMessage", notification.message);
+    setStatusPill(
+        "dashboardBookingNotificationStatus",
+        notification.statusLabel,
+        notification.statusClass || "pending"
+    );
+    setText("dashboardBookingNotificationReference", notification.reference);
+    setText("dashboardBookingNotificationTime", notification.timeLabel);
+    setAction(
+        "dashboardBookingNotificationAction",
+        notification.actionLabel || "Track Booking",
+        notification.href || "client-my-bookings.php"
+    );
 }
 
 function applyBillingPageState(state) {

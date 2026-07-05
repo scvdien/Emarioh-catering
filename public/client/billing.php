@@ -13,7 +13,7 @@ $clientPortalState = emarioh_fetch_client_portal_state(
 $clientPortalStateJson = json_encode(
     $clientPortalState,
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
-) ?: '{"clientName":"","bookingRequest":null,"billingDetails":null}';
+) ?: '{"clientName":"","bookingRequest":null,"billingDetails":null,"bookingNotification":null}';
 $packageCatalogJson = json_encode(
     emarioh_fetch_service_package_catalog($db),
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
@@ -27,7 +27,7 @@ $packageCatalogJson = json_encode(
     <title>Emarioh Catering Services Client Billing</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/pages/client-billing.css?v=20260418i">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418e">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418h">
 </head>
 <body class="dashboard-page client-dashboard-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -58,6 +58,7 @@ $packageCatalogJson = json_encode(
                             <a class="nav-link" href="client-dashboard.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <a class="nav-link" href="client-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-plus"></i></span><span>Book Event</span></a>
                             <a class="nav-link" href="client-my-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span><span>My Bookings</span></a>
+                            <a class="nav-link" href="client-notifications.php"><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span></a>
                             <a class="nav-link active" href="client-billing.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span><span>Billing</span></a>
                             <a class="nav-link" href="client-preferences.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Account Settings</span></a>
                         </nav>
@@ -80,7 +81,6 @@ $packageCatalogJson = json_encode(
                     <section class="surface-card billing-empty-state" id="billingPendingState">
                         <div class="panel-heading">
                             <div class="panel-heading__copy">
-                                <h2>Billing</h2>
                                 <p class="billing-empty-state__status" id="billingPendingTitle">Payment opens after approval</p>
                             </div>
                             <a href="client-my-bookings.php" id="billingPendingLink">View booking</a>
@@ -287,7 +287,7 @@ $packageCatalogJson = json_encode(
 
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js?v=20260419c"></script>
-    <script src="assets/js/logout-confirmation.js?v=20260418a"></script>
+    <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
     <script>
         window.EmariohServerClientPortalState = <?= $clientPortalStateJson ?>;
     </script>
@@ -296,7 +296,7 @@ $packageCatalogJson = json_encode(
     </script>
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/payment-settings-store.js?v=20260412a"></script>
-    <script src="assets/js/client-portal-state.js?v=20260419c"></script>
+    <script src="assets/js/client-portal-state.js?v=20260419d"></script>
     <script src="assets/js/pages/client-dashboard.js?v=20260419a"></script>
 </body>
 </html>

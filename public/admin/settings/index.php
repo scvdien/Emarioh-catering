@@ -17,7 +17,7 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260418z">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260701q">
 </head>
 <body class="admin-dashboard-page admin-settings-page admin-settings-menu-page" data-auth-guard="admin">
     <div class="dashboard-shell container-fluid">
@@ -153,6 +153,6 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
 
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
-    <script src="assets/js/logout-confirmation.js?v=20260418a"></script>
+    <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
 </body>
 </html>

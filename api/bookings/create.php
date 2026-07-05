@@ -9,6 +9,18 @@ $db = emarioh_db();
 $currentUser = emarioh_require_role('client');
 $data = emarioh_request_data();
 
+$blockingBooking = emarioh_find_client_active_upcoming_booking($db, (int) $currentUser['id']);
+
+if ($blockingBooking !== null) {
+    emarioh_fail(
+        emarioh_client_active_booking_block_message($blockingBooking),
+        409,
+        [
+            'blocking_booking' => emarioh_client_active_booking_payload($blockingBooking),
+        ]
+    );
+}
+
 $eventType = emarioh_normalize_name((string) ($data['event_type'] ?? ''));
 $eventDateValue = trim((string) ($data['event_date'] ?? ''));
 $eventTimeValue = trim((string) ($data['event_time'] ?? ''));

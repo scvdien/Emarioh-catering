@@ -8,7 +8,9 @@
 }
 
 .client-dashboard-page .dashboard-frame {
+    display: grid;
     grid-template-columns: 280px minmax(0, 1fr);
+    min-height: 100vh;
 }
 
 .client-dashboard-page .dashboard-sidebar {
@@ -222,6 +224,91 @@
     display: none;
 }
 
+.client-dashboard-page .status-pill--confirmed {
+    background: rgba(41, 111, 73, 0.12);
+    color: #276b47;
+}
+
+.client-dashboard-page .status-pill--cancelled {
+    background: rgba(114, 105, 95, 0.12);
+    color: #6d645b;
+}
+
+.client-dashboard-page .status-pill--rejected {
+    background: rgba(174, 64, 64, 0.12);
+    color: #9c3838;
+}
+
+.client-dashboard-page .client-booking-notification {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.95rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid rgba(63, 94, 76, 0.14);
+    border-radius: 1.15rem;
+    background: linear-gradient(135deg, rgba(247, 252, 248, 0.98) 0%, rgba(255, 250, 242, 0.98) 100%);
+    box-shadow: 0 18px 36px rgba(50, 42, 33, 0.08);
+}
+
+.client-dashboard-page .client-booking-notification__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    background: #245442;
+    color: #fffaf3;
+    font-size: 1rem;
+    box-shadow: 0 12px 26px rgba(36, 84, 66, 0.18);
+}
+
+.client-dashboard-page .client-booking-notification__body {
+    min-width: 0;
+}
+
+.client-dashboard-page .client-booking-notification__eyebrow {
+    margin: 0 0 0.18rem;
+    color: #7b6247;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.client-dashboard-page .client-booking-notification h2 {
+    margin: 0;
+    color: #1f3028;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.28;
+}
+
+.client-dashboard-page .client-booking-notification p:not(.client-booking-notification__eyebrow) {
+    margin: 0.34rem 0 0;
+    color: #625b54;
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.client-dashboard-page .client-booking-notification__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.65rem;
+    margin-top: 0.6rem;
+    color: #7b7167;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.client-dashboard-page .client-booking-notification__meta .status-pill {
+    padding: 0.34rem 0.58rem;
+    font-size: 0.68rem;
+}
+
 @media (max-width: 1199.98px) {
     .client-dashboard-page .dashboard-frame {
         grid-template-columns: 1fr;
@@ -266,8 +353,8 @@
         left: 0;
         z-index: 30;
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 0.35rem;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 0.24rem;
         width: 100%;
         padding:
             0.72rem
@@ -284,10 +371,10 @@
         display: grid;
         justify-items: center;
         gap: 0.24rem;
-        padding: 0.45rem 0.2rem;
+        padding: 0.42rem 0.14rem;
         border-radius: 0.9rem;
         color: #6d665f;
-        font-size: 0.66rem;
+        font-size: 0.62rem;
         font-weight: 700;
         line-height: 1.1;
         text-decoration: none;
@@ -303,10 +390,15 @@
         color: #174638;
     }
 
-    .client-dashboard-page .dashboard-content,
+    .client-dashboard-page:not(.client-dashboard-home) .dashboard-content,
     .client-dashboard-page .settings-dashboard-content {
         padding-bottom: 1rem;
     }
+
+    .client-dashboard-page .client-booking-notification {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
 }
 
 @media (max-width: 575.98px) {
@@ -320,7 +412,24 @@
     }
 
     .client-dashboard-page .client-mobile-bottom-nav__item {
-        font-size: 0.62rem;
+        font-size: 0.58rem;
+    }
+
+    .client-dashboard-page .client-booking-notification {
+        align-items: start;
+        gap: 0.75rem;
+        padding: 0.9rem;
+        border-radius: 1rem;
+    }
+
+    .client-dashboard-page .client-booking-notification__icon {
+        width: 2.55rem;
+        height: 2.55rem;
+        border-radius: 0.85rem;
+    }
+
+    .client-dashboard-page .client-booking-notification h2 {
+        font-size: 0.98rem;
     }
 }
 

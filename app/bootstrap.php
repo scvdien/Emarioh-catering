@@ -1183,6 +1183,22 @@ CREATE TABLE IF NOT EXISTS booking_status_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 SQL,
         <<<'SQL'
+CREATE TABLE IF NOT EXISTS client_notification_reads (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    booking_status_log_id BIGINT UNSIGNED NOT NULL,
+    read_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_client_notification_read (user_id, booking_status_log_id),
+    KEY idx_client_notification_reads_user (user_id, read_at),
+    CONSTRAINT fk_client_notification_reads_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_client_notification_reads_log
+        FOREIGN KEY (booking_status_log_id) REFERENCES booking_status_logs(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+SQL,
+        <<<'SQL'
 CREATE TABLE IF NOT EXISTS client_activity_logs (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
@@ -1603,21 +1619,37 @@ function emarioh_admin_mobile_nav_items(): array
             'href' => 'index.php',
             'icon' => 'bi-grid-1x2-fill',
             'label' => 'Home',
+            'active_paths' => [
+                'index.php',
+                'dashboard.php',
+            ],
         ],
         [
             'href' => 'admin-bookings.php',
             'icon' => 'bi-journal-check',
             'label' => 'Bookings',
+            'active_paths' => [
+                'admin-bookings.php',
+                'bookings.php',
+            ],
         ],
         [
             'href' => 'admin-events.php',
             'icon' => 'bi-calendar-event',
             'label' => 'Events',
+            'active_paths' => [
+                'admin-events.php',
+                'events.php',
+            ],
         ],
         [
             'href' => 'admin-payments.php',
             'icon' => 'bi-wallet2',
             'label' => 'Payments',
+            'active_paths' => [
+                'admin-payments.php',
+                'payments.php',
+            ],
         ],
         [
             'href' => 'admin-settings.php',
@@ -1625,8 +1657,20 @@ function emarioh_admin_mobile_nav_items(): array
             'label' => 'Profile',
             'active_paths' => [
                 'admin-settings.php',
+                'admin-settings-menu.php',
+                'admin-settings-account.php',
+                'admin-settings-payment.php',
+                'admin-settings-public-page.php',
+                'admin-settings-sms.php',
+                '_base.php',
+                'account.php',
+                'payment.php',
+                'public-page.php',
+                'sms.php',
                 'admin-clients.php',
+                'clients.php',
                 'admin-inquiries.php',
+                'inquiries.php',
             ],
         ],
     ];
@@ -1639,26 +1683,57 @@ function emarioh_client_mobile_nav_items(): array
             'href' => 'client-dashboard.php',
             'icon' => 'bi-grid-1x2-fill',
             'label' => 'Home',
+            'active_paths' => [
+                'client-dashboard.php',
+                'dashboard.php',
+            ],
         ],
         [
             'href' => 'client-bookings.php',
             'icon' => 'bi-calendar2-plus',
             'label' => 'Book',
+            'active_paths' => [
+                'client-bookings.php',
+                'bookings.php',
+            ],
         ],
         [
             'href' => 'client-my-bookings.php',
             'icon' => 'bi-journal-check',
             'label' => 'Bookings',
+            'active_paths' => [
+                'client-my-bookings.php',
+                'my-bookings.php',
+            ],
+        ],
+        [
+            'href' => 'client-notifications.php',
+            'icon' => 'bi-bell',
+            'label' => 'Alerts',
+            'active_paths' => [
+                'client-notifications.php',
+                'notifications.php',
+            ],
         ],
         [
             'href' => 'client-billing.php',
             'icon' => 'bi-wallet2',
             'label' => 'Billing',
+            'active_paths' => [
+                'client-billing.php',
+                'billing.php',
+                'client-payment-receipt.php',
+                'payment-receipt.php',
+            ],
         ],
         [
             'href' => 'client-preferences.php',
             'icon' => 'bi-person-circle',
             'label' => 'Profile',
+            'active_paths' => [
+                'client-preferences.php',
+                'preferences.php',
+            ],
         ],
     ];
 }
@@ -5197,6 +5272,167 @@ function emarioh_find_payment_invoice_by_booking(PDO $db, int $bookingId): ?arra
     return is_array($invoice) ? $invoice : null;
 }
 
+function emarioh_format_booking_date_label(?string $eventDateValue): string
+{
+    $normalizedValue = trim((string) $eventDateValue);
+
+    if ($normalizedValue === '') {
+        return 'date not provided';
+    }
+
+    try {
+        $date = new DateTimeImmutable($normalizedValue);
+    } catch (Throwable $throwable) {
+        return 'date not provided';
+    }
+
+    return $date->format('F j, Y');
+}
+
+function emarioh_find_client_unpaid_active_booking(PDO $db, int $userId): ?array
+{
+    if ($userId < 1) {
+        return null;
+    }
+
+    $statement = $db->prepare("
+        SELECT
+            br.*,
+            pi.id AS invoice_id,
+            pi.invoice_number,
+            pi.status AS invoice_status,
+            pi.amount_due AS invoice_amount_due,
+            pi.amount_paid AS invoice_amount_paid,
+            pi.balance_due AS invoice_balance_due
+        FROM booking_requests br
+        LEFT JOIN payment_invoices pi
+            ON pi.id = (
+                SELECT latest_pi.id
+                FROM payment_invoices latest_pi
+                WHERE latest_pi.booking_id = br.id
+                ORDER BY latest_pi.id DESC
+                LIMIT 1
+            )
+        WHERE br.user_id = :user_id
+          AND br.status IN ('approved', 'completed')
+          AND (
+              pi.id IS NULL
+              OR COALESCE(pi.status, '') <> 'approved'
+              OR COALESCE(pi.balance_due, 0) > 0.00001
+          )
+        ORDER BY br.event_date ASC, br.id ASC
+        LIMIT 1
+    ");
+    $statement->execute([
+        ':user_id' => $userId,
+    ]);
+
+    $booking = $statement->fetch();
+    return is_array($booking) ? $booking : null;
+}
+
+function emarioh_find_client_active_upcoming_booking(PDO $db, int $userId): ?array
+{
+    if ($userId < 1) {
+        return null;
+    }
+
+    $statement = $db->prepare("
+        SELECT
+            br.*,
+            pi.id AS invoice_id,
+            pi.invoice_number,
+            pi.status AS invoice_status,
+            pi.amount_due AS invoice_amount_due,
+            pi.amount_paid AS invoice_amount_paid,
+            pi.balance_due AS invoice_balance_due
+        FROM booking_requests br
+        LEFT JOIN payment_invoices pi
+            ON pi.id = (
+                SELECT latest_pi.id
+                FROM payment_invoices latest_pi
+                WHERE latest_pi.booking_id = br.id
+                ORDER BY latest_pi.id DESC
+                LIMIT 1
+            )
+        WHERE br.user_id = :user_id
+          AND br.status IN ('pending_review', 'approved', 'completed')
+          AND br.event_date >= CURDATE()
+        ORDER BY br.event_date ASC, br.id ASC
+        LIMIT 1
+    ");
+    $statement->execute([
+        ':user_id' => $userId,
+    ]);
+
+    $booking = $statement->fetch();
+    return is_array($booking) ? $booking : null;
+}
+
+function emarioh_client_unpaid_booking_block_message(array $booking): string
+{
+    $reference = trim((string) ($booking['reference'] ?? ''));
+    $eventDateLabel = emarioh_format_booking_date_label((string) ($booking['event_date'] ?? ''));
+    $balanceDue = max(0, (float) ($booking['invoice_balance_due'] ?? 0));
+    $amountLabel = $balanceDue > 0.00001
+        ? ' Remaining balance: ' . emarioh_format_money_amount($balanceDue)
+        : '';
+    $bookingLabel = $reference !== '' ? $reference : 'your existing booking';
+
+    return sprintf(
+        'You still have an unpaid approved booking (%s for %s). Please settle it in Billing before submitting another booking request.%s',
+        $bookingLabel,
+        $eventDateLabel,
+        $amountLabel
+    );
+}
+
+function emarioh_client_active_booking_block_message(array $booking): string
+{
+    $reference = trim((string) ($booking['reference'] ?? ''));
+    $eventDateLabel = emarioh_format_booking_date_label((string) ($booking['event_date'] ?? ''));
+    $statusLabel = emarioh_booking_status_label((string) ($booking['status'] ?? 'pending_review'));
+    $bookingLabel = $reference !== '' ? $reference : 'your existing booking';
+
+    return sprintf(
+        'You already have an active booking (%s for %s, %s). You can submit another booking after this event date has passed, or if the booking is cancelled or rejected.',
+        $bookingLabel,
+        $eventDateLabel,
+        $statusLabel
+    );
+}
+
+function emarioh_client_unpaid_booking_payload(array $booking): array
+{
+    $balanceDue = max(0, (float) ($booking['invoice_balance_due'] ?? 0));
+
+    return [
+        'booking_id' => (int) ($booking['id'] ?? 0),
+        'reference' => (string) ($booking['reference'] ?? ''),
+        'event_date' => (string) ($booking['event_date'] ?? ''),
+        'event_date_label' => emarioh_format_booking_date_label((string) ($booking['event_date'] ?? '')),
+        'invoice_number' => (string) ($booking['invoice_number'] ?? ''),
+        'invoice_status' => (string) ($booking['invoice_status'] ?? ''),
+        'balance_due' => $balanceDue,
+        'balance_due_label' => emarioh_format_money_amount($balanceDue),
+        'billing_url' => 'client-billing.php',
+    ];
+}
+
+function emarioh_client_active_booking_payload(array $booking): array
+{
+    return [
+        'booking_id' => (int) ($booking['id'] ?? 0),
+        'reference' => (string) ($booking['reference'] ?? ''),
+        'event_date' => (string) ($booking['event_date'] ?? ''),
+        'event_date_label' => emarioh_format_booking_date_label((string) ($booking['event_date'] ?? '')),
+        'status' => (string) ($booking['status'] ?? 'pending_review'),
+        'status_label' => emarioh_booking_status_label((string) ($booking['status'] ?? 'pending_review')),
+        'my_bookings_url' => 'client-my-bookings.php',
+        'billing_url' => 'client-billing.php',
+    ];
+}
+
 function emarioh_find_payment_invoice_by_number(PDO $db, string $invoiceNumber): ?array
 {
     $normalizedNumber = trim($invoiceNumber);
@@ -6347,12 +6583,309 @@ function emarioh_select_client_portal_booking(array $bookings): ?array
     return $bookings[0] ?? null;
 }
 
+function emarioh_fetch_latest_booking_status_log(PDO $db, int $bookingId): ?array
+{
+    if ($bookingId < 1) {
+        return null;
+    }
+
+    $statement = $db->prepare('
+        SELECT *
+        FROM booking_status_logs
+        WHERE booking_id = :booking_id
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+    ');
+    $statement->execute([
+        ':booking_id' => $bookingId,
+    ]);
+
+    $row = $statement->fetch();
+    return is_array($row) ? $row : null;
+}
+
+function emarioh_booking_notification_time_value(array $booking, ?array $statusLog = null): string
+{
+    $status = (string) ($booking['status'] ?? 'pending_review');
+    $logCreatedAt = trim((string) ($statusLog['created_at'] ?? ''));
+
+    if ($logCreatedAt !== '') {
+        return $logCreatedAt;
+    }
+
+    $candidate = match ($status) {
+        'approved' => (string) ($booking['approved_at'] ?? $booking['reviewed_at'] ?? ''),
+        'rejected' => (string) ($booking['rejected_at'] ?? $booking['reviewed_at'] ?? ''),
+        'cancelled' => (string) ($booking['cancelled_at'] ?? ''),
+        'completed' => (string) ($booking['completed_at'] ?? ''),
+        default => (string) ($booking['submitted_at'] ?? ''),
+    };
+
+    $candidate = trim($candidate);
+
+    if ($candidate !== '') {
+        return $candidate;
+    }
+
+    return trim((string) ($booking['updated_at'] ?? $booking['created_at'] ?? ''));
+}
+
+function emarioh_build_client_booking_notification(array $booking, ?array $statusLog = null): array
+{
+    $status = (string) ($booking['status'] ?? 'pending_review');
+    $reference = trim((string) ($booking['reference'] ?? ''));
+    $eventLabel = trim((string) ($booking['package_label'] ?? ''));
+
+    if ($eventLabel === '') {
+        $eventLabel = trim((string) ($booking['event_type'] ?? 'booking'));
+    }
+
+    if ($eventLabel === '') {
+        $eventLabel = 'booking';
+    }
+
+    $fallback = match ($status) {
+        'approved' => [
+            'title' => 'Booking approved',
+            'message' => 'Your reservation for ' . $eventLabel . ' has been approved. Review Billing to settle the reservation payment.',
+            'actionLabel' => 'Open Billing',
+            'href' => 'client-billing.php',
+            'icon' => 'bi-check-circle-fill',
+        ],
+        'completed' => [
+            'title' => 'Booking completed',
+            'message' => 'Your reservation for ' . $eventLabel . ' is marked completed. Thank you for choosing Emarioh Catering Services.',
+            'actionLabel' => 'View Booking',
+            'href' => 'client-my-bookings.php',
+            'icon' => 'bi-check2-circle',
+        ],
+        'cancelled' => [
+            'title' => 'Booking cancelled',
+            'message' => 'Your reservation for ' . $eventLabel . ' has been cancelled. You can submit a new booking request anytime.',
+            'actionLabel' => 'Book Again',
+            'href' => 'client-bookings.php',
+            'icon' => 'bi-x-circle-fill',
+        ],
+        'rejected' => [
+            'title' => 'Booking request rejected',
+            'message' => 'Your reservation request for ' . $eventLabel . ' was not approved. You can submit a new request with updated details.',
+            'actionLabel' => 'Book Again',
+            'href' => 'client-bookings.php',
+            'icon' => 'bi-exclamation-triangle-fill',
+        ],
+        default => [
+            'title' => 'Booking request received',
+            'message' => 'Your reservation request for ' . $eventLabel . ' is pending review. We will update this account once availability is checked.',
+            'actionLabel' => 'Track Booking',
+            'href' => 'client-my-bookings.php',
+            'icon' => 'bi-hourglass-split',
+        ],
+    };
+
+    $title = trim((string) ($statusLog['title'] ?? ''));
+    $message = trim((string) ($statusLog['summary'] ?? ''));
+    $timeValue = emarioh_booking_notification_time_value($booking, $statusLog);
+
+    return [
+        'title' => $title !== '' ? $title : $fallback['title'],
+        'message' => $message !== '' ? $message : $fallback['message'],
+        'status' => $status,
+        'statusLabel' => emarioh_booking_status_label($status),
+        'statusClass' => emarioh_booking_client_status_class($status),
+        'reference' => $reference !== '' ? $reference : 'Reference pending',
+        'time' => $timeValue,
+        'timeLabel' => emarioh_format_log_datetime($timeValue),
+        'actionLabel' => $fallback['actionLabel'],
+        'href' => $fallback['href'],
+        'icon' => $fallback['icon'],
+    ];
+}
+
+function emarioh_ensure_client_notification_reads_table(PDO $db): bool
+{
+    try {
+        $db->exec(<<<'SQL'
+CREATE TABLE IF NOT EXISTS client_notification_reads (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    booking_status_log_id BIGINT UNSIGNED NOT NULL,
+    read_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_client_notification_read (user_id, booking_status_log_id),
+    KEY idx_client_notification_reads_user (user_id, read_at),
+    CONSTRAINT fk_client_notification_reads_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_client_notification_reads_log
+        FOREIGN KEY (booking_status_log_id) REFERENCES booking_status_logs(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+SQL);
+
+        return true;
+    } catch (Throwable $throwable) {
+        emarioh_write_runtime_log('client-notifications', 'Client notification read table is not available.', [
+            'error' => $throwable->getMessage(),
+        ]);
+
+        return false;
+    }
+}
+
+function emarioh_fetch_client_notifications(PDO $db, int $userId, int $limit = 80): array
+{
+    if ($userId < 1) {
+        return [];
+    }
+
+    $limit = max(1, min(200, $limit));
+    $hasReadTracking = emarioh_ensure_client_notification_reads_table($db);
+    $readSelect = $hasReadTracking ? 'cnr.read_at AS notification_read_at' : 'NULL AS notification_read_at';
+    $readJoin = $hasReadTracking ? '
+        LEFT JOIN client_notification_reads cnr
+            ON cnr.booking_status_log_id = bsl.id
+           AND cnr.user_id = br.user_id' : '';
+
+    $statement = $db->prepare('
+        SELECT
+            bsl.*,
+            br.reference,
+            br.event_type,
+            br.event_date,
+            br.event_time,
+            br.package_label,
+            br.status AS booking_status,
+            ' . $readSelect . '
+        FROM booking_status_logs bsl
+        INNER JOIN booking_requests br
+            ON br.id = bsl.booking_id
+        ' . $readJoin . '
+        WHERE br.user_id = :user_id
+        ORDER BY bsl.created_at DESC, bsl.id DESC
+        LIMIT ' . $limit
+    );
+    $statement->execute([
+        ':user_id' => $userId,
+    ]);
+
+    $rows = $statement->fetchAll();
+
+    if (!is_array($rows)) {
+        return [];
+    }
+
+    $notifications = [];
+
+    foreach ($rows as $row) {
+        $status = trim((string) ($row['to_status'] ?? $row['booking_status'] ?? 'pending_review'));
+        $eventLabel = trim((string) ($row['package_label'] ?? ''));
+
+        if ($eventLabel === '') {
+            $eventLabel = trim((string) ($row['event_type'] ?? 'booking'));
+        }
+
+        $title = trim((string) ($row['title'] ?? ''));
+        $message = trim((string) ($row['summary'] ?? ''));
+
+        if ($title === '') {
+            $title = match ($status) {
+                'approved' => 'Booking approved',
+                'rejected' => 'Booking request rejected',
+                'cancelled' => 'Booking cancelled',
+                'completed' => 'Booking completed',
+                default => 'Booking request received',
+            };
+        }
+
+        if ($message === '') {
+            $message = match ($status) {
+                'approved' => 'Your reservation for ' . $eventLabel . ' has been approved. Review Billing to settle the reservation payment.',
+                'rejected' => 'Your reservation request for ' . $eventLabel . ' was not approved. You can submit a new request with updated details.',
+                'cancelled' => 'Your reservation for ' . $eventLabel . ' has been cancelled.',
+                'completed' => 'Your reservation for ' . $eventLabel . ' is marked completed.',
+                default => 'Your reservation request for ' . $eventLabel . ' is pending review.',
+            };
+        }
+
+        $notifications[] = [
+            'id' => (int) ($row['id'] ?? 0),
+            'bookingId' => (int) ($row['booking_id'] ?? 0),
+            'title' => $title,
+            'message' => $message,
+            'reference' => trim((string) ($row['reference'] ?? 'Reference pending')) ?: 'Reference pending',
+            'eventLabel' => $eventLabel !== '' ? $eventLabel : 'Booking',
+            'status' => $status,
+            'readStatus' => trim((string) ($row['notification_read_at'] ?? '')) === '' ? 'unread' : 'read',
+            'readAt' => trim((string) ($row['notification_read_at'] ?? '')),
+            'statusLabel' => emarioh_booking_status_label($status),
+            'statusClass' => emarioh_booking_client_status_class($status),
+            'time' => trim((string) ($row['created_at'] ?? '')),
+            'timeLabel' => emarioh_format_log_datetime((string) ($row['created_at'] ?? '')),
+            'href' => in_array($status, ['approved', 'completed'], true) ? 'client-billing.php' : 'client-my-bookings.php',
+            'icon' => match ($status) {
+                'approved', 'completed' => 'bi-check-circle-fill',
+                'rejected' => 'bi-exclamation-triangle-fill',
+                'cancelled' => 'bi-x-circle-fill',
+                default => 'bi-bell-fill',
+            },
+        ];
+    }
+
+    return $notifications;
+}
+
+function emarioh_mark_client_notification_read(PDO $db, int $userId, int $notificationId): ?array
+{
+    if ($userId < 1 || $notificationId < 1) {
+        return null;
+    }
+
+    $statement = $db->prepare('
+        SELECT bsl.id
+        FROM booking_status_logs bsl
+        INNER JOIN booking_requests br
+            ON br.id = bsl.booking_id
+        WHERE bsl.id = :notification_id
+          AND br.user_id = :user_id
+        LIMIT 1
+    ');
+    $statement->execute([
+        ':notification_id' => $notificationId,
+        ':user_id' => $userId,
+    ]);
+
+    if (!$statement->fetchColumn()) {
+        return null;
+    }
+
+    if (!emarioh_ensure_client_notification_reads_table($db)) {
+        return null;
+    }
+
+    $db->prepare('
+        INSERT INTO client_notification_reads (user_id, booking_status_log_id, read_at)
+        VALUES (:user_id, :notification_id, CURRENT_TIMESTAMP)
+        ON DUPLICATE KEY UPDATE read_at = VALUES(read_at)
+    ')->execute([
+        ':user_id' => $userId,
+        ':notification_id' => $notificationId,
+    ]);
+
+    foreach (emarioh_fetch_client_notifications($db, $userId, 200) as $notification) {
+        if ((int) ($notification['id'] ?? 0) === $notificationId) {
+            return $notification;
+        }
+    }
+
+    return null;
+}
+
 function emarioh_fetch_client_portal_state(PDO $db, int $userId, ?string $clientName = null): array
 {
     $portalState = [
         'clientName' => trim((string) $clientName),
         'bookingRequest' => null,
         'billingDetails' => null,
+        'bookingNotification' => null,
     ];
 
     if ($userId < 1) {
@@ -6374,6 +6907,10 @@ function emarioh_fetch_client_portal_state(PDO $db, int $userId, ?string $client
 
     $portalState['bookingRequest'] = $mappedState['bookingRequest'] ?? null;
     $portalState['billingDetails'] = emarioh_build_client_portal_billing_details($db, $selectedBooking, $package);
+    $portalState['bookingNotification'] = emarioh_build_client_booking_notification(
+        $selectedBooking,
+        emarioh_fetch_latest_booking_status_log($db, (int) ($selectedBooking['id'] ?? 0))
+    );
 
     if ($portalState['clientName'] === '') {
         $portalState['clientName'] = trim((string) ($selectedBooking['primary_contact'] ?? ''));
@@ -6405,6 +6942,16 @@ function emarioh_fetch_booking_requests(PDO $db, array $options = []): array
         $params[':user_id'] = (int) $options['user_id'];
     }
 
+    if (isset($options['event_date'])) {
+        $where[] = 'br.event_date = :event_date';
+        $params[':event_date'] = (string) $options['event_date'];
+    }
+
+    if (isset($options['exclude_booking_id']) && (int) $options['exclude_booking_id'] > 0) {
+        $where[] = 'br.id <> :exclude_booking_id';
+        $params[':exclude_booking_id'] = (int) $options['exclude_booking_id'];
+    }
+
     if (!empty($options['statuses']) && is_array($options['statuses'])) {
         $statusPlaceholders = [];
 
@@ -6427,6 +6974,7 @@ function emarioh_fetch_booking_requests(PDO $db, array $options = []): array
     $sql .= match ($orderBy) {
         'event_date_asc' => ' ORDER BY br.event_date ASC, br.event_time ASC, br.id ASC',
         'event_date_desc' => ' ORDER BY br.event_date DESC, br.event_time DESC, br.id DESC',
+        'submitted_asc' => ' ORDER BY br.submitted_at ASC, br.id ASC',
         default => ' ORDER BY br.submitted_at DESC, br.id DESC',
     };
 

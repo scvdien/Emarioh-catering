@@ -2887,13 +2887,13 @@ button {
     }
 
     .client-settings-page .client-mobile-bottom-nav {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 1199.98px) {
     .client-dashboard-page.client-settings-page {
-        --client-settings-mobile-nav-space: calc(4.85rem + env(safe-area-inset-bottom));
+        --client-settings-mobile-nav-space: calc(5.2rem + env(safe-area-inset-bottom));
     }
 
     .client-settings-page .dashboard-sidebar,
@@ -2915,24 +2915,28 @@ button {
 
     .client-dashboard-page.client-settings-page .dashboard-main {
         grid-template-rows: minmax(0, 1fr) auto;
-        min-height: auto;
+        min-height: 100dvh;
         padding-bottom: 0;
     }
 
     .client-dashboard-page.client-settings-page .settings-dashboard-content {
+        display: grid;
         gap: 0;
+        min-height: 100dvh;
         padding: 0 0 var(--client-settings-mobile-nav-space);
+        background: #ffffff;
     }
 
     .client-dashboard-page.client-settings-page .settings-profile-hub,
     .client-dashboard-page.client-settings-page .settings-panel {
         width: 100%;
+        max-width: none;
         margin-inline: auto;
         border-radius: 0;
     }
 
     .client-dashboard-page.client-settings-page .settings-profile-hub {
-        padding: 1.15rem 1rem 1.4rem;
+        padding: 0;
         border: 0;
         background: #ffffff;
         box-shadow: none;
@@ -2946,34 +2950,36 @@ button {
     }
 
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] {
+        place-items: center;
         min-height: 100dvh;
-        padding-bottom: 0;
+        padding: 0 0 var(--client-settings-mobile-nav-space);
     }
 
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub {
-        min-height: 100dvh;
+        width: 100%;
+        max-width: none;
+        min-height: calc(100dvh - var(--client-settings-mobile-nav-space));
         box-sizing: border-box;
         display: grid;
         align-content: start;
-        gap: 0.95rem;
-        padding-top: max(0.7rem, env(safe-area-inset-top));
-        padding-bottom: var(--client-settings-mobile-nav-space);
+        gap: clamp(0.9rem, 2.2vh, 1.15rem);
+        padding: max(2.15rem, env(safe-area-inset-top)) max(0.95rem, env(safe-area-inset-right)) clamp(1rem, 3.5vw, 1.3rem) max(0.95rem, env(safe-area-inset-left));
     }
 
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub__header,
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub__grid,
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-logout {
-        width: min(100%, 29rem);
+        width: min(100%, 27.5rem);
         margin-inline: auto;
     }
 
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub__grid {
-        gap: 0.85rem;
+        gap: clamp(0.85rem, 2.5vh, 1.15rem);
     }
 
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-shortcut,
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-logout {
-        min-height: 6.8rem;
+        min-height: clamp(5.7rem, 13vh, 7rem);
     }
 
     .client-dashboard-page.client-settings-page .client-mobile-bottom-nav__item {

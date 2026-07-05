@@ -843,7 +843,7 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260418w">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260701q">
 </head>
 <body class="admin-dashboard-page admin-settings-page<?= $settingsPageIsDetail ? ' admin-settings-detail-page' : '' ?>" data-auth-guard="admin" data-mobile-settings-view="<?= $settingsPageIsDetail ? 'detail' : 'hub' ?>"<?= $settingsPageIsDetail ? ' data-active-settings-section="' . $escape($settingsPageSection) . '"' : '' ?>>
     <div class="dashboard-shell container-fluid">
@@ -2105,26 +2105,10 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     </script>
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
-    <script src="assets/js/logout-confirmation.js?v=20260418a"></script>
+    <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/pages/index.js?v=20260417c"></script>
     <script src="assets/js/pages/admin-packages.js"></script>
     <script src="assets/js/pages/admin-settings.js?v=20260418h"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

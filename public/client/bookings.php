@@ -7,6 +7,11 @@ $db = emarioh_db();
 $currentUser = emarioh_require_page_role('client');
 $clientProfile = emarioh_find_client_profile($db, (int) $currentUser['id']);
 $bookedEventDates = emarioh_fetch_booked_event_dates($db);
+$blockingBooking = emarioh_find_client_active_upcoming_booking($db, (int) $currentUser['id']);
+$bookingSubmissionLocked = $blockingBooking !== null;
+$bookingSubmissionLockMessage = $bookingSubmissionLocked
+    ? emarioh_client_active_booking_block_message($blockingBooking)
+    : '';
 
 $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 $primaryContactValue = (string) ($currentUser['full_name'] ?? '');
@@ -26,7 +31,7 @@ $packageCatalogJson = json_encode(
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/pages/client-bookings.css?v=20260418v">
     <link rel="stylesheet" href="assets/css/client-portal-state.css">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418e">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418h">
 </head>
 <body class="dashboard-page client-dashboard-page client-book-event-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -57,6 +62,7 @@ $packageCatalogJson = json_encode(
                             <a class="nav-link" href="client-dashboard.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <a class="nav-link active" href="client-bookings.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-calendar2-plus"></i></span><span>Book Event</span></a>
                             <a class="nav-link" href="client-my-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span><span>My Bookings</span></a>
+                            <a class="nav-link" href="client-notifications.php"><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span></a>
                             <a class="nav-link" href="client-billing.php"><span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span><span>Billing</span></a>
                             <a class="nav-link" href="client-preferences.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Account Settings</span></a>
                         </nav>
@@ -217,16 +223,23 @@ $packageCatalogJson = json_encode(
                                         </div>
                                     </div>
 
-                                    <div class="booking-submit-box">
-                                        <p class="booking-submit-box__title" id="bookingSubmitTitle">Ready To Submit?</p>
-                                        <p class="booking-submit-box__text" id="bookingSubmitText">After submission, your request will appear in My Bookings while the team checks availability and prepares billing.</p>
+                                    <div class="booking-submit-box<?= $bookingSubmissionLocked ? ' booking-submit-box--locked' : '' ?>">
+                                        <p class="booking-submit-box__title" id="bookingSubmitTitle"><?= $bookingSubmissionLocked ? 'Existing Booking Active' : 'Ready To Submit?' ?></p>
+                                        <p class="booking-submit-box__text" id="bookingSubmitText"><?= $bookingSubmissionLocked ? $escape($bookingSubmissionLockMessage) : 'After submission, your request will appear in My Bookings while the team checks availability and prepares billing.' ?></p>
                                         <div class="booking-submit-actions">
-                                            <button class="client-action-button client-action-button--primary client-action-button--block" id="bookingSubmitButton" type="submit">Submit Request</button>
+                                            <button class="client-action-button client-action-button--primary client-action-button--block" id="bookingSubmitButton" type="submit"<?= $bookingSubmissionLocked ? ' disabled aria-disabled="true"' : '' ?>><?= $bookingSubmissionLocked ? 'Booking Still Active' : 'Submit Request' ?></button>
                                         </div>
                                         <p class="booking-submit-feedback" id="bookingSubmitFeedback" aria-live="polite"></p>
                                         <div class="booking-submit-links">
-                                            <button class="booking-submit-support__link" type="button">Save draft</button>
-                                            <button class="booking-submit-support__link" type="button" data-bs-toggle="modal" data-bs-target="#bookingChecklistModal">Review checklist</button>
+                                            <?php if ($bookingSubmissionLocked): ?>
+                                                <a class="booking-submit-support__link" href="client-my-bookings.php">View Booking</a>
+                                                <?php if (in_array((string) ($blockingBooking['status'] ?? ''), ['approved', 'completed'], true)): ?>
+                                                    <a class="booking-submit-support__link" href="client-billing.php">Open Billing</a>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <button class="booking-submit-support__link" type="button">Save draft</button>
+                                                <button class="booking-submit-support__link" type="button" data-bs-toggle="modal" data-bs-target="#bookingChecklistModal">Review checklist</button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </form>
@@ -305,7 +318,7 @@ $packageCatalogJson = json_encode(
 
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
-    <script src="assets/js/logout-confirmation.js?v=20260418a"></script>
+    <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
     <script>
         window.EmariohServerPackageCatalog = <?= $packageCatalogJson ?>;
     </script>

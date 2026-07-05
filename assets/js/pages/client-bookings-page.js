@@ -475,6 +475,15 @@ function initializeBookingSubmission() {
     detailsForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
+        if (submitButton.disabled) {
+            renderBookingSubmitFeedback(
+                submitFeedback,
+                submitText?.textContent || "Please settle your existing booking payment before submitting another request.",
+                "error"
+            );
+            return;
+        }
+
         const bookingPayload = collectBookingPayload(submitFeedback);
 
         if (!bookingPayload) {

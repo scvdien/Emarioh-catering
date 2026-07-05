@@ -288,6 +288,22 @@ CREATE TABLE IF NOT EXISTS `booking_status_logs` (
         ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `client_notification_reads` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT UNSIGNED NOT NULL,
+    `booking_status_log_id` BIGINT UNSIGNED NOT NULL,
+    `read_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_client_notification_read` (`user_id`, `booking_status_log_id`),
+    KEY `idx_client_notification_reads_user` (`user_id`, `read_at`),
+    CONSTRAINT `fk_client_notification_reads_user`
+        FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+        ON DELETE CASCADE,
+    CONSTRAINT `fk_client_notification_reads_log`
+        FOREIGN KEY (`booking_status_log_id`) REFERENCES `booking_status_logs` (`id`)
+        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `client_activity_logs` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` INT UNSIGNED NOT NULL,

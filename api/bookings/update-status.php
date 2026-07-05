@@ -34,6 +34,9 @@ $smsNotification = [
     'skipped' => true,
     'message' => 'SMS notification not attempted.',
 ];
+$affectedRejectedBookings = [];
+$affectedSmsSentCount = 0;
+$affectedSmsFailedCount = 0;
 
 if ($role === 'client') {
     if ((int) ($booking['user_id'] ?? 0) !== (int) $currentUser['id']) {
@@ -130,6 +133,55 @@ try {
             if ($invoice === null) {
                 throw new RuntimeException('The booking was approved, but the billing invoice could not be prepared.');
             }
+
+            $conflictingBookings = emarioh_fetch_booking_requests($db, [
+                'event_date' => (string) ($booking['event_date'] ?? ''),
+                'statuses' => ['pending_review'],
+                'exclude_booking_id' => $bookingId,
+                'order_by' => 'submitted_asc',
+            ]);
+
+            foreach ($conflictingBookings as $conflictingBooking) {
+                $conflictingBookingId = (int) ($conflictingBooking['id'] ?? 0);
+
+                if ($conflictingBookingId <= 0) {
+                    continue;
+                }
+
+                $declineStatement = $db->prepare('
+                    UPDATE booking_requests
+                    SET status = :status,
+                        reviewed_at = NOW(),
+                        reviewed_by_user_id = :reviewed_by_user_id,
+                        rejected_at = NOW()
+                    WHERE id = :id
+                      AND status = :current_status
+                ');
+                $declineStatement->execute([
+                    ':status' => 'rejected',
+                    ':reviewed_by_user_id' => (int) $currentUser['id'],
+                    ':id' => $conflictingBookingId,
+                    ':current_status' => 'pending_review',
+                ]);
+
+                if ($declineStatement->rowCount() < 1) {
+                    continue;
+                }
+
+                emarioh_log_booking_status(
+                    $db,
+                    $conflictingBookingId,
+                    (int) $currentUser['id'],
+                    'pending_review',
+                    'rejected',
+                    'Booking date unavailable',
+                    'Another reservation was approved for this event date. This request was declined under the first-come, first-served booking policy.',
+                    'Automatically declined after booking ' . (string) ($booking['reference'] ?? ('#' . $bookingId)) . ' was approved.'
+                );
+
+                $conflictingBooking['status'] = 'rejected';
+                $affectedRejectedBookings[] = $conflictingBooking;
+            }
         }
     }
 
@@ -154,6 +206,20 @@ if ($role === 'admin') {
             'message' => 'Booking status updated, but the SMS notification failed.',
         ];
     }
+
+    foreach ($affectedRejectedBookings as $affectedBooking) {
+        try {
+            $affectedSmsNotification = emarioh_send_booking_status_sms($db, $affectedBooking, 'rejected');
+
+            if (!($affectedSmsNotification['skipped'] ?? false) && ($affectedSmsNotification['ok'] ?? false)) {
+                $affectedSmsSentCount++;
+            } elseif (!($affectedSmsNotification['skipped'] ?? false)) {
+                $affectedSmsFailedCount++;
+            }
+        } catch (Throwable $throwable) {
+            $affectedSmsFailedCount++;
+        }
+    }
 }
 
 emarioh_success([
@@ -167,4 +233,7 @@ emarioh_success([
     'sms_notification_attempted' => !($smsNotification['skipped'] ?? false),
     'sms_notification_sent' => (bool) ($smsNotification['ok'] ?? false),
     'sms_notification_message' => (string) ($smsNotification['message'] ?? ''),
+    'affected_reservations_declined' => count($affectedRejectedBookings),
+    'affected_sms_sent' => $affectedSmsSentCount,
+    'affected_sms_failed' => $affectedSmsFailedCount,
 ]);

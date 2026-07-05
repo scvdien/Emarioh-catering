@@ -2278,10 +2278,17 @@ button {
     transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
-.client-action-button:hover {
+.client-action-button:hover:not(:disabled) {
     color: #2f241e;
     background: #fff;
     transform: translateY(-1px);
+}
+
+.client-action-button:disabled,
+.client-action-button[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.68;
+    transform: none;
 }
 
 .client-action-button--primary {
@@ -2290,7 +2297,7 @@ button {
     color: #fff9f0;
 }
 
-.client-action-button--primary:hover {
+.client-action-button--primary:hover:not(:disabled) {
     color: #fff;
     background: #b78f58;
 }
@@ -3768,6 +3775,15 @@ button {
     border: 1px solid rgba(95, 71, 53, 0.08);
     border-radius: 1.08rem;
     background: rgba(246, 239, 230, 0.72);
+}
+
+.booking-submit-box--locked {
+    border-color: rgba(157, 75, 61, 0.2);
+    background: rgba(255, 246, 231, 0.9);
+}
+
+.booking-submit-box--locked .booking-submit-box__title {
+    color: #9d4b3d;
 }
 
 .booking-submit-box__title {

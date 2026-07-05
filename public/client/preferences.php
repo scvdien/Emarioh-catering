@@ -22,8 +22,8 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
     <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260418w">
-    <link rel="stylesheet" href="assets/css/pages/client-preferences.css?v=20260418i">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418e">
+    <link rel="stylesheet" href="assets/css/pages/client-preferences.css?v=20260418m">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418h">
 </head>
 <body class="dashboard-page admin-settings-page client-dashboard-page client-settings-page" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -59,6 +59,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                             <a class="nav-link" href="client-dashboard.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <a class="nav-link" href="client-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-plus"></i></span><span>Book Event</span></a>
                             <a class="nav-link" href="client-my-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span><span>My Bookings</span></a>
+                            <a class="nav-link" href="client-notifications.php"><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span></a>
                             <a class="nav-link" href="client-billing.php"><span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span><span>Billing</span></a>
                             <a class="nav-link active" href="client-preferences.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Account Settings</span></a>
                         </nav>
@@ -81,7 +82,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                     </div>
                 </header>
 
-                <main class="dashboard-content settings-dashboard-content">
+                <main class="dashboard-content settings-dashboard-content" data-mobile-state="collapsed">
                     <section class="surface-card settings-profile-hub d-xl-none" data-client-settings-hub aria-labelledby="clientSettingsHubTitle">
                         <div class="settings-profile-hub__header">
                             <span class="settings-profile-hub__icon" aria-hidden="true"><i class="bi bi-person-circle"></i></span>
@@ -159,7 +160,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                                 <div class="settings-field-grid settings-field-grid--account">
                                                     <label class="settings-field">
                                                         <span class="settings-field__label">Client Name</span>
-                                                        <input class="settings-input" type="text" value="<?= $escape($clientFullName) ?>" autocomplete="name" data-auth-input="full_name">
+                                                        <input class="settings-input" type="text" id="clientFullNameInput" name="full_name" value="<?= $escape($clientFullName) ?>" autocomplete="name" data-auth-input="full_name">
                                                     </label>
                                                     <div class="settings-field">
                                                         <span class="settings-field__label">Mobile Number</span>
@@ -167,6 +168,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                                             class="settings-input is-readonly"
                                                             type="tel"
                                                             id="clientMobileInput"
+                                                            name="mobile"
                                                             value="<?= $escape($clientMobile) ?>"
                                                             maxlength="20"
                                                             inputmode="numeric"
@@ -184,7 +186,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                                     </div>
                                                     <label class="settings-field settings-field--full">
                                                         <span class="settings-field__label">Alternate Contact</span>
-                                                        <input class="settings-input" id="alternateContactInput" type="text" value="<?= $escape($clientAlternateContact) ?>" placeholder="Name and mobile number">
+                                                        <input class="settings-input" id="alternateContactInput" name="alternate_contact" type="text" value="<?= $escape($clientAlternateContact) ?>" placeholder="Name and mobile number">
                                                     </label>
                                                 </div>
                                             </section>
@@ -226,6 +228,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                                             class="settings-input"
                                                             type="password"
                                                             id="clientCurrentPasswordInput"
+                                                            name="current_password"
                                                             placeholder="Enter current password"
                                                             autocomplete="current-password"
                                                         >
@@ -236,6 +239,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                                             class="settings-input"
                                                             type="password"
                                                             id="clientNewPasswordInput"
+                                                            name="new_password"
                                                             placeholder="Enter new password"
                                                             autocomplete="new-password"
                                                         >
@@ -246,6 +250,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                                             class="settings-input"
                                                             type="password"
                                                             id="clientConfirmPasswordInput"
+                                                            name="confirm_password"
                                                             placeholder="Confirm new password"
                                                             autocomplete="new-password"
                                                         >
@@ -295,6 +300,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                 class="settings-input"
                                 type="tel"
                                 id="clientMobileDraftInput"
+                                name="new_mobile"
                                 maxlength="20"
                                 inputmode="numeric"
                                 autocomplete="tel"
@@ -320,6 +326,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                                         class="settings-input settings-input--otp"
                                         type="text"
                                         id="clientMobileOtpInput"
+                                        name="mobile_otp"
                                         inputmode="numeric"
                                         maxlength="6"
                                         placeholder="Enter 6-digit OTP"
@@ -362,7 +369,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
 
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
-    <script src="assets/js/logout-confirmation.js?v=20260418a"></script>
+    <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
     <script src="assets/js/pages/client-dashboard.js"></script>
     <script>
         const settingsTabs = document.querySelectorAll("[data-client-settings-tab]");

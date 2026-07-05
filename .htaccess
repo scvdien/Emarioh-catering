@@ -35,6 +35,7 @@ DirectoryIndex public/index.php
     RewriteRule ^client-dashboard\.php$ public/client/dashboard.php [L,QSA]
     RewriteRule ^client-bookings\.php$ public/client/bookings.php [L,QSA]
     RewriteRule ^client-billing\.php$ public/client/billing.php [L,QSA]
+    RewriteRule ^client-notifications\.php$ public/client/notifications.php [L,QSA]
     RewriteRule ^client-preferences\.php$ public/client/preferences.php [L,QSA]
     RewriteRule ^client-my-bookings\.php$ public/client/my-bookings.php [L,QSA]
     RewriteRule ^client-payment-receipt\.php$ public/client/payment-receipt.php [L,QSA]

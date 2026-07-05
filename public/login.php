@@ -13,7 +13,7 @@ $loginAdminExists = emarioh_admin_exists($loginDb);
     <title>Log In | Emarioh Catering Services</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/auth.css?v=20260331f">
-    <link rel="stylesheet" href="assets/css/pages/login.css?v=20260418b">
+    <link rel="stylesheet" href="assets/css/pages/login.css?v=20260706a">
 </head>
 <body class="auth-page auth-page--login" data-auth-guard="guest">
     <main class="login-shell">
@@ -43,7 +43,7 @@ $loginAdminExists = emarioh_admin_exists($loginDb);
                         <div class="login-field">
                             <label for="loginIdentity">Mobile Number</label>
                             <div class="login-input-wrap">
-                                <input id="loginIdentity" name="mobile" type="tel" inputmode="numeric" placeholder="0917 555 2481" autocomplete="tel" required>
+                                <input id="loginIdentity" name="mobile" type="tel" inputmode="numeric" placeholder="Enter Mobile Number" autocomplete="tel" required>
                                 <span class="login-input-icon" aria-hidden="true"><i class="bi bi-phone"></i></span>
                             </div>
                         </div>
@@ -69,6 +69,10 @@ $loginAdminExists = emarioh_admin_exists($loginDb);
                 </div>
             </div>
         </section>
+        <footer class="login-page-footer">
+            <span>&copy; <?= date('Y') ?> Emarioh Catering Services</span>
+            <span>Online Booking &amp; Reservation System</span>
+        </footer>
     </main>
     <?= emarioh_render_vendor_runtime_assets(false); ?>
     <script src="assets/js/auth-api.js?v=20260419b"></script>

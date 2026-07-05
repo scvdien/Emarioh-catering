@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (nextStatus === "approved") {
             return {
                 title: "Approve Booking?",
-                message: `Approve ${bookingReference}? This will confirm the booking date on the admin schedule.`,
+                message: `Approve ${bookingReference}? This will confirm the date and decline other pending requests for the same date.`,
                 confirmLabel: "Approve Booking",
                 loadingLabel: "Approving...",
                 buttonClass: "action-btn--primary"

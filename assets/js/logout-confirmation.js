@@ -129,6 +129,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             @media (max-width: 575.98px) {
+                .logout-confirmation-modal .modal-dialog {
+                    width: auto;
+                    max-width: 26rem;
+                    margin-left: max(1.25rem, env(safe-area-inset-left));
+                    margin-right: max(1.25rem, env(safe-area-inset-right));
+                }
+
                 .logout-confirmation-modal__header,
                 .logout-confirmation-modal__body,
                 .logout-confirmation-modal__footer {
@@ -157,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         document.body.insertAdjacentHTML("beforeend", `
-            <div class="modal fade logout-confirmation-modal" id="${modalId}" tabindex="-1" aria-labelledby="logoutConfirmationModalLabel" aria-hidden="true" role="dialog" aria-modal="true">
+            <div class="modal fade logout-confirmation-modal" id="${modalId}" tabindex="-1" aria-labelledby="logoutConfirmationModalLabel" aria-hidden="true" role="dialog">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content logout-confirmation-modal__content">
                         <div class="modal-header logout-confirmation-modal__header">
@@ -189,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const dismissButtons = Array.from(modalElement.querySelectorAll("[data-logout-dismiss]"));
 
     let pendingHref = "logout.php";
+    let activeLogoutLink = null;
     let backdropElement = null;
     let isOpen = false;
     let isSubmitting = false;
@@ -235,6 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
         isOpen = true;
         modalElement.style.display = "block";
         modalElement.removeAttribute("aria-hidden");
+        modalElement.setAttribute("aria-modal", "true");
         modalElement.classList.add("show");
         createBackdrop();
         document.body.classList.add("modal-open");
@@ -251,12 +260,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         isOpen = false;
+
+        if (modalElement.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+
         modalElement.classList.remove("show");
+        modalElement.removeAttribute("aria-modal");
         modalElement.setAttribute("aria-hidden", "true");
         modalElement.style.display = "none";
         removeBackdrop();
         document.body.classList.remove("modal-open");
         document.body.style.removeProperty("overflow");
+
+        if (activeLogoutLink && document.contains(activeLogoutLink)) {
+            activeLogoutLink.focus({ preventScroll: true });
+        }
     };
 
     const performLogout = async () => {
@@ -292,6 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
             event.preventDefault();
             event.stopPropagation();
             pendingHref = link.getAttribute("href")?.trim() || "logout.php";
+            activeLogoutLink = link;
             showModal();
         }, true);
     });

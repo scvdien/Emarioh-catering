@@ -15,7 +15,7 @@
     overflow: hidden;
 }
 
-@media (max-width: 1199.98px) {
+@media (max-width: 767.98px) {
     .admin-settings-page .settings-panel[data-mobile-state="collapsed"] {
         display: none;
     }
@@ -992,6 +992,113 @@
     }
 }
 
+@media (max-width: 767.98px) {
+    .admin-settings-page {
+        --admin-settings-mobile-nav-space: calc(5.2rem + env(safe-area-inset-bottom));
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .dashboard-sidebar,
+    .admin-settings-page[data-mobile-settings-view="hub"] .dashboard-topbar {
+        display: none !important;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .dashboard-main {
+        grid-template-rows: minmax(0, 1fr) auto;
+        min-height: 100dvh;
+        padding-bottom: 0;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-dashboard-content {
+        display: grid;
+        gap: 0;
+        place-items: center;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 0 0 var(--admin-settings-mobile-nav-space);
+        background: #ffffff;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-hub {
+        width: 100%;
+        max-width: none;
+        min-height: calc(100dvh - var(--admin-settings-mobile-nav-space));
+        box-sizing: border-box;
+        display: grid;
+        align-content: start;
+        gap: clamp(0.9rem, 2.2vh, 1.15rem);
+        margin: 0;
+        padding: max(2.15rem, env(safe-area-inset-top)) max(0.95rem, env(safe-area-inset-right)) clamp(1rem, 3.5vw, 1.3rem) max(0.95rem, env(safe-area-inset-left));
+        border: 0;
+        border-radius: 0;
+        background: #ffffff;
+        box-shadow: none;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-hub__header,
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-hub__grid,
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-logout {
+        width: min(100%, 27.5rem);
+        margin-inline: auto;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-hub__grid {
+        gap: clamp(0.85rem, 2.5vh, 1.15rem);
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-shortcut,
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-logout {
+        min-height: clamp(5.7rem, 13vh, 7rem);
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .admin-mobile-bottom-nav {
+        position: fixed !important;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 40;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.35rem;
+        align-content: center;
+        align-items: center;
+        box-sizing: border-box;
+        width: 100%;
+        padding:
+            0.72rem
+            max(0.7rem, env(safe-area-inset-right))
+            calc(0.72rem + env(safe-area-inset-bottom))
+            max(0.7rem, env(safe-area-inset-left));
+        box-shadow: 0 -12px 30px rgba(47, 36, 30, 0.08);
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .admin-mobile-bottom-nav__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        align-self: start;
+        gap: 0.24rem;
+        min-height: 0;
+        height: auto;
+        max-height: none;
+        padding-top: 0.42rem;
+        padding-bottom: 0.42rem;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .admin-mobile-bottom-nav__item.is-active {
+        background: rgba(15, 90, 70, 0.10);
+        color: #174638;
+        border-radius: 0.95rem;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .admin-mobile-bottom-nav__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+}
+
 .admin-settings-page .dashboard-topbar {
     justify-content: flex-start;
 }
@@ -1183,6 +1290,45 @@
 
     .admin-settings-page .settings-tab.is-active {
         box-shadow: none;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .admin-settings-page:not(.admin-settings-detail-page) .dashboard-topbar {
+        display: none !important;
+    }
+
+    .admin-settings-page .admin-mobile-bottom-nav {
+        position: fixed !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        z-index: 40 !important;
+        width: 100% !important;
+        align-content: center !important;
+        align-items: center !important;
+        grid-auto-rows: max-content !important;
+        min-height: calc(5.2rem + env(safe-area-inset-bottom)) !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow: hidden !important;
+    }
+
+    .admin-settings-page .admin-mobile-bottom-nav__item,
+    .admin-settings-page .admin-mobile-bottom-nav__item.is-active {
+        align-self: start !important;
+        justify-content: flex-start !important;
+        min-height: 3.45rem !important;
+        height: 3.45rem !important;
+        max-height: 3.45rem !important;
+        padding-top: 0.38rem !important;
+        padding-bottom: 0.38rem !important;
+    }
+
+    .admin-settings-page .admin-mobile-bottom-nav__item.is-active {
+        background: rgba(15, 90, 70, 0.10) !important;
+        color: #174638 !important;
+        border-radius: 0.95rem !important;
     }
 }
 

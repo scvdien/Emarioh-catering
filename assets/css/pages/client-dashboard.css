@@ -18,7 +18,21 @@
 .client-dashboard-content {
     display: grid;
     gap: 1rem;
-    align-content: start;
+    align-content: stretch;
+}
+
+.client-dashboard-home .dashboard-main {
+    min-height: 100vh;
+    grid-template-rows: minmax(0, 1fr);
+}
+
+.client-dashboard-home .client-dashboard-content {
+    min-height: 100vh;
+    padding: clamp(1rem, 2vw, 1.6rem);
+}
+
+.client-dashboard-home .dashboard-primary {
+    min-height: calc(100vh - clamp(2rem, 4vw, 3.2rem));
 }
 
 .client-dashboard-page .topbar-copy {
@@ -74,7 +88,6 @@
 
 .client-hero-card,
 .client-details-card,
-.client-quick-actions-card,
 .client-billing-card {
     min-width: 0;
 }
@@ -90,6 +103,11 @@
     overflow: hidden;
     background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(252, 247, 239, 0.94));
     isolation: isolate;
+}
+
+.client-dashboard-home .client-hero-card {
+    margin-top: 0;
+    min-height: calc(100vh - clamp(2rem, 4vw, 3.2rem));
 }
 
 .client-hero-card::before {
@@ -128,6 +146,25 @@
     background: linear-gradient(90deg, rgba(255, 252, 247, 0.98) 0%, rgba(252, 247, 239, 0.95) 68%, rgba(252, 247, 239, 0.8) 82%, rgba(252, 247, 239, 0.42) 92%, rgba(252, 247, 239, 0) 100%);
 }
 
+.client-dashboard-home .client-hero-card__content {
+    gap: 0.95rem;
+    padding: clamp(2rem, 4vw, 3.4rem);
+    max-width: min(54%, 42rem);
+}
+
+.client-hero-card__client {
+    margin: 0;
+    max-width: 32rem;
+    color: #5f5147;
+    font-size: clamp(1rem, 1.2vw, 1.16rem);
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.client-dashboard-home .client-hero-card__client {
+    font-size: clamp(1.05rem, 1.35vw, 1.28rem);
+}
+
 .client-hero-card__content h2 {
     margin: 0;
     font-family: "Cormorant Garamond", serif;
@@ -135,6 +172,10 @@
     font-weight: 600;
     line-height: 0.98;
     color: var(--ink);
+}
+
+.client-dashboard-home .client-hero-card__content h2 {
+    font-size: clamp(2.6rem, 4.8vw, 4.6rem);
 }
 
 .client-hero-card__intro {
@@ -145,6 +186,11 @@
     line-height: 1.7;
 }
 
+.client-dashboard-home .client-hero-card__intro {
+    max-width: 38rem;
+    font-size: clamp(1.05rem, 1.45vw, 1.35rem);
+}
+
 .client-hero-card__note {
     margin: 0;
     max-width: 29rem;
@@ -153,29 +199,59 @@
     line-height: 1.6;
 }
 
+.client-dashboard-home .client-hero-card__note {
+    font-size: clamp(0.92rem, 1vw, 1.05rem);
+}
+
+.client-hero-card .status-pill {
+    width: fit-content;
+    background: rgba(201, 162, 74, 0.14);
+    color: var(--accent-strong);
+}
+
 .client-hero-card__actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.8rem;
-    margin-top: 0.15rem;
+    gap: 0.7rem;
 }
 
-.client-hero-card .action-btn--primary {
-    min-width: 11.8rem;
+.client-hero-card__action {
+    display: none;
+    align-items: center;
     justify-content: center;
-    border: 1px solid rgba(31, 59, 47, 0.16);
-    background: linear-gradient(135deg, #5d7a60 0%, #355438 100%);
-    box-shadow: 0 16px 28px rgba(41, 66, 45, 0.2);
+    width: fit-content;
+    min-height: 2.75rem;
+    padding: 0.78rem 1.15rem;
+    border-radius: 999px;
+    background: #174638;
+    color: #fffaf0;
+    font-size: 0.88rem;
+    font-weight: 800;
+    line-height: 1;
+    text-decoration: none;
+    box-shadow: 0 14px 26px rgba(23, 70, 56, 0.18);
 }
 
-.client-hero-card .action-btn--primary:hover {
-    background: linear-gradient(135deg, #68896b 0%, #3f6443 100%);
+.client-hero-card__action:hover {
+    color: #ffffff;
 }
 
-.client-hero-card .status-pill {
-    background: rgba(201, 162, 74, 0.14);
-    color: var(--accent-strong);
+.client-hero-card__next-step {
+    display: none;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+    color: #6d645b;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+.client-hero-card__next-step i {
+    color: #b4851f;
+    font-size: 1.05rem;
+    line-height: 1;
 }
 
 .client-hero-card__media {
@@ -206,7 +282,6 @@
 }
 
 .client-details-card,
-.client-quick-actions-card,
 .client-billing-card {
     padding: 1.3rem;
     border-radius: 1.45rem;
@@ -214,14 +289,12 @@
 }
 
 .client-details-card__heading,
-.client-quick-actions-card__heading,
 .client-billing-card__heading,
 .client-mobile-status-card__heading {
     margin-bottom: 0.95rem;
 }
 
 .client-details-card__heading h2,
-.client-quick-actions-card__heading h2,
 .client-billing-card__heading h2,
 .client-mobile-status-card__heading h2 {
     margin: 0;
@@ -323,65 +396,6 @@
     line-height: 1.6;
 }
 
-.client-quick-actions-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.8rem;
-}
-
-.client-quick-action {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0.95rem 1rem;
-    border: 1px solid rgba(95, 71, 53, 0.08);
-    border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--ink);
-    font-weight: 700;
-    text-decoration: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.client-quick-action:hover {
-    transform: translateY(-1px);
-    border-color: rgba(201, 162, 74, 0.24);
-    box-shadow: 0 12px 24px rgba(95, 71, 53, 0.08);
-    color: var(--ink);
-}
-
-.client-quick-action__content {
-    display: grid;
-    gap: 0.12rem;
-    min-width: 0;
-}
-
-.client-quick-action__content strong {
-    display: block;
-    font-size: 0.96rem;
-    line-height: 1.3;
-}
-
-.client-quick-action__content span {
-    display: block;
-    color: #776b63;
-    font-size: 0.79rem;
-    line-height: 1.5;
-}
-
-.client-quick-action__icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.8rem;
-    background: rgba(201, 162, 74, 0.12);
-    color: var(--accent-strong);
-    font-size: 0.92rem;
-}
-
 .client-billing-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -480,13 +494,6 @@
         grid-template-columns: 1fr;
     }
 
-    .client-quick-actions-list {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .client-quick-action {
-        min-height: 100%;
-    }
 }
 
 @media (max-width: 991.98px) {
@@ -529,20 +536,17 @@
         background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(252, 247, 239, 0.94));
     }
 
-    .client-quick-actions-list {
-        grid-template-columns: 1fr;
-    }
 }
 
 @media (max-width: 767.98px) {
     .client-dashboard-home .dashboard-content {
-        padding: 0 0 1rem;
+        padding: 0 0 5.8rem;
     }
 
     .client-dashboard-home .client-dashboard-content,
-    .client-dashboard-home .dashboard-primary,
-    .client-dashboard-home .client-dashboard-secondary-grid {
+    .client-dashboard-home .dashboard-primary {
         gap: 0.85rem;
+        min-height: auto;
     }
 
     .client-dashboard-content {
@@ -560,10 +564,7 @@
         line-height: 1;
     }
 
-    .client-dashboard-page .dashboard-topbar .topbar-copy__text,
-    .client-hero-card__intro,
-    .client-hero-card__note,
-    .client-quick-actions-card {
+    .client-dashboard-page .dashboard-topbar .topbar-copy__text {
         display: none;
     }
 
@@ -571,18 +572,16 @@
         display: none;
     }
 
-    .client-dashboard-page .dashboard-primary {
+    .client-dashboard-page .dashboard-primary,
+    .client-dashboard-home .dashboard-primary {
         order: 1;
         gap: 0.85rem;
+        min-height: auto;
     }
 
-    .client-dashboard-home .dashboard-primary > .surface-card,
-    .client-dashboard-home .client-dashboard-secondary-grid > .surface-card {
+    .client-dashboard-home .dashboard-primary > .surface-card {
         width: 100%;
-        border-right: 0;
-        border-left: 0;
         border-radius: 0;
-        box-shadow: none;
     }
 
     .client-summary-grid,
@@ -593,52 +592,138 @@
 
     .client-summary-grid .summary-card,
     .client-details-card,
-    .client-quick-actions-card,
     .client-billing-card,
     .client-mobile-status-card {
         padding: 0.92rem;
     }
 
+    .client-dashboard-home .client-hero-card,
     .client-hero-card {
-        min-height: auto;
-        border-radius: 1.2rem;
-    }
-
-    .client-hero-card::before,
-    .client-hero-card::after {
-        display: none;
-    }
-
-    .client-hero-card__media {
-        display: none;
-    }
-
-    .client-hero-card__content {
-        gap: 0.75rem;
-        padding: 1rem 0.95rem;
-        background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(252, 247, 239, 0.96));
-    }
-
-    .client-hero-card__content h2 {
-        font-size: 1.45rem;
-        line-height: 1.02;
-    }
-
-    .client-hero-card .action-btn--primary {
-        width: 100%;
-        min-height: 2.9rem;
+        min-height: calc(100dvh - 5.8rem);
+        border-radius: 0;
+        border: 0;
+        background:
+            linear-gradient(180deg, rgba(255, 252, 247, 0.99) 0%, rgba(252, 247, 239, 0.97) 58%, rgba(246, 241, 233, 0.98) 100%);
         box-shadow: none;
     }
 
-    .client-hero-card__actions {
-        align-items: stretch;
-        gap: 0.6rem;
+    .client-dashboard-home .client-hero-card::before {
+        display: block;
+        inset: 0 0 auto;
+        height: 62%;
+        z-index: 1;
+        background:
+            linear-gradient(120deg, rgba(23, 70, 56, 0.08) 0%, rgba(23, 70, 56, 0.025) 42%, transparent 76%),
+            linear-gradient(180deg, rgba(201, 162, 74, 0.10) 0%, transparent 54%);
+        filter: none;
     }
 
+    .client-dashboard-home .client-hero-card::after {
+        display: block;
+        inset: auto 0 0;
+        height: 44%;
+        width: auto;
+        z-index: 2;
+        background:
+            linear-gradient(180deg, rgba(255, 252, 247, 0.96) 0%, rgba(255, 252, 247, 0.32) 22%, rgba(255, 252, 247, 0.06) 55%, rgba(255, 252, 247, 0.78) 100%);
+        filter: none;
+    }
+
+    .client-dashboard-home .client-hero-card__media {
+        display: block;
+        position: absolute;
+        inset: auto 0 0;
+        width: 100%;
+        min-height: 0;
+        height: 40%;
+        opacity: 0.84;
+        background-color: transparent;
+        background-image:
+            linear-gradient(180deg, rgba(255, 252, 247, 0.68) 0%, rgba(255, 252, 247, 0.20) 32%, rgba(255, 252, 247, 0.08) 62%, rgba(255, 252, 247, 0.76) 100%),
+            linear-gradient(160deg, rgba(23, 70, 56, 0.12), rgba(201, 162, 74, 0.08)),
+            var(--client-hero-card-image);
+        background-size: auto, auto, cover;
+        background-position: center bottom;
+        background-repeat: no-repeat;
+    }
+
+    .client-dashboard-home .client-hero-card__content,
+    .client-hero-card__content {
+        align-content: start;
+        gap: 0.9rem;
+        min-height: auto;
+        max-width: none;
+        width: 100%;
+        padding: max(1.65rem, env(safe-area-inset-top)) 1.38rem 1.45rem;
+        background: transparent;
+    }
+
+    .client-dashboard-home .client-hero-card .panel-heading__eyebrow {
+        width: fit-content;
+        padding: 0.42rem 0.62rem;
+        border-radius: 999px;
+        background: rgba(201, 162, 74, 0.13);
+        color: #a77914;
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+    }
+
+    .client-dashboard-home .client-hero-card__client,
+    .client-hero-card__client {
+        max-width: 22rem;
+        font-size: 1.04rem;
+        line-height: 1.35;
+    }
+
+    .client-dashboard-home .client-hero-card__content h2,
+    .client-hero-card__content h2 {
+        max-width: 22rem;
+        font-size: clamp(2.2rem, 9vw, 2.75rem);
+        line-height: 1;
+        text-wrap: balance;
+    }
+
+    .client-dashboard-home .client-hero-card__intro,
+    .client-hero-card__intro {
+        display: block;
+        max-width: 21rem;
+        font-size: 0.95rem;
+        line-height: 1.55;
+    }
+
+    .client-hero-card__note {
+        display: none;
+    }
+
+    .client-dashboard-home .client-hero-card .status-pill,
     .client-hero-card .status-pill {
         width: fit-content;
-        padding: 0.4rem 0.7rem;
+        padding: 0.44rem 0.78rem;
+        border: 1px solid rgba(201, 162, 74, 0.18);
+        background: rgba(255, 255, 255, 0.82);
         font-size: 0.68rem;
+        box-shadow: 0 8px 18px rgba(95, 71, 53, 0.06);
+    }
+
+    .client-dashboard-home .client-hero-card__actions,
+    .client-hero-card__actions {
+        gap: 0.62rem;
+        margin-top: 0.08rem;
+    }
+
+    .client-dashboard-home .client-hero-card__action,
+    .client-hero-card__action {
+        display: inline-flex;
+        min-width: 9.4rem;
+        margin-top: 0.12rem;
+        box-shadow: 0 16px 28px rgba(23, 70, 56, 0.18);
+    }
+
+    .client-dashboard-home .client-hero-card__next-step,
+    .client-hero-card__next-step {
+        display: flex;
+        max-width: 22rem;
+        padding-top: 0.1rem;
     }
 
     .client-details-card__heading,
@@ -707,7 +792,7 @@
         color: #174638;
     }
 
-    .client-dashboard-page .dashboard-content {
+    .client-dashboard-page:not(.client-dashboard-home) .dashboard-content {
         padding-bottom: 1rem;
     }
 }
@@ -722,7 +807,7 @@
     }
 
     .client-dashboard-home .dashboard-content {
-        padding: 0 0 0.9rem;
+        padding: 0 0 5.8rem;
     }
 
     .client-summary-grid .summary-card {
@@ -738,7 +823,6 @@
         font-size: 0.78rem;
     }
 
-    .client-quick-actions-card__heading h2,
     .client-details-card__heading h2,
     .client-mobile-status-card__heading h2 {
         font-size: 0.98rem;
@@ -760,17 +844,16 @@
         font-size: 1.34rem;
     }
 
-    .client-dashboard-home .dashboard-primary > .surface-card,
-    .client-dashboard-home .client-dashboard-secondary-grid > .surface-card {
-        padding: 0.88rem;
+    .client-dashboard-home .dashboard-primary > .surface-card {
+        padding: 0;
     }
 
     .client-hero-card__content {
-        padding: 0.88rem 0.82rem;
+        padding: max(1.45rem, env(safe-area-inset-top)) 1.15rem 1.2rem;
     }
 
     .client-hero-card__content h2 {
-        font-size: 1.3rem;
+        font-size: 1.9rem;
     }
 
     .client-mobile-bottom-nav__item {
