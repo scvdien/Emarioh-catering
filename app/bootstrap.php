@@ -1653,8 +1653,8 @@ function emarioh_admin_mobile_nav_items(): array
         ],
         [
             'href' => 'admin-settings.php',
-            'icon' => 'bi-person-circle',
-            'label' => 'Profile',
+            'icon' => 'bi-gear',
+            'label' => 'Settings',
             'active_paths' => [
                 'admin-settings.php',
                 'admin-settings-menu.php',
@@ -1667,10 +1667,6 @@ function emarioh_admin_mobile_nav_items(): array
                 'payment.php',
                 'public-page.php',
                 'sms.php',
-                'admin-clients.php',
-                'clients.php',
-                'admin-inquiries.php',
-                'inquiries.php',
             ],
         ],
     ];

@@ -41,6 +41,15 @@
     gap: 0.9rem;
 }
 
+.admin-settings-page .settings-profile-hub__header--centered {
+    justify-content: center;
+    text-align: center;
+}
+
+.admin-settings-page .settings-profile-hub__header--centered .settings-profile-hub__copy {
+    justify-items: center;
+}
+
 .admin-settings-page .settings-profile-hub__icon,
 .admin-settings-page .settings-profile-shortcut__icon {
     display: inline-flex;
@@ -370,6 +379,12 @@
         border-right: 0;
         border-radius: 0;
         box-shadow: none;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .admin-settings-menu-page .settings-dashboard-content {
+        padding-bottom: calc(5.2rem + env(safe-area-inset-bottom));
     }
 }
 
@@ -2477,4 +2492,27 @@
     .admin-settings-page .public-gallery-card__controls {
         justify-content: flex-start;
     }
+
+    .admin-settings-page.admin-settings-detail-page .settings-dashboard-content {
+        padding-bottom: calc(7.4rem + env(safe-area-inset-bottom)) !important;
+    }
+}
+
+.admin-settings-page .settings-profile-hub__header--centered {
+    display: grid;
+    justify-content: stretch;
+    justify-items: start;
+    width: 100%;
+    max-width: 24rem;
+    margin: 0 auto 0.2rem;
+    text-align: left;
+}
+
+.admin-settings-page .settings-profile-hub__header--centered .settings-profile-hub__copy {
+    justify-items: start;
+    max-width: 100%;
+}
+
+.admin-settings-page .settings-profile-hub__header--centered .settings-profile-hub__summary {
+    max-width: 100%;
 }
