@@ -384,7 +384,53 @@
 
 @media (max-width: 767.98px) {
     .admin-settings-menu-page .settings-dashboard-content {
-        padding-bottom: calc(5.2rem + env(safe-area-inset-bottom));
+        min-height: 100dvh;
+        padding: 0 0 calc(5.75rem + env(safe-area-inset-bottom));
+        overflow-y: auto;
+    }
+
+    .admin-settings-menu-page .settings-menu-page__hub {
+        min-height: calc(100dvh - 5.75rem - env(safe-area-inset-bottom));
+        align-content: start;
+        gap: 0.72rem;
+        padding: max(1.15rem, env(safe-area-inset-top)) 1rem 0.95rem;
+    }
+
+    .admin-settings-menu-page .settings-profile-hub__grid {
+        gap: 0.68rem;
+    }
+
+    .admin-settings-menu-page .settings-profile-hub__copy h2 {
+        font-size: 1.08rem;
+        line-height: 1.15;
+    }
+
+    .admin-settings-menu-page .settings-profile-hub__summary {
+        font-size: 0.76rem;
+        line-height: 1.45;
+    }
+
+    .admin-settings-menu-page .settings-profile-shortcut,
+    .admin-settings-menu-page .settings-profile-logout {
+        min-height: 4.85rem;
+        padding: 0.68rem 0.82rem;
+        border-radius: 0.9rem;
+    }
+
+    .admin-settings-menu-page .settings-profile-shortcut__icon {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 0.78rem;
+        font-size: 0.86rem;
+    }
+
+    .admin-settings-menu-page .settings-profile-shortcut__copy strong {
+        font-size: 0.86rem;
+    }
+
+    .admin-settings-menu-page .settings-profile-shortcut__copy span {
+        font-size: 0.72rem;
+        line-height: 1.35;
     }
 }
 
@@ -1040,9 +1086,9 @@
         box-sizing: border-box;
         display: grid;
         align-content: start;
-        gap: clamp(0.9rem, 2.2vh, 1.15rem);
+        gap: 0.72rem;
         margin: 0;
-        padding: max(2.15rem, env(safe-area-inset-top)) max(0.95rem, env(safe-area-inset-right)) clamp(1rem, 3.5vw, 1.3rem) max(0.95rem, env(safe-area-inset-left));
+        padding: max(1.15rem, env(safe-area-inset-top)) max(0.95rem, env(safe-area-inset-right)) 0.95rem max(0.95rem, env(safe-area-inset-left));
         border: 0;
         border-radius: 0;
         background: #ffffff;
@@ -1057,12 +1103,30 @@
     }
 
     .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-hub__grid {
-        gap: clamp(0.85rem, 2.5vh, 1.15rem);
+        gap: 0.68rem;
     }
 
     .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-shortcut,
     .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-logout {
-        min-height: clamp(5.7rem, 13vh, 7rem);
+        min-height: 4.85rem;
+        padding: 0.68rem 0.82rem;
+        border-radius: 0.9rem;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-shortcut__icon {
+        width: 2.1rem;
+        height: 2.1rem;
+        border-radius: 0.78rem;
+        font-size: 0.86rem;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-shortcut__copy strong {
+        font-size: 0.86rem;
+    }
+
+    .admin-settings-page[data-mobile-settings-view="hub"] .settings-profile-shortcut__copy span {
+        font-size: 0.72rem;
+        line-height: 1.35;
     }
 
     .admin-settings-page[data-mobile-settings-view="hub"] .admin-mobile-bottom-nav {

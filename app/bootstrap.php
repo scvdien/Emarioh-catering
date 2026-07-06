@@ -5094,7 +5094,7 @@ function emarioh_render_vendor_head_assets(bool $includeBootstrapCss = true, boo
 {
     $tags = [];
     $tags[] = '<base href="' . htmlspecialchars(rtrim(emarioh_app_base_url(), '/') . '/', ENT_QUOTES, 'UTF-8') . '">';
-    $faviconHref = htmlspecialchars(emarioh_app_url('favicon.svg?v=20260419a'), ENT_QUOTES, 'UTF-8');
+    $faviconHref = htmlspecialchars(emarioh_app_url('favicon.svg?v=20260706a'), ENT_QUOTES, 'UTF-8');
     $tags[] = '<link rel="icon" type="image/svg+xml" href="' . $faviconHref . '">';
     $tags[] = '<link rel="shortcut icon" href="' . $faviconHref . '">';
 

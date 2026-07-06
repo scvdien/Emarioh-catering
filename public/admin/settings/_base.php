@@ -843,7 +843,7 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260706d">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260706e">
 </head>
 <body class="admin-dashboard-page admin-settings-page<?= $settingsPageIsDetail ? ' admin-settings-detail-page' : '' ?>" data-auth-guard="admin" data-mobile-settings-view="<?= $settingsPageIsDetail ? 'detail' : 'hub' ?>"<?= $settingsPageIsDetail ? ' data-active-settings-section="' . $escape($settingsPageSection) . '"' : '' ?>>
     <div class="dashboard-shell container-fluid">
@@ -969,6 +969,16 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
             <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
         </a>
     </div>
+    <a class="settings-profile-logout" href="logout.php" data-logout-link>
+        <span class="settings-profile-logout__content">
+            <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-box-arrow-right"></i></span>
+            <span class="settings-profile-shortcut__copy">
+                <strong>Log Out</strong>
+                <span>Sign out of the admin dashboard.</span>
+            </span>
+        </span>
+        <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+    </a>
 </section>
 <?php endif; ?>
 <section class="surface-card settings-panel" data-settings-panel data-mobile-state="<?= $settingsPageIsDetail ? 'expanded' : 'collapsed' ?>" aria-hidden="<?= $settingsPageIsDetail ? 'false' : 'true' ?>">

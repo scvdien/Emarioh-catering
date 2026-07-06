@@ -1,5 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#1f4a3a"/>
-  <path d="M18 47V19l5 5v18h4V20l5 5v17h4V25l5-5v27zm20 0V24l5-5v28z" fill="#d4ad67"/>
-  <path d="M16 50h32" stroke="#f4ead6" stroke-width="3" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 828 829" role="img" aria-labelledby="faviconTitle">
+  <title id="faviconTitle">Emarioh Cafe and Restaurant logo</title>
+  <defs>
+    <linearGradient id="emariohGold" x1="150" y1="145" x2="674" y2="675" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e8c56b"/>
+      <stop offset="0.55" stop-color="#d3a047"/>
+      <stop offset="1" stop-color="#c78d35"/>
+    </linearGradient>
+  </defs>
+  <rect width="828" height="829" fill="#fffefe"/>
+  <g fill="url(#emariohGold)">
+    <path d="M145 497V374l50-52 90 51v124H145Z"/>
+    <path d="M501 497V333l126-96 45 87v173H501Z"/>
+    <path d="M296 497V317l31-25v205h-31Z"/>
+    <path d="M343 497V262l31-25v260h-31Z"/>
+    <path d="M390 497V151l27-21 27 21v346h-54Z"/>
+    <path d="M460 497V237l31 25v235h-31Z"/>
+    <path d="M507 497V292l31 25v180h-31Z"/>
+  </g>
+  <g fill="none" stroke="#fffefe" stroke-linecap="square" stroke-width="13">
+    <path d="M145 398h139"/>
+    <path d="M145 440h139"/>
+    <path d="M501 360l142-52"/>
+    <path d="M501 409l157-39"/>
+    <path d="M501 458l167-24"/>
+    <path d="M327 292v205"/>
+    <path d="M374 237v260"/>
+    <path d="M444 151v346"/>
+    <path d="M491 262v235"/>
+  </g>
+  <g fill="url(#emariohGold)" text-anchor="middle">
+    <text x="414" y="606" font-family="Georgia, 'Times New Roman', serif" font-size="84" font-weight="400">EMARIOH</text>
+    <text x="414" y="666" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700">CAFE &amp; RESTAURANT</text>
+  </g>
+  <image href="assets/images/logo.jpg" xlink:href="assets/images/logo.jpg" x="0" y="0" width="828" height="829" preserveAspectRatio="xMidYMid meet"/>
 </svg>

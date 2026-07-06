@@ -17,7 +17,7 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260706d">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260706e">
 </head>
 <body class="admin-dashboard-page admin-settings-page admin-settings-menu-page" data-auth-guard="admin">
     <div class="dashboard-shell container-fluid">
@@ -143,6 +143,16 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
                                 <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
                             </a>
                         </div>
+                        <a class="settings-profile-logout" href="logout.php" data-logout-link>
+                            <span class="settings-profile-logout__content">
+                                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-box-arrow-right"></i></span>
+                                <span class="settings-profile-shortcut__copy">
+                                    <strong>Log Out</strong>
+                                    <span>Sign out of the admin dashboard.</span>
+                                </span>
+                            </span>
+                            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+                        </a>
                     </section>
                 </main>
                 <?= emarioh_render_admin_mobile_nav('admin-settings-menu.php') ?>
