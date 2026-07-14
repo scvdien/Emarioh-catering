@@ -17,6 +17,7 @@ if (!in_array($currentUserRole, ['admin', 'client'], true)) {
 }
 
 $invoiceNumber = trim((string) ($_GET['invoice'] ?? ''));
+$receiptId = (int) ($_GET['receipt'] ?? 0);
 $autoPrint = isset($_GET['print']) && (string) $_GET['print'] === '1';
 $downloadPdf = isset($_GET['download']) && (string) $_GET['download'] === '1';
 
@@ -54,18 +55,25 @@ if (
     exit('You do not have access to this receipt.');
 }
 
-$amountPaidValue = max(0, (float) ($invoice['amount_paid'] ?? 0));
+$receipt = $receiptId > 0
+    ? emarioh_find_payment_receipt_by_id($db, $receiptId)
+    : emarioh_find_payment_receipt_by_invoice($db, (int) ($invoice['id'] ?? 0));
 
-if ($amountPaidValue <= 0) {
+if ($receipt === null || (int) ($receipt['invoice_id'] ?? 0) !== (int) ($invoice['id'] ?? 0)) {
     http_response_code(404);
     exit('Receipt is not available yet.');
 }
 
-$receipt = emarioh_upsert_system_payment_receipt($db, $invoice, $booking);
+$invoiceReceipts = emarioh_fetch_payment_receipts_for_invoice($db, (int) ($invoice['id'] ?? 0));
+$amountPaidValue = max(0, (float) ($receipt['amount_reported'] ?? 0));
 
-if ($receipt === null) {
-    http_response_code(500);
-    exit('Receipt could not be prepared right now.');
+if ($amountPaidValue <= 0) {
+    $amountPaidValue = max(0, (float) ($invoice['amount_paid'] ?? 0));
+}
+
+if ($amountPaidValue <= 0) {
+    http_response_code(404);
+    exit('Receipt is not available yet.');
 }
 
 $escape = static fn (?string $value): string => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
@@ -114,11 +122,16 @@ $receiptReference = (string) ($receipt['receipt_reference'] ?? emarioh_payment_r
 $invoiceStatus = strtolower(trim((string) ($invoice['status'] ?? 'pending')));
 $statusLabel = $invoiceStatus === 'approved' ? 'Paid Successful' : 'Payment Posted';
 $balanceDueValue = max(0, (float) ($invoice['balance_due'] ?? 0));
-$paymentReference = trim((string) ($invoice['gateway_payment_id'] ?? '')) ?: trim((string) ($invoice['gateway_checkout_reference'] ?? ''));
-$paymentDate = (string) ($invoice['gateway_paid_at'] ?? $invoice['last_payment_at'] ?? '');
+$paymentReference = $receiptReference !== '' ? $receiptReference : (trim((string) ($invoice['gateway_payment_id'] ?? '')) ?: trim((string) ($invoice['gateway_checkout_reference'] ?? '')));
+$paymentDate = (string) ($receipt['reviewed_at'] ?? $receipt['uploaded_at'] ?? $receipt['created_at'] ?? $invoice['gateway_paid_at'] ?? $invoice['last_payment_at'] ?? '');
 $clientName = trim((string) ($booking['primary_contact'] ?? $currentUser['full_name'] ?? 'Client'));
 $clientMobile = trim((string) ($booking['primary_mobile'] ?? ''));
 $description = trim((string) ($invoice['title'] ?? $booking['package_label'] ?? 'Booking Payment'));
+$receiptNotes = trim((string) ($receipt['notes'] ?? ''));
+$isManualReceipt = str_contains(strtolower($receiptNotes), 'manual');
+$receiptSubtext = $isManualReceipt
+    ? 'This receipt was generated automatically after admin recorded your manual payment.'
+    : 'This receipt was generated automatically after your payment was confirmed.';
 
 function emarioh_pdf_sanitize_text(string $value): string
 {
@@ -445,7 +458,8 @@ function emarioh_stream_payment_receipt_pdf(array $payload): never
     );
     $page .= $eventSection['content'];
 
-    $footerTop = 776.0;
+    $eventBottom = $cursorTop + (float) $eventSection['height'];
+    $footerTop = min(776.0, $eventBottom + 24.0);
     $page .= emarioh_pdf_line($left, $footerTop - 14.0, $right, $footerTop - 14.0);
     $page .= emarioh_pdf_text($left, $footerTop, (string) ($payload['generated_label'] ?? 'Generated On'), 'F2', 8.5);
     $page .= emarioh_pdf_text($left, $footerTop + 12.0, (string) ($payload['generated_on'] ?? ''), 'F1', 10.5);
@@ -471,7 +485,7 @@ function emarioh_stream_payment_receipt_pdf(array $payload): never
 if ($downloadPdf) {
     emarioh_stream_payment_receipt_pdf([
         'status_label' => $statusLabel,
-        'subtext' => 'This receipt was generated automatically after PayMongo confirmed your payment.',
+        'subtext' => $receiptSubtext,
         'receipt_reference' => $receiptReference,
         'invoice_number' => (string) ($invoice['invoice_number'] ?? ''),
         'amount_paid' => $formatMoney($amountPaidValue),
@@ -484,7 +498,7 @@ if ($downloadPdf) {
         'payment_entries' => [
             ['label' => 'Description', 'value' => $description],
             ['label' => 'Payment Method', 'value' => (string) ($invoice['payment_method'] ?? 'PayMongo QRPh')],
-            ['label' => 'PayMongo Reference', 'value' => $paymentReference !== '' ? $paymentReference : 'Will appear after settlement sync'],
+            ['label' => 'Payment Reference', 'value' => $paymentReference !== '' ? $paymentReference : 'Not provided'],
             ['label' => 'Remaining Balance', 'value' => $formatMoney($balanceDueValue)],
         ],
         'event_entries' => [
@@ -516,44 +530,29 @@ if ($downloadPdf) {
         }
 
         .receipt-shell {
-            max-width: 980px;
+            max-width: 880px;
             margin: 0 auto;
-            padding: 2rem 1rem 3rem;
+            padding: 1rem 0.85rem 1.6rem;
         }
 
         .receipt-actions {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
+            gap: 0.55rem;
+            margin-bottom: 0.7rem;
         }
 
-        .receipt-card {
+        .receipt-switcher {
             display: grid;
-            gap: 1.2rem;
-            padding: 1.4rem;
+            gap: 0.45rem;
+            margin-bottom: 0.75rem;
+            padding: 0.65rem;
             border: 1px solid rgba(95, 71, 53, 0.08);
-            border-radius: 1.4rem;
-            background: rgba(255, 255, 255, 0.94);
-            box-shadow: 0 18px 40px rgba(58, 41, 35, 0.1);
+            border-radius: 0.8rem;
+            background: rgba(255, 255, 255, 0.76);
         }
 
-        .receipt-card__head,
-        .receipt-card__summary,
-        .receipt-card__details {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .receipt-card__head {
-            grid-template-columns: minmax(0, 1fr) auto;
-            align-items: start;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(95, 71, 53, 0.08);
-        }
-
-        .receipt-card__eyebrow,
-        .receipt-grid__label {
+        .receipt-switcher__title {
             margin: 0;
             color: #8b7866;
             font-size: 0.72rem;
@@ -562,29 +561,89 @@ if ($downloadPdf) {
             text-transform: uppercase;
         }
 
+        .receipt-switcher__list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .receipt-switcher__link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.42rem 0.68rem;
+            border: 1px solid rgba(95, 71, 53, 0.12);
+            border-radius: 999px;
+            background: #fff;
+            color: #5d4a3d;
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        .receipt-switcher__link.is-active {
+            border-color: rgba(201, 162, 74, 0.65);
+            background: rgba(201, 162, 74, 0.16);
+            color: #7A4B12;
+        }
+
+        .receipt-card {
+            display: grid;
+            gap: 0.82rem;
+            padding: 1rem;
+            border: 1px solid rgba(95, 71, 53, 0.08);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: 0 12px 28px rgba(58, 41, 35, 0.08);
+        }
+
+        .receipt-card__head,
+        .receipt-card__summary,
+        .receipt-card__details {
+            display: grid;
+            gap: 0.72rem;
+        }
+
+        .receipt-card__head {
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: start;
+            padding-bottom: 0.68rem;
+            border-bottom: 1px solid rgba(95, 71, 53, 0.08);
+        }
+
+        .receipt-card__eyebrow,
+        .receipt-grid__label {
+            margin: 0;
+            color: #8b7866;
+            font-size: 0.64rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
         .receipt-card__title {
-            margin: 0.2rem 0 0;
+            margin: 0.12rem 0 0;
             font-family: "Cormorant Garamond", serif;
-            font-size: clamp(2rem, 4vw, 3rem);
+            font-size: clamp(1.65rem, 3vw, 2.35rem);
             line-height: 1;
         }
 
         .receipt-card__subtext {
-            margin: 0.55rem 0 0;
+            margin: 0.38rem 0 0;
             color: #67584c;
-            font-size: 0.92rem;
-            line-height: 1.7;
+            font-size: 0.8rem;
+            line-height: 1.45;
         }
 
         .receipt-badge {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 0.45rem 0.85rem;
+            padding: 0.34rem 0.7rem;
             border-radius: 999px;
             background: rgba(227, 234, 223, 0.9);
             color: #31553f;
-            font-size: 0.78rem;
+            font-size: 0.68rem;
             font-weight: 800;
             letter-spacing: 0.05em;
             text-transform: uppercase;
@@ -596,18 +655,18 @@ if ($downloadPdf) {
 
         .receipt-grid__item {
             display: grid;
-            gap: 0.28rem;
-            padding: 0.95rem 1rem;
+            gap: 0.2rem;
+            padding: 0.68rem 0.78rem;
             border: 1px solid rgba(95, 71, 53, 0.08);
-            border-radius: 1rem;
+            border-radius: 0.76rem;
             background: rgba(249, 246, 240, 0.8);
         }
 
         .receipt-grid__value {
             color: #2d211b;
-            font-size: 1rem;
+            font-size: 0.88rem;
             font-weight: 800;
-            line-height: 1.45;
+            line-height: 1.35;
         }
 
         .receipt-card__details {
@@ -618,24 +677,29 @@ if ($downloadPdf) {
             grid-column: 1 / -1;
         }
 
+        .receipt-detail-card--wide .receipt-detail-list {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            align-items: start;
+        }
+
         .receipt-detail-card {
             display: grid;
-            gap: 0.8rem;
-            padding: 1rem;
+            gap: 0.42rem;
+            padding: 0.68rem 0.72rem;
             border: 1px solid rgba(95, 71, 53, 0.08);
-            border-radius: 1rem;
+            border-radius: 0.62rem;
             background: rgba(255, 255, 255, 0.88);
         }
 
         .receipt-detail-card h2 {
             margin: 0;
-            font-size: 1rem;
+            font-size: 0.88rem;
             font-weight: 800;
         }
 
         .receipt-detail-list {
             display: grid;
-            gap: 0.7rem;
+            gap: 0.38rem 0.7rem;
             margin: 0;
         }
 
@@ -646,7 +710,7 @@ if ($downloadPdf) {
 
         .receipt-detail-list dt {
             color: #8b7866;
-            font-size: 0.72rem;
+            font-size: 0.64rem;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -655,22 +719,22 @@ if ($downloadPdf) {
         .receipt-detail-list dd {
             margin: 0;
             color: #2d211b;
-            font-size: 0.94rem;
-            line-height: 1.65;
+            font-size: 0.82rem;
+            line-height: 1.45;
         }
 
         .receipt-card__footnote {
             margin: 0;
             padding-top: 0.2rem;
             color: #67584c;
-            font-size: 0.86rem;
-            line-height: 1.7;
+            font-size: 0.76rem;
+            line-height: 1.45;
         }
 
         .receipt-card__meta {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.9rem;
+            gap: 0.72rem;
         }
 
         @media (max-width: 767.98px) {
@@ -681,8 +745,12 @@ if ($downloadPdf) {
                 grid-template-columns: 1fr;
             }
 
+            .receipt-detail-card--wide .receipt-detail-list {
+                grid-template-columns: 1fr;
+            }
+
             .receipt-shell {
-                padding: 1rem 0.8rem 2rem;
+                padding: 0.75rem 0.65rem 1.25rem;
             }
         }
 
@@ -711,15 +779,32 @@ if ($downloadPdf) {
     <main class="receipt-shell">
         <div class="receipt-actions">
             <a class="client-action-button client-action-button--secondary" href="client-billing.php">Back To Billing</a>
-            <a class="client-action-button client-action-button--primary" href="client-payment-receipt.php?invoice=<?= rawurlencode($invoiceNumber) ?>&amp;download=1">Download PDF</a>
+            <a class="client-action-button client-action-button--primary" href="client-payment-receipt.php?invoice=<?= rawurlencode($invoiceNumber) ?>&amp;receipt=<?= (int) ($receipt['id'] ?? 0) ?>&amp;download=1">Download PDF</a>
         </div>
+
+        <?php if (count($invoiceReceipts) > 1): ?>
+            <nav class="receipt-switcher" aria-label="Payment receipts">
+                <p class="receipt-switcher__title">Separate Payment Receipts</p>
+                <div class="receipt-switcher__list">
+                    <?php foreach ($invoiceReceipts as $index => $receiptOption): ?>
+                        <?php
+                            $receiptOptionId = (int) ($receiptOption['id'] ?? 0);
+                            $receiptOptionAmount = $formatMoney((float) ($receiptOption['amount_reported'] ?? 0));
+                            $receiptOptionLabel = 'Receipt ' . ($index + 1) . ' - ' . $receiptOptionAmount;
+                            $receiptOptionIsActive = $receiptOptionId === (int) ($receipt['id'] ?? 0);
+                        ?>
+                        <a class="receipt-switcher__link<?= $receiptOptionIsActive ? ' is-active' : '' ?>" href="client-payment-receipt.php?invoice=<?= rawurlencode($invoiceNumber) ?>&amp;receipt=<?= $receiptOptionId ?>"><?= $escape($receiptOptionLabel) ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </nav>
+        <?php endif; ?>
 
         <section class="receipt-card">
             <header class="receipt-card__head">
                 <div>
                     <p class="receipt-card__eyebrow">Emarioh Catering Services</p>
                     <h1 class="receipt-card__title">Payment Receipt</h1>
-                    <p class="receipt-card__subtext">This receipt was generated automatically after PayMongo confirmed your payment.</p>
+                    <p class="receipt-card__subtext"><?= $escape($receiptSubtext) ?></p>
                 </div>
                 <span class="receipt-badge"><?= $escape($statusLabel) ?></span>
             </header>
@@ -774,8 +859,8 @@ if ($downloadPdf) {
                             <dd><?= $escape((string) ($invoice['payment_method'] ?? 'PayMongo QRPh')) ?></dd>
                         </div>
                         <div>
-                            <dt>PayMongo Reference</dt>
-                            <dd><?= $escape($paymentReference !== '' ? $paymentReference : 'Will appear after settlement sync') ?></dd>
+                            <dt>Payment Reference</dt>
+                            <dd><?= $escape($paymentReference !== '' ? $paymentReference : 'Not provided') ?></dd>
                         </div>
                         <div>
                             <dt>Remaining Balance</dt>

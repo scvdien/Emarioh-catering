@@ -15,9 +15,10 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Settings Menu</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260706e">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260709b">
+    <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-settings-page admin-settings-menu-page" data-auth-guard="admin">
     <div class="dashboard-shell container-fluid">
@@ -54,9 +55,10 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
 
                         <nav class="dashboard-nav nav flex-column" aria-label="Admin navigation">
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
+                            <?= emarioh_render_admin_notification_nav_link($db) ?>
+                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
                             <a class="nav-link" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
                             <a class="nav-link" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
-                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Event Schedule</span></a>
                             <a class="nav-link" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
                             <a class="nav-link" href="admin-inquiries.php"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
                             <a class="nav-link active" href="admin-settings-menu.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
@@ -87,6 +89,7 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
                             <p class="settings-mobile-topbar__text">Choose which part of the admin settings you want to manage.</p>
                         </div>
                     </div>
+                    <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
 
                 <main class="dashboard-content settings-dashboard-content">
@@ -138,6 +141,17 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
                                     <span class="settings-profile-shortcut__copy">
                                         <strong>SMS Templates</strong>
                                         <span>Review message templates and placeholders.</span>
+                                    </span>
+                                </span>
+                                <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+                            </a>
+
+                            <a class="settings-profile-shortcut" href="admin-inquiries.php">
+                                <span class="settings-profile-shortcut__content">
+                                    <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-envelope-paper"></i></span>
+                                    <span class="settings-profile-shortcut__copy">
+                                        <strong>Website Inquiries</strong>
+                                        <span>Review customer messages from the public page.</span>
                                     </span>
                                 </span>
                                 <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>

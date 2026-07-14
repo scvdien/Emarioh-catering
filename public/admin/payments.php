@@ -56,18 +56,30 @@ function emarioh_admin_payment_datetime_label(?string $value, string $fallback =
     }
 }
 
-function emarioh_admin_payment_status_meta(array $invoice, array $billingDetails): array
+function emarioh_admin_payment_status_meta(array $invoice, array $billingDetails, array $booking = []): array
 {
     $invoiceStatus = strtolower(trim((string) ($invoice['status'] ?? 'pending')));
     $statusClass = strtolower(trim((string) ($billingDetails['statusPillClass'] ?? $invoiceStatus)));
     $statusLabel = trim((string) ($billingDetails['statusText'] ?? 'Open'));
     $dueDateValue = trim((string) ($invoice['due_date'] ?? ''));
+    $eventDateValue = trim((string) ($booking['event_date'] ?? ''));
+    $amountPaid = max(0, (float) ($invoice['amount_paid'] ?? 0));
+    $today = new DateTimeImmutable('today');
+    $isExpiredWithoutPayment = false;
     $isOverdue = false;
+
+    if ($eventDateValue !== '' && in_array($invoiceStatus, ['pending', 'review'], true) && $amountPaid <= 0.00001) {
+        try {
+            $eventDate = new DateTimeImmutable($eventDateValue);
+            $isExpiredWithoutPayment = $eventDate < $today;
+        } catch (Throwable $exception) {
+            $isExpiredWithoutPayment = false;
+        }
+    }
 
     if ($dueDateValue !== '' && in_array($invoiceStatus, ['pending', 'review'], true)) {
         try {
             $dueDate = new DateTimeImmutable($dueDateValue);
-            $today = new DateTimeImmutable('today');
             $isOverdue = $dueDate < $today;
         } catch (Throwable $exception) {
             $isOverdue = false;
@@ -79,6 +91,14 @@ function emarioh_admin_payment_status_meta(array $invoice, array $billingDetails
             'class' => 'inactive',
             'label' => 'Cancelled',
             'filter' => 'inactive',
+        ];
+    }
+
+    if ($isExpiredWithoutPayment) {
+        return [
+            'class' => 'rejected',
+            'label' => 'Expired - No Payment',
+            'filter' => 'rejected',
         ];
     }
 
@@ -169,8 +189,8 @@ function emarioh_admin_payment_receipt_href(array $invoice, ?array $receipt, arr
         return $receiptHref;
     }
 
-    return max(0, (float) ($invoice['amount_paid'] ?? 0)) > 0
-        ? 'client-payment-receipt.php?invoice=' . rawurlencode((string) ($invoice['invoice_number'] ?? ''))
+    return $receipt !== null && (int) ($receipt['id'] ?? 0) > 0
+        ? 'client-payment-receipt.php?invoice=' . rawurlencode((string) ($invoice['invoice_number'] ?? '')) . '&receipt=' . (int) $receipt['id']
         : '';
 }
 
@@ -209,7 +229,12 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
         $receipt = emarioh_find_payment_receipt_by_invoice($db, (int) ($invoice['id'] ?? 0));
         $logs = emarioh_fetch_payment_logs_for_invoice($db, (int) ($invoice['id'] ?? 0));
         $latestLog = $logs !== [] ? $logs[array_key_last($logs)] : null;
-        $statusMeta = emarioh_admin_payment_status_meta($invoice, $billingDetails);
+        $statusMeta = emarioh_admin_payment_status_meta($invoice, $billingDetails, $booking);
+
+        if (in_array((string) ($statusMeta['label'] ?? ''), ['Overdue', 'Expired - No Payment'], true)) {
+            emarioh_create_admin_overdue_payment_notification($db, $booking, $invoice);
+        }
+
         $invoiceNumber = (string) ($billingDetails['invoiceNumber'] ?? $invoice['invoice_number'] ?? 'INV-TBA');
         $bookingReference = (string) ($booking['reference'] ?? 'BK-TBA');
         $clientName = trim((string) ($booking['primary_contact'] ?? 'Client'));
@@ -220,6 +245,15 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
         $amountLabel = (string) ($billingDetails['totalAmount'] ?? emarioh_format_money_amount((float) ($invoice['amount_due'] ?? 0)));
         $totalPaidLabel = (string) ($billingDetails['totalPaid'] ?? emarioh_format_money_amount((float) ($invoice['amount_paid'] ?? 0)));
         $pendingBalanceLabel = (string) ($billingDetails['pendingBalance'] ?? emarioh_format_money_amount((float) ($invoice['balance_due'] ?? 0)));
+        $totalAmountValue = max(0, (float) ($invoice['amount_due'] ?? 0));
+        $totalPaidValue = max(0, (float) ($invoice['amount_paid'] ?? 0));
+        $pendingBalanceValue = max(0, (float) ($invoice['balance_due'] ?? 0));
+
+        if ($pendingBalanceValue <= 0.00001) {
+            $pendingBalanceValue = max(0, $totalAmountValue - $totalPaidValue);
+            $pendingBalanceLabel = emarioh_format_money_amount($pendingBalanceValue);
+        }
+
         $lastPaymentLabel = emarioh_admin_payment_datetime_label(
             (string) ($billingDetails['lastPayment'] ?? $invoice['last_payment_at'] ?? ''),
             'No payment posted yet'
@@ -265,6 +299,9 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
         $canSyncStatus = trim((string) ($invoice['gateway_checkout_session_id'] ?? '')) !== ''
             && emarioh_paymongo_has_secret_key()
             && !in_array(strtolower(trim((string) ($invoice['status'] ?? 'pending'))), ['approved', 'cancelled'], true);
+        $canRecordManualPayment = $pendingBalanceValue > 0.00001
+            && !in_array(strtolower(trim((string) ($invoice['status'] ?? 'pending'))), ['approved', 'cancelled'], true);
+        $manualPaymentReference = $canRecordManualPayment ? emarioh_generate_manual_payment_reference() : '';
         $canSendDownPaymentReminder = emarioh_can_send_downpayment_reminder($booking, $invoice);
         $searchText = strtolower(implode(' ', array_filter([
             $clientName,
@@ -319,6 +356,9 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
                         data-event-name="' . $escape($eventName) . '"
                         data-event-schedule="' . $escape($eventSchedule) . '"
                         data-amount="' . $escape($amountLabel) . '"
+                        data-payment-total-amount-value="' . $escape(number_format($totalAmountValue, 2, '.', '')) . '"
+                        data-payment-total-paid-value="' . $escape(number_format($totalPaidValue, 2, '.', '')) . '"
+                        data-payment-pending-balance-value="' . $escape(number_format($pendingBalanceValue, 2, '.', '')) . '"
                         data-due-date="' . $escape(emarioh_admin_payment_date_label((string) ($invoice['due_date'] ?? ''))) . '"
                         data-method="' . $escape((string) ($billingDetails['paymentMethod'] ?? 'PayMongo QRPh')) . '"
                         data-status-label="' . $escape((string) $statusMeta['label']) . '"
@@ -339,6 +379,8 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
                         data-receipt-empty-label="' . $escape($receiptHref !== '' ? 'Receipt ready to open.' : 'No receipt yet.') . '"
                         data-payment-confirm-mode="' . $escape($canSyncStatus ? 'admin-sync' : '') . '"
                         data-payment-confirm-label="' . $escape($canSyncStatus ? 'Refresh Status' : '') . '"
+                        data-payment-can-record-manual="' . $escape($canRecordManualPayment ? 'true' : 'false') . '"
+                        data-manual-payment-reference="' . $escape($manualPaymentReference) . '"
                         data-payment-reminder-template="' . $escape($canSendDownPaymentReminder ? 'downpayment_reminder' : '') . '"
                         data-payment-reminder-label="' . $escape($canSendDownPaymentReminder ? 'Down Payment Reminder' : '') . '"
                     >View</button>
@@ -361,7 +403,8 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Payments</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260418x">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260710d">
+    <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-payments-page" data-auth-guard="admin" data-payment-source="db-only">
     <div class="dashboard-shell container-fluid">
@@ -398,9 +441,10 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
 
                         <nav class="dashboard-nav nav flex-column" aria-label="Admin navigation">
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
+                            <?= emarioh_render_admin_notification_nav_link($db) ?>
+                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
                             <a class="nav-link" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
                             <a class="nav-link" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
-                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Event Schedule</span></a>
                             <a class="nav-link active" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
                             <a class="nav-link" href="admin-inquiries.php"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
                             <a class="nav-link" href="admin-settings.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
@@ -429,6 +473,7 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
                             <h1 class="topbar-copy__title">Payments</h1>
                         </div>
                     </div>
+                    <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
 
                 <main class="dashboard-content">
@@ -445,16 +490,9 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
                                         <option value="pending">Open</option>
                                         <option value="review">Needs Review</option>
                                         <option value="approved">Paid</option>
-                                        <option value="rejected">Overdue</option>
+                                        <option value="rejected">Overdue / No Payment</option>
                                     </select>
                                 </label>
-                                <div class="booking-filters booking-filters--compact" aria-label="Payment status filters">
-                                    <button class="booking-filter-chip is-active" type="button" data-payment-filter="all" aria-pressed="true">All</button>
-                                    <button class="booking-filter-chip" type="button" data-payment-filter="pending" aria-pressed="false">Open</button>
-                                    <button class="booking-filter-chip" type="button" data-payment-filter="review" aria-pressed="false">Needs Review</button>
-                                    <button class="booking-filter-chip" type="button" data-payment-filter="approved" aria-pressed="false">Paid</button>
-                                    <button class="booking-filter-chip" type="button" data-payment-filter="rejected" aria-pressed="false">Overdue</button>
-                                </div>
                             </div>
 
                             <div class="table-responsive dashboard-table-wrap payment-queue-table">
@@ -547,6 +585,7 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
                                 <div class="payment-receipt-card__actions">
                                     <button class="action-btn action-btn--soft" id="paymentDetailsOpenReceiptButton" type="button" hidden>Open Receipt</button>
                                     <button class="action-btn action-btn--soft" id="paymentDetailsReminderButton" type="button" hidden>Down Payment Reminder</button>
+                                    <button class="action-btn action-btn--soft" id="paymentDetailsManualPaymentButton" type="button" hidden>Record Manual Payment</button>
                                     <button class="action-btn action-btn--primary" id="paymentDetailsConfirmButton" type="button" hidden>Refresh Status</button>
                                 </div>
                             </div>
@@ -567,6 +606,39 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
                                 </div>
                                 <p class="payment-receipt-preview__note" id="paymentDetailsReceiptNote">No receipt note provided.</p>
                             </div>
+                        </section>
+                        <section class="booking-details-card booking-details-card--full payment-manual-card" id="paymentManualPaymentCard" hidden>
+                            <h3 class="booking-details-card__title">Manual Payment</h3>
+                            <form class="payment-manual-form" id="paymentManualPaymentForm" autocomplete="off">
+                                <div class="payment-manual-grid">
+                                    <label class="payment-manual-field" for="paymentManualAmount">
+                                        <span>Amount Paid</span>
+                                        <input class="form-control" id="paymentManualAmount" name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required>
+                                    </label>
+                                    <label class="payment-manual-field" for="paymentManualMethod">
+                                        <span>Method</span>
+                                        <select class="form-control" id="paymentManualMethod" name="payment_method">
+                                            <option value="personal_gcash">Personal GCash</option>
+                                            <option value="cash">Cash</option>
+                                            <option value="bank_transfer">Bank Transfer</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </label>
+                                    <label class="payment-manual-field payment-manual-field--full" for="paymentManualReference">
+                                        <span>System Reference</span>
+                                        <input class="form-control" id="paymentManualReference" name="reference_number" type="text" maxlength="100" placeholder="Generated by system" readonly aria-readonly="true">
+                                    </label>
+                                    <label class="payment-manual-field payment-manual-field--full" for="paymentManualNote">
+                                        <span>Note</span>
+                                        <textarea class="form-control" id="paymentManualNote" name="notes" rows="2" maxlength="500" placeholder="Optional admin note"></textarea>
+                                    </label>
+                                </div>
+                                <p class="payment-manual-feedback" id="paymentManualPaymentFeedback" aria-live="polite"></p>
+                                <div class="payment-manual-actions">
+                                    <button class="action-btn action-btn--ghost" id="paymentManualCancelButton" type="button">Cancel</button>
+                                    <button class="action-btn action-btn--primary" id="paymentManualSubmitButton" type="submit">Save Payment</button>
+                                </div>
+                            </form>
                         </section>
                         <section class="booking-details-card booking-details-card--full">
                             <h3 class="booking-details-card__title">Payment Log</h3>
@@ -605,6 +677,6 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
     <script src="assets/js/logout-confirmation.js"></script>
-    <script src="assets/js/pages/index.js?v=20260418c"></script>
+    <script src="assets/js/pages/index.js?v=20260710b"></script>
 </body>
 </html>

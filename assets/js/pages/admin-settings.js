@@ -20,6 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const galleryImageInput = document.getElementById("galleryImageInput");
     const galleryCaptionInput = document.getElementById("galleryCaptionInput");
     const gallerySaveButton = document.getElementById("gallerySaveButton");
+    const galleryCancelButton = document.getElementById("galleryCancelButton");
+    const galleryUploadPreviewImage = document.getElementById("galleryUploadPreviewImage");
+    const galleryUploadPreviewEmpty = document.getElementById("galleryUploadPreviewEmpty");
+    const gallerySelectedFileName = document.getElementById("gallerySelectedFileName");
     const gallerySaveConfirmModalElement = document.getElementById("gallerySaveConfirmModal");
     const gallerySaveConfirmButton = document.getElementById("gallerySaveConfirmButton");
     const gallerySaveConfirmModalText = document.getElementById("gallerySaveConfirmModalText");
@@ -60,8 +64,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const heroImageForm = document.getElementById("heroImageForm");
     const heroImageInput = document.getElementById("heroImageInput");
     const heroImageSaveButton = document.getElementById("heroImageSaveButton");
+    const heroImageCancelButton = document.getElementById("heroImageCancelButton");
+    const heroImageNewPreview = document.getElementById("heroImageNewPreview");
+    const heroImageNewPreviewImage = document.getElementById("heroImageNewPreviewImage");
+    const heroImageSelectedFile = document.getElementById("heroImageSelectedFile");
     const contactDetailsForm = document.getElementById("contactDetailsForm");
     const contactDetailsSaveButton = document.getElementById("contactDetailsSaveButton");
+    const contactDetailsCancelButton = document.getElementById("contactDetailsCancelButton");
     const contactServiceAreaInput = document.getElementById("contactServiceAreaInput");
     const contactPublicEmailInput = document.getElementById("contactPublicEmailInput");
     const contactPrimaryMobileInput = document.getElementById("contactPrimaryMobileInput");
@@ -72,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const contactDetailsConfirmButton = document.getElementById("contactDetailsConfirmButton");
     const serviceCardsForm = document.getElementById("serviceCardsForm");
     const serviceCardsSaveButton = document.getElementById("serviceCardsSaveButton");
+    const serviceCardsCancelButton = document.getElementById("serviceCardsCancelButton");
     const serviceCardsConfirmModalElement = document.getElementById("serviceCardsConfirmModal");
     const serviceCardsConfirmButton = document.getElementById("serviceCardsConfirmButton");
     const serviceCardsConfirmModalText = document.getElementById("serviceCardsConfirmModalText");
@@ -969,7 +979,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getGalleryCardDetails(card) {
         const title = card?.querySelector(".public-gallery-card__meta strong")?.textContent?.trim() || "Gallery image";
-        const fileName = card?.querySelector(".public-gallery-card__meta span")?.textContent?.trim() || "Selected file";
+        const fileName = String(card?.dataset.galleryFileName || "").trim() || "Selected file";
 
         return { title, fileName };
     }
@@ -977,6 +987,62 @@ document.addEventListener("DOMContentLoaded", () => {
     function getGalleryImageFileName() {
         const selectedFile = galleryImageInput?.files?.[0];
         return selectedFile?.name?.trim() || "";
+    }
+
+    let galleryUploadPreviewUrl = "";
+
+    function resetGalleryUploadSelection() {
+        galleryUploadForm?.reset();
+        if (galleryUploadPreviewUrl) {
+            URL.revokeObjectURL(galleryUploadPreviewUrl);
+            galleryUploadPreviewUrl = "";
+        }
+        if (galleryUploadPreviewImage) {
+            galleryUploadPreviewImage.removeAttribute("src");
+            galleryUploadPreviewImage.hidden = true;
+        }
+        if (galleryUploadPreviewEmpty) {
+            galleryUploadPreviewEmpty.hidden = false;
+        }
+        if (gallerySelectedFileName) {
+            gallerySelectedFileName.textContent = "No image selected";
+        }
+        if (gallerySaveButton) {
+            gallerySaveButton.disabled = true;
+        }
+        if (galleryCancelButton) {
+            galleryCancelButton.disabled = true;
+        }
+        syncGalleryManager();
+    }
+
+    function updateGalleryUploadPreview() {
+        const selectedFile = galleryImageInput?.files?.[0];
+
+        if (!selectedFile) {
+            resetGalleryUploadSelection();
+            return;
+        }
+        if (galleryUploadPreviewUrl) {
+            URL.revokeObjectURL(galleryUploadPreviewUrl);
+        }
+        galleryUploadPreviewUrl = URL.createObjectURL(selectedFile);
+        if (galleryUploadPreviewImage) {
+            galleryUploadPreviewImage.src = galleryUploadPreviewUrl;
+            galleryUploadPreviewImage.hidden = false;
+        }
+        if (galleryUploadPreviewEmpty) {
+            galleryUploadPreviewEmpty.hidden = true;
+        }
+        if (gallerySelectedFileName) {
+            gallerySelectedFileName.textContent = selectedFile.name;
+        }
+        if (gallerySaveButton) {
+            gallerySaveButton.disabled = false;
+        }
+        if (galleryCancelButton) {
+            galleryCancelButton.disabled = false;
+        }
     }
 
     function getGalleryCategoryLabel() {
@@ -1151,8 +1217,134 @@ document.addEventListener("DOMContentLoaded", () => {
         return selectedFile?.name?.trim() || "";
     }
 
+    let heroImagePreviewUrl = "";
+
+    function resetHeroImageSelection() {
+        if (!heroImageInput) {
+            return;
+        }
+
+        heroImageInput.value = "";
+        if (heroImagePreviewUrl) {
+            URL.revokeObjectURL(heroImagePreviewUrl);
+            heroImagePreviewUrl = "";
+        }
+        if (heroImageNewPreviewImage) {
+            heroImageNewPreviewImage.removeAttribute("src");
+        }
+        if (heroImageNewPreview) {
+            heroImageNewPreview.hidden = true;
+            heroImageNewPreview.closest(".hero-image-picker")?.classList.remove("has-preview");
+        }
+        if (heroImageSelectedFile) {
+            heroImageSelectedFile.textContent = "No new image selected";
+        }
+        if (heroImageSaveButton) {
+            heroImageSaveButton.disabled = true;
+        }
+        if (heroImageCancelButton) {
+            heroImageCancelButton.disabled = true;
+        }
+    }
+
+    function updateHeroImageSelection() {
+        const selectedFile = heroImageInput?.files?.[0];
+
+        if (!selectedFile) {
+            resetHeroImageSelection();
+            return;
+        }
+
+        if (heroImagePreviewUrl) {
+            URL.revokeObjectURL(heroImagePreviewUrl);
+        }
+        heroImagePreviewUrl = URL.createObjectURL(selectedFile);
+        if (heroImageNewPreviewImage) {
+            heroImageNewPreviewImage.src = heroImagePreviewUrl;
+        }
+        if (heroImageNewPreview) {
+            heroImageNewPreview.hidden = false;
+            heroImageNewPreview.closest(".hero-image-picker")?.classList.add("has-preview");
+        }
+        if (heroImageSelectedFile) {
+            heroImageSelectedFile.textContent = selectedFile.name;
+        }
+        if (heroImageSaveButton) {
+            heroImageSaveButton.disabled = false;
+        }
+        if (heroImageCancelButton) {
+            heroImageCancelButton.disabled = false;
+        }
+    }
+
     function getServiceCardEditors() {
         return Array.from(serviceCardsForm?.querySelectorAll("[data-service-card-editor]") || []);
+    }
+
+    const serviceImagePreviewUrls = new Map();
+
+    function setServiceCardsChanged(hasChanges) {
+        if (serviceCardsSaveButton) {
+            serviceCardsSaveButton.disabled = !hasChanges;
+        }
+        if (serviceCardsCancelButton) {
+            serviceCardsCancelButton.disabled = !hasChanges;
+        }
+    }
+
+    function updateServiceImagePreview(input) {
+        const editor = input.closest("[data-service-card-editor]");
+        const preview = editor?.querySelector("[data-service-image-preview]");
+        const emptyState = editor?.querySelector("[data-service-image-empty]");
+        const fileName = editor?.querySelector("[data-service-file-name]");
+        const selectedFile = input.files?.[0];
+
+        if (!editor || !preview || !selectedFile) {
+            return;
+        }
+
+        const previousUrl = serviceImagePreviewUrls.get(input);
+        if (previousUrl) {
+            URL.revokeObjectURL(previousUrl);
+        }
+        const previewUrl = URL.createObjectURL(selectedFile);
+        serviceImagePreviewUrls.set(input, previewUrl);
+        preview.src = previewUrl;
+        preview.hidden = false;
+        if (emptyState) {
+            emptyState.hidden = true;
+        }
+        if (fileName) {
+            fileName.textContent = `New image: ${selectedFile.name}`;
+        }
+    }
+
+    function resetServiceCardsChanges() {
+        serviceCardsForm?.reset();
+        getServiceCardEditors().forEach((editor) => {
+            const input = editor.querySelector("[data-service-image-input]");
+            const preview = editor.querySelector("[data-service-image-preview]");
+            const emptyState = editor.querySelector("[data-service-image-empty]");
+            const fileName = editor.querySelector("[data-service-file-name]");
+            const previewUrl = input ? serviceImagePreviewUrls.get(input) : "";
+
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                serviceImagePreviewUrls.delete(input);
+            }
+            if (preview) {
+                const currentSrc = preview.dataset.currentSrc || "";
+                preview.src = currentSrc;
+                preview.hidden = currentSrc === "";
+            }
+            if (emptyState) {
+                emptyState.hidden = (preview?.dataset.currentSrc || "") !== "";
+            }
+            if (fileName) {
+                fileName.textContent = fileName.dataset.currentName || "No image uploaded yet";
+            }
+        });
+        setServiceCardsChanged(false);
     }
 
     function syncServiceCardsConfirmContent() {
@@ -1433,6 +1625,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return null;
         }
 
+        if (!packageDownPaymentForm.reportValidity()) {
+            return null;
+        }
+
         const toggleMap = new Map(
             Array.from(packageDownPaymentForm.querySelectorAll("[data-package-down-payment-toggle]"))
                 .map((input) => [input.dataset.packageId || "", input.checked])
@@ -1584,10 +1780,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 const tierLines = Array.isArray(packageItem?.downPaymentTiers) && packageItem.downPaymentTiers.length
                     ? packageItem.downPaymentTiers
                         .filter((tier) => String(tier?.amount || "").trim() !== "")
-                        .map((tier) => `${String(tier?.label || "").trim()}: ${String(tier?.amount || "").trim()}`)
+                        .map((tier) => `${String(tier?.label || "").trim()}: ${String(tier?.amount || "").trim()}%`)
                         .join(" | ")
                     : "";
-                const amountLine = tierLines || String(packageItem?.downPaymentAmount || "").trim() || "No amount";
+                const basePercentage = String(packageItem?.downPaymentAmount || "").trim();
+                const amountLine = tierLines || (basePercentage ? `${basePercentage}%` : "No percentage");
 
                 return `
                     <div class="gallery-delete-modal__target">
@@ -1864,7 +2061,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        packageDownPaymentList.innerHTML = catalog.map((packageItem) => {
+        const renderPackagePaymentCard = (packageItem) => {
             const statusMeta = catalogApi.STATUS_META[packageItem.status] || catalogApi.STATUS_META.review;
             const groupMeta = catalogApi.GROUPS[packageItem.group] || catalogApi.GROUPS["per-head"];
             const allowDownPayment = Boolean(packageItem.allowDownPayment);
@@ -1877,17 +2074,24 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="package-down-payment-card__tier-list">
                         ${pricingTiers.map((tier) => `
                             <label class="package-down-payment-card__field package-down-payment-card__tier-field">
-                                <span class="settings-field__label">${escapeHtml(tier.label)}</span>
-                                <input
-                                    class="settings-input"
-                                    type="text"
-                                    data-package-down-payment-tier-input
-                                    data-package-id="${escapeHtml(packageItem.id)}"
-                                    data-tier-label="${escapeHtml(tier.label)}"
-                                    value="${escapeHtml(catalogApi.getPackageDownPaymentAmount(packageItem, tier.label))}"
-                                    placeholder="Enter amount"
-                                    ${allowDownPayment ? "" : "disabled"}
-                                >
+                                <span class="settings-field__label">${escapeHtml(tier.label)} — Down payment percentage</span>
+                                <span class="package-down-payment-money-field is-percent">
+                                    <span class="package-down-payment-money-field__prefix">%</span>
+                                    <input
+                                        class="settings-input"
+                                        type="number"
+                                        min="1"
+                                        max="99"
+                                        step="0.01"
+                                        inputmode="decimal"
+                                        data-package-down-payment-tier-input
+                                        data-package-id="${escapeHtml(packageItem.id)}"
+                                        data-tier-label="${escapeHtml(tier.label)}"
+                                        value="${escapeHtml(catalogApi.getPackageDownPaymentAmount(packageItem, tier.label))}"
+                                        placeholder="e.g. 20"
+                                        ${allowDownPayment ? "" : "disabled"}
+                                    >
+                                </span>
                                 <span class="package-down-payment-card__tier-note">${escapeHtml(tier.price)}</span>
                             </label>
                         `).join("")}
@@ -1895,8 +2099,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 `
                 : `
                     <label class="package-down-payment-card__field">
-                        <span class="settings-field__label">Down Payment</span>
-                        <input class="settings-input" type="text" data-package-down-payment-input data-package-id="${escapeHtml(packageItem.id)}" value="${escapeHtml(catalogApi.getPackageDownPaymentAmount(packageItem) || "")}" placeholder="Enter amount"${allowDownPayment ? "" : " disabled"}>
+                        <span class="settings-field__label">Down payment percentage</span>
+                        <span class="package-down-payment-money-field is-percent">
+                            <span class="package-down-payment-money-field__prefix">%</span>
+                            <input class="settings-input" type="number" min="1" max="99" step="0.01" inputmode="decimal" data-package-down-payment-input data-package-id="${escapeHtml(packageItem.id)}" value="${escapeHtml(catalogApi.getPackageDownPaymentAmount(packageItem) || "")}" placeholder="e.g. 20"${allowDownPayment ? "" : " disabled"}>
+                        </span>
+                        <span class="package-down-payment-card__tier-note">Calculated automatically from the client’s booking total.</span>
                     </label>
                 `;
 
@@ -1916,12 +2124,52 @@ document.addEventListener("DOMContentLoaded", () => {
                         <label class="package-down-payment-card__toggle">
                             <input class="package-down-payment-card__toggle-input" type="checkbox" data-package-down-payment-toggle data-package-id="${escapeHtml(packageItem.id)}"${allowDownPayment ? " checked" : ""}>
                             <span class="package-down-payment-card__toggle-copy">
-                                <strong>Allow Down Payment</strong>
+                                <strong>Accept percentage down payment</strong>
                             </span>
                         </label>
                         ${amountFields}
                     </div>
                 </article>
+            `;
+        };
+
+        const packageGroups = [
+            {
+                key: "per-head",
+                title: "Per-Head Packages",
+                description: "Set the initial payment for packages priced per guest."
+            },
+            {
+                key: "celebration",
+                title: "Celebration Packages",
+                description: "Set the initial payment for fixed celebration packages."
+            }
+        ];
+
+        packageDownPaymentList.innerHTML = packageGroups.map((group) => {
+            const groupPackages = catalog.filter((packageItem) => (
+                group.key === "celebration"
+                    ? packageItem.group === "celebration"
+                    : packageItem.group !== "celebration"
+            ));
+
+            if (!groupPackages.length) {
+                return "";
+            }
+
+            return `
+                <section class="package-down-payment-group" data-package-payment-group="${escapeHtml(group.key)}">
+                    <div class="package-down-payment-group__heading">
+                        <div>
+                            <h4>${escapeHtml(group.title)}</h4>
+                            <p>${escapeHtml(group.description)}</p>
+                        </div>
+                        <span>${groupPackages.length} package${groupPackages.length === 1 ? "" : "s"}</span>
+                    </div>
+                    <div class="package-down-payment-group__list">
+                        ${groupPackages.map(renderPackagePaymentCard).join("")}
+                    </div>
+                </section>
             `;
         }).join("");
     }
@@ -2281,6 +2529,9 @@ document.addEventListener("DOMContentLoaded", () => {
         openGallerySaveConfirm();
     });
 
+    galleryImageInput?.addEventListener("change", updateGalleryUploadPreview);
+    galleryCancelButton?.addEventListener("click", resetGalleryUploadSelection);
+
     galleryUploadForm?.addEventListener("submit", (event) => {
         if (isGallerySubmitting) {
             return;
@@ -2365,6 +2616,26 @@ document.addEventListener("DOMContentLoaded", () => {
         openServiceCardsConfirm();
     });
 
+    serviceCardsForm?.querySelectorAll("[data-service-file-name]").forEach((fileName) => {
+        fileName.dataset.currentName = fileName.textContent?.trim() || "No image uploaded yet";
+    });
+
+    serviceCardsForm?.addEventListener("input", (event) => {
+        if (event.target instanceof HTMLInputElement && event.target.matches("[data-service-image-input]")) {
+            updateServiceImagePreview(event.target);
+        }
+        setServiceCardsChanged(true);
+    });
+
+    serviceCardsForm?.addEventListener("change", (event) => {
+        if (event.target instanceof HTMLInputElement && event.target.matches("[data-service-image-input]")) {
+            updateServiceImagePreview(event.target);
+        }
+        setServiceCardsChanged(true);
+    });
+
+    serviceCardsCancelButton?.addEventListener("click", resetServiceCardsChanges);
+
     serviceCardsForm?.addEventListener("submit", (event) => {
         if (isServiceCardsSubmitting) {
             return;
@@ -2433,6 +2704,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    heroImageInput?.addEventListener("change", updateHeroImageSelection);
+    heroImageCancelButton?.addEventListener("click", resetHeroImageSelection);
+
     heroImageForm?.addEventListener("submit", (event) => {
         if (isHeroImageSubmitting) {
             return;
@@ -2464,6 +2738,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     contactDetailsSaveButton?.addEventListener("click", () => {
         openContactDetailsConfirm();
+    });
+
+    contactDetailsForm?.addEventListener("input", () => {
+        if (contactDetailsSaveButton) {
+            contactDetailsSaveButton.disabled = false;
+        }
+        if (contactDetailsCancelButton) {
+            contactDetailsCancelButton.disabled = false;
+        }
+    });
+
+    contactDetailsCancelButton?.addEventListener("click", () => {
+        contactDetailsForm?.reset();
+        contactDetailsSaveButton?.setAttribute("disabled", "disabled");
+        contactDetailsCancelButton.disabled = true;
     });
 
     contactDetailsForm?.addEventListener("submit", (event) => {

@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function formatTopbarSummary(unreadTotal, total) {
         if (!total) {
-            return "No inquiries yet";
+            return "";
         }
 
         if (!unreadTotal) {
@@ -198,14 +198,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderSummary() {
         if (topbarStatus) {
+            let summary = "";
+
             if (isLoading && !messages.length) {
-                topbarStatus.textContent = "Loading inquiries...";
+                summary = "Loading inquiries...";
             } else if (lastErrorMessage && !messages.length) {
-                topbarStatus.textContent = "Inbox unavailable";
+                summary = "Inbox unavailable";
             } else {
                 const unreadTotal = messages.filter((message) => normalizeStatus(message.status) === "unread").length;
-                topbarStatus.textContent = formatTopbarSummary(unreadTotal, messages.length);
+                summary = formatTopbarSummary(unreadTotal, messages.length);
             }
+
+            topbarStatus.textContent = summary;
+            topbarStatus.hidden = summary === "";
         }
 
         if (inboxCount) {

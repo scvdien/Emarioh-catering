@@ -210,6 +210,28 @@ button {
     transform: translateX(2px);
 }
 
+.admin-notification-nav-link,
+.client-notification-nav-link {
+    position: relative;
+}
+
+.admin-nav-badge,
+.client-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-left: auto;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: #D5AE4B;
+    color: #1F3B2F;
+    font-size: 0.66rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
 .dashboard-nav .nav-link--muted {
     opacity: 0.58;
 }
@@ -631,6 +653,11 @@ button {
     background: rgba(201, 162, 74, 0.05);
 }
 
+.admin-table tbody tr.is-record-target td {
+    background: rgba(201, 162, 74, 0.1);
+    box-shadow: inset 0 1px 0 rgba(201, 162, 74, 0.24), inset 0 -1px 0 rgba(201, 162, 74, 0.24);
+}
+
 .admin-table--bookings th:nth-child(1),
 .admin-table--bookings td:nth-child(1) {
     width: 22%;
@@ -717,6 +744,284 @@ button {
     font-size: 0.92rem;
     font-weight: 600;
     text-align: center;
+}
+
+.admin-notification-content {
+    display: block;
+}
+
+.admin-notification-panel {
+    display: block;
+    min-height: clamp(28rem, 62vh, 44rem);
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(95, 71, 53, 0.1);
+    border-radius: 0.95rem;
+    background: #fffaf3;
+    box-shadow: 0 14px 34px rgba(47, 36, 30, 0.06);
+}
+
+.admin-notification-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.admin-notification-panel__head h2 {
+    margin: 0.2rem 0 0;
+    color: var(--ink);
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.admin-notification-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 4.4rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(201, 162, 74, 0.18);
+    border-radius: 0.85rem;
+    background: rgba(201, 162, 74, 0.09);
+}
+
+.admin-notification-count span {
+    color: var(--accent-strong);
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.admin-notification-count small {
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-notification-list {
+    display: grid;
+}
+
+.admin-notification-item,
+.admin-notification-empty {
+    display: grid;
+    grid-template-columns: 2.35rem minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: start;
+    padding: 0.95rem 1.05rem 0.95rem 1.25rem;
+    border: 0;
+    border-bottom: 1px solid rgba(31, 71, 56, 0.08);
+    border-radius: 0;
+    background: #fffaf3;
+}
+
+.admin-notification-item {
+    position: relative;
+    grid-template-columns: 2.35rem minmax(0, 1fr) 2.375rem;
+    cursor: pointer;
+    outline: 0;
+    transition: background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.notification-delete-button {
+    align-self: center;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 10px;
+    color: #a33b3b;
+    background: #fff1f1;
+    display: inline-grid;
+    place-items: center;
+    transition: background-color .2s ease, color .2s ease, transform .2s ease;
+}
+
+.notification-delete-button:hover,
+.notification-delete-button:focus-visible {
+    color: #fff;
+    background: #b93737;
+    transform: translateY(-1px);
+}
+
+.admin-notification-item::before {
+    content: "";
+    position: absolute;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    left: 0;
+    width: 0.28rem;
+    border-radius: 0 999px 999px 0;
+    background: transparent;
+}
+
+.admin-notification-item:last-child,
+.admin-notification-empty:last-child {
+    border-bottom: 0;
+}
+
+.admin-notification-item.is-unread {
+    background: #fff6e7;
+    box-shadow: inset 0 0 0 1px rgba(201, 141, 37, 0.18);
+}
+
+.admin-notification-item.is-unread::before {
+    background: #c98d25;
+}
+
+.admin-notification-item.is-read {
+    background: #fffaf3;
+    box-shadow: none;
+}
+
+.admin-notification-item:hover,
+.admin-notification-item:focus-visible {
+    background: #fffdf8;
+    box-shadow: inset 0 0 0 2px rgba(201, 141, 37, 0.2);
+    outline: none;
+}
+
+.admin-notification-item.is-unread .admin-notification-item__icon {
+    background: rgba(201, 141, 37, 0.16);
+    color: #9b6818;
+}
+
+.admin-notification-item.is-unread .admin-notification-item__head h2 {
+    color: #16110e;
+}
+
+.admin-notification-item__icon,
+.admin-notification-empty__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.72rem;
+    background: rgba(33, 72, 58, 0.1);
+    color: #21483a;
+    font-size: 0.95rem;
+}
+
+.admin-notification-item__body,
+.admin-notification-empty div {
+    min-width: 0;
+}
+
+.admin-notification-item__head {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.admin-notification-item h2,
+.admin-notification-empty h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+    margin: 0;
+    color: #211a16;
+    font-size: 0.98rem;
+    font-weight: 800;
+    line-height: 1.35;
+}
+
+.admin-notification-item__message,
+.admin-notification-empty p {
+    margin: 0.24rem 0 0;
+    color: #5f554c;
+    font-size: 0.86rem;
+    line-height: 1.5;
+}
+
+.admin-notification-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+    margin-top: 0.5rem;
+}
+
+.admin-notification-item__meta span {
+    color: #766a5f;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.admin-notification-item__meta span + span::before {
+    content: "/";
+    margin-right: 0.38rem;
+    color: #b8aa9a;
+}
+
+.admin-notification-empty {
+    display: flex;
+    align-items: center;
+    color: #756a60;
+}
+
+.admin-notification-empty h2 {
+    color: #2f241e;
+    font-size: 0.98rem;
+}
+
+.admin-notification-modal__header {
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.admin-notification-modal__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.65rem;
+    background: rgba(201, 162, 74, 0.12);
+    color: var(--accent-strong);
+    font-size: 1rem;
+}
+
+.admin-notification-modal__time {
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.admin-notification-modal__body p {
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+.admin-notification-modal__meta {
+    display: grid;
+    gap: 0.2rem;
+    margin-top: 1rem;
+    padding: 0.72rem 0.85rem;
+    border: 1px solid rgba(95, 71, 53, 0.08);
+    border-radius: 0.6rem;
+    background: rgba(95, 71, 53, 0.035);
+}
+
+.admin-notification-modal__meta span {
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-notification-modal__meta strong {
+    color: var(--ink);
+    font-size: 0.9rem;
+    word-break: break-word;
 }
 
 .action-menu {
@@ -1858,6 +2163,71 @@ button {
     gap: 0.65rem;
 }
 
+.admin-payments-page .payment-manual-card[hidden] {
+    display: none;
+}
+
+.admin-payments-page .payment-manual-form {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.admin-payments-page .payment-manual-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+.admin-payments-page .payment-manual-field {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.admin-payments-page .payment-manual-field--full {
+    grid-column: 1 / -1;
+}
+
+.admin-payments-page .payment-manual-field .form-control {
+    min-height: 42px;
+    border-color: rgba(231, 223, 209, 0.95);
+    border-radius: 0.85rem;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.admin-payments-page .payment-manual-field .form-control[readonly] {
+    background: rgba(255, 250, 241, 0.74);
+    color: var(--muted);
+    cursor: default;
+}
+
+.admin-payments-page .payment-manual-feedback {
+    min-height: 1.25rem;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
+.admin-payments-page .payment-manual-feedback.is-error {
+    color: #B42318;
+}
+
+.admin-payments-page .payment-manual-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.65rem;
+}
+
 .admin-payments-page .payment-receipt-empty {
     padding: 1rem;
     border: 1px dashed rgba(201, 162, 74, 0.32);
@@ -2225,6 +2595,16 @@ button {
     }
 }
 
+@media (max-width: 575.98px) {
+    .admin-payments-page .payment-manual-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-payments-page .payment-manual-actions .action-btn {
+        flex: 1 1 100%;
+    }
+}
+
 @media (max-width: 991.98px) {
     .admin-payments-page .payment-hero {
         grid-template-columns: 1fr;
@@ -2354,13 +2734,14 @@ button {
 }
 
 .admin-payments-page .payment-status-select-wrap {
-    display: none;
-    width: fit-content;
+    display: block;
+    justify-self: end;
+    width: min(100%, 15rem);
     min-width: 0;
 }
 
 .admin-payments-page .payment-status-select {
-    width: auto;
+    width: 100%;
     min-height: 2.7rem;
     padding: 0.62rem 1.75rem 0.62rem 0.9rem;
     border: 1px solid rgba(95, 71, 53, 0.1);
@@ -2383,34 +2764,16 @@ button {
     min-width: 0;
 }
 
-.admin-payments-page .payment-toolbar .booking-filters {
-    padding: 0;
-}
-
 @media (min-width: 768px) {
     .admin-payments-page .payment-toolbar {
         display: grid;
-        grid-template-columns: minmax(18rem, 48%) minmax(0, 1fr);
+        grid-template-columns: minmax(18rem, 1fr) minmax(12rem, 15rem);
         align-items: center;
         gap: 0.9rem 1rem;
     }
 
     .admin-payments-page .admin-search {
         max-width: none;
-    }
-
-    .admin-payments-page .payment-status-select-wrap {
-        display: none;
-    }
-
-    .admin-payments-page .payment-toolbar .booking-filters {
-        width: 100%;
-        justify-content: flex-end;
-    }
-
-    .admin-payments-page .payment-toolbar .booking-filter-chip {
-        min-width: auto;
-        white-space: nowrap;
     }
 }
 
@@ -2419,7 +2782,7 @@ button {
         max-width: none;
     }
 
-    .admin-payments-page .payment-toolbar .booking-filters {
+    .admin-payments-page .payment-status-select-wrap {
         width: 100%;
     }
 }

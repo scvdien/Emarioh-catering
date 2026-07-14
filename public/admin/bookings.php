@@ -130,7 +130,7 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
                 </td>
                 <td>
                     <span class="d-block fw-semibold">' . $escape($reference) . '</span>
-                    <span class="d-block text-secondary small fw-normal">Submitted ' . $escape(date('M j, Y', strtotime((string) ($booking['submitted_at'] ?? 'now')))) . '</span>
+                    <span class="d-block text-secondary small fw-normal">Submitted ' . $escape($submittedAt) . '</span>
                 </td>
                 <td>
                     <span class="d-block fw-semibold">' . $escape($eventType) . '</span>
@@ -164,8 +164,9 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Booking Management</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
-    <link rel="stylesheet" href="assets/css/pages/admin-bookings.css?v=20260418h">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260710d">
+    <link rel="stylesheet" href="assets/css/pages/admin-bookings.css?v=20260714k">
+    <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-bookings-page" data-auth-guard="admin">
     <div class="dashboard-shell container-fluid">
@@ -202,9 +203,10 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
 
                         <nav class="dashboard-nav nav flex-column" aria-label="Admin navigation">
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
+                            <?= emarioh_render_admin_notification_nav_link($db) ?>
+                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
                             <a class="nav-link active" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
                             <a class="nav-link" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
-                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Event Schedule</span></a>
                             <a class="nav-link" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
                             <a class="nav-link" href="admin-inquiries.php"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
                             <a class="nav-link" href="admin-settings.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
@@ -243,6 +245,7 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
                             </select>
                         </div>
                     </div>
+                    <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
 
                 <main class="dashboard-content">
@@ -356,7 +359,7 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
         </div>
     </div>
 
-    <div class="modal fade booking-modal booking-action-modal" id="bookingActionConfirmModal" tabindex="-1" aria-labelledby="bookingActionConfirmModalLabel" aria-hidden="true">
+    <div class="modal fade booking-modal booking-action-modal" id="bookingActionConfirmModal" tabindex="-1" aria-labelledby="bookingActionConfirmModalLabel" aria-hidden="true" data-bs-backdrop="false">
         <div class="modal-dialog modal-dialog-centered booking-action-modal__dialog">
             <div class="modal-content booking-modal__content booking-action-modal__content">
                 <div class="modal-header booking-modal__header booking-action-modal__header">
@@ -378,7 +381,7 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
     <script src="assets/js/logout-confirmation.js"></script>
-    <script src="assets/js/pages/index.js?v=20260418d"></script>
-    <script src="assets/js/pages/admin-bookings.js?v=20260417d"></script>
+    <script src="assets/js/pages/index.js?v=20260710b"></script>
+    <script src="assets/js/pages/admin-bookings.js?v=20260709a"></script>
 </body>
 </html>

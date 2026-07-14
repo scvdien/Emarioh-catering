@@ -421,7 +421,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedDate = dateISO;
             renderSchedule();
 
-            if (!shouldUseSelectedDatePanel() && summary.hasEvent) {
+            if (summary.hasEvent) {
                 openBookingModal(dateISO);
             }
         });
@@ -484,7 +484,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getTableSummaryText(count) {
         if (hasPinnedScheduleFilter()) {
-            return `${count} upcoming event${count === 1 ? "" : "s"}`;
+        return `${count} upcoming booking${count === 1 ? "" : "s"}`;
         }
 
         if (activeFilter === "all") {
@@ -498,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hasPinnedScheduleFilter()) {
             if (activeFilter === "approved") {
                 return {
-                    title: "No upcoming events",
+                    title: "No upcoming bookings",
                     copy: "Approved bookings will appear here once they are confirmed."
                 };
             }
@@ -506,14 +506,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const filterLabel = getStatusMeta(activeFilter).filterLabel;
 
             return {
-                title: "No upcoming events",
+                title: "No upcoming bookings",
                 copy: `There are no upcoming ${filterLabel} schedules to show right now.`
             };
         }
 
         if (activeFilter === "all") {
             return {
-                title: "No upcoming events",
+                title: "No upcoming bookings",
                 copy: "There are no upcoming bookings to show right now."
             };
         }
@@ -521,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const filterLabel = getStatusMeta(activeFilter).filterLabel;
 
         return {
-            title: `No upcoming ${filterLabel} events`,
+            title: `No upcoming ${filterLabel} bookings`,
             copy: `Try another filter to view other upcoming ${filterLabel} schedules.`
         };
     }
@@ -573,18 +573,18 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const summaryLabel = activeFilter === "all"
-            ? "upcoming events"
-            : `upcoming ${getStatusMeta(activeFilter).filterLabel} events`;
+            ? "upcoming bookings"
+            : `upcoming ${getStatusMeta(activeFilter).filterLabel} bookings`;
 
         return `Next ${visibleCount} of ${totalCount} ${summaryLabel}`;
     }
 
     function getUpcomingModalSummaryText(count) {
         if (activeFilter === "all") {
-            return `${count} upcoming event${count === 1 ? "" : "s"}`;
+            return `${count} upcoming booking${count === 1 ? "" : "s"}`;
         }
 
-        return `${count} upcoming ${getStatusMeta(activeFilter).filterLabel} event${count === 1 ? "" : "s"}`;
+        return `${count} upcoming ${getStatusMeta(activeFilter).filterLabel} booking${count === 1 ? "" : "s"}`;
     }
 
     function createViewActionMarkup(reference) {
@@ -899,7 +899,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dashboardUpcomingButton.setAttribute(
             "aria-label",
             upcomingCount === 0
-                ? "No upcoming events available"
+                ? "No upcoming bookings available"
                 : `${getUpcomingModalSummaryText(upcomingCount)}. Open next events`
         );
     }

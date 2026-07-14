@@ -38,6 +38,34 @@ try {
         $tagRows = is_array($rawPackage['tags'] ?? null) ? $rawPackage['tags'] : [];
         $inclusionRows = is_array($rawPackage['inclusions'] ?? null) ? $rawPackage['inclusions'] : [];
 
+        if ($allowDownPayment && $downPaymentAmount !== '') {
+            $percentageValue = (float) $downPaymentAmount;
+
+            if (!is_numeric($downPaymentAmount) || $percentageValue < 1 || $percentageValue >= 100) {
+                throw new RuntimeException($packageName . ' down payment must be from 1% to 99%.');
+            }
+        }
+
+        if ($allowDownPayment) {
+            foreach ($downPaymentTierRows as $tierRow) {
+                if (!is_array($tierRow)) {
+                    continue;
+                }
+
+                $tierPercentage = trim((string) ($tierRow['amount'] ?? ''));
+
+                if ($tierPercentage === '') {
+                    continue;
+                }
+
+                $tierPercentageValue = (float) $tierPercentage;
+
+                if (!is_numeric($tierPercentage) || $tierPercentageValue < 1 || $tierPercentageValue >= 100) {
+                    throw new RuntimeException($packageName . ' tier down payment must be from 1% to 99%.');
+                }
+            }
+        }
+
         if ($packageCode === '' || $packageName === '' || $categoryLabel === '' || $guestLabel === '' || $rateLabel === '') {
             throw new RuntimeException(sprintf('Package #%d is missing required fields.', $index + 1));
         }

@@ -27,7 +27,7 @@ $packageCatalogJson = json_encode(
     <title>Emarioh Catering Services Client Billing</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/pages/client-billing.css?v=20260418i">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418h">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
 </head>
 <body class="dashboard-page client-dashboard-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -58,7 +58,7 @@ $packageCatalogJson = json_encode(
                             <a class="nav-link" href="client-dashboard.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <a class="nav-link" href="client-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-plus"></i></span><span>Book Event</span></a>
                             <a class="nav-link" href="client-my-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span><span>My Bookings</span></a>
-                            <a class="nav-link" href="client-notifications.php"><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span></a>
+                            <?= emarioh_render_client_notification_nav_link($db, (int) $currentUser['id']) ?>
                             <a class="nav-link active" href="client-billing.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span><span>Billing</span></a>
                             <a class="nav-link" href="client-preferences.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Account Settings</span></a>
                         </nav>
@@ -296,8 +296,8 @@ $packageCatalogJson = json_encode(
     </script>
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/payment-settings-store.js?v=20260412a"></script>
-    <script src="assets/js/client-portal-state.js?v=20260419d"></script>
-    <script src="assets/js/pages/client-dashboard.js?v=20260419a"></script>
+    <script src="assets/js/client-portal-state.js?v=20260710b"></script>
+    <script src="assets/js/pages/client-dashboard.js?v=20260709a"></script>
 </body>
 </html>
 

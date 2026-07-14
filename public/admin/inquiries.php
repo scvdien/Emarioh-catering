@@ -14,7 +14,8 @@ $currentUser = emarioh_require_page_role('admin');
     <title>Emarioh Catering Services Website Inquiries</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/messages.css?v=20260410e">
-    <link rel="stylesheet" href="assets/css/pages/admin-messages.css?v=20260418y">
+    <link rel="stylesheet" href="assets/css/pages/admin-messages.css?v=20260709c">
+    <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-messages-page admin-inquiries-page" data-auth-guard="admin">
     <div class="dashboard-shell container-fluid">
@@ -51,9 +52,10 @@ $currentUser = emarioh_require_page_role('admin');
 
                         <nav class="dashboard-nav nav flex-column" aria-label="Admin navigation">
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
+                            <?= emarioh_render_admin_notification_nav_link($db) ?>
+                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
                             <a class="nav-link" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
                             <a class="nav-link" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
-                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Event Schedule</span></a>
                             <a class="nav-link" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
                             <a class="nav-link active" href="admin-inquiries.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
                             <a class="nav-link" href="admin-settings.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
@@ -76,14 +78,14 @@ $currentUser = emarioh_require_page_role('admin');
                             <i class="bi bi-list"></i>
                         </button>
                         <div class="topbar-copy">
-                            <p class="topbar-copy__eyebrow">Inbox</p>
                             <div class="admin-inquiries-title-row">
                                 <h1 class="topbar-copy__title">Website Inquiries</h1>
                                 <span class="admin-message-count admin-message-count--topbar" id="adminMessagesInboxCount">0 inquiries</span>
                             </div>
-                            <p class="admin-message-topbar-summary" id="adminMessagesTopbarStatus">0 unread inquiries to review</p>
+                            <p class="admin-message-topbar-summary" id="adminMessagesTopbarStatus" hidden></p>
                         </div>
                     </div>
+                    <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
 
                 <main class="dashboard-content">
@@ -158,6 +160,6 @@ $currentUser = emarioh_require_page_role('admin');
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
     <script src="assets/js/logout-confirmation.js"></script>
-    <script src="assets/js/pages/admin-inquiries.js?v=20260412k"></script>
+    <script src="assets/js/pages/admin-inquiries.js?v=20260709b"></script>
 </body>
 </html>

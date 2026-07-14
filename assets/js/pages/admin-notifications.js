@@ -1,9 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const items = Array.from(document.querySelectorAll("[data-notification-item]"));
-    const modalElement = document.getElementById("clientNotificationModal");
-    const modal = modalElement && window.bootstrap?.Modal
-        ? window.bootstrap.Modal.getOrCreateInstance(modalElement)
+    const items = Array.from(document.querySelectorAll("[data-admin-notification-item]"));
+    const modalElement = document.getElementById("adminNotificationModal");
+    const modal = modalElement && window.bootstrap && window.bootstrap.Modal
+        ? new window.bootstrap.Modal(modalElement)
         : null;
+    const modalTitle = document.getElementById("adminNotificationModalTitle");
+    const modalMessage = document.getElementById("adminNotificationModalMessage");
+    const modalReference = document.getElementById("adminNotificationModalReference");
+    const modalTime = document.getElementById("adminNotificationModalTime");
+    const modalIcon = document.getElementById("adminNotificationModalIcon");
+    const modalOpenLink = document.getElementById("adminNotificationModalOpenLink");
     const notificationList = document.querySelector("[data-notification-list]");
     const deleteModalElement = document.getElementById("notificationDeleteModal");
     const deleteModal = deleteModalElement && window.bootstrap?.Modal
@@ -12,25 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmDeleteButton = deleteModalElement?.querySelector("[data-confirm-notification-delete]");
     let pendingDelete = null;
 
-    const modalFields = {
-        title: modalElement?.querySelector("[data-notification-modal-title]"),
-        message: modalElement?.querySelector("[data-notification-modal-message]"),
-        reference: modalElement?.querySelector("[data-notification-modal-reference]"),
-        time: modalElement?.querySelector("[data-notification-modal-time]"),
-        event: modalElement?.querySelector("[data-notification-modal-event]"),
-        status: modalElement?.querySelector("[data-notification-modal-status]")
-    };
-
-    const setText = (element, value) => {
-        if (element) {
-            element.textContent = value || "";
-        }
-    };
-
     const updateUnreadBadges = (unreadTotal) => {
         const count = Math.max(0, Number.parseInt(String(unreadTotal), 10) || 0);
+        const badges = document.querySelectorAll(".admin-nav-badge, .admin-mobile-notification-badge");
 
-        document.querySelectorAll("[data-client-notification-badge]").forEach((badge) => {
+        badges.forEach((badge) => {
             if (count === 0) {
                 badge.remove();
                 return;
@@ -41,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    const markItemRead = (item) => {
+    const markReadLocally = (item) => {
         if (!item || item.dataset.readStatus !== "unread") {
             return;
         }
@@ -49,21 +41,17 @@ document.addEventListener("DOMContentLoaded", () => {
         item.dataset.readStatus = "read";
         item.classList.remove("is-unread");
         item.classList.add("is-read");
-        item.querySelector(".client-notification-dot")?.remove();
-
-        const unreadCount = items.filter((notificationItem) => notificationItem.dataset.readStatus === "unread").length;
-        updateUnreadBadges(unreadCount);
     };
 
-    const persistReadStatus = async (item) => {
-        const notificationId = Number.parseInt(item?.dataset.notificationId || "0", 10);
+    const persistRead = async (item) => {
+        const notificationId = Number.parseInt(item && item.dataset ? item.dataset.notificationId || "0" : "0", 10);
 
         if (!notificationId) {
             return;
         }
 
         try {
-            const response = await fetch("api/notifications/mark-read.php", {
+            const response = await fetch("api/admin-notifications/mark-read.php", {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
@@ -82,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             updateUnreadBadges(result.unread_total ?? result.data?.unread_total ?? 0);
         } catch (error) {
-            // The item is still marked read locally so the client experience stays smooth.
+            // Keep the UI responsive even if the read state cannot be saved immediately.
         }
     };
 
@@ -94,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         button.disabled = true;
         try {
-            const response = await fetch("api/notifications/delete.php", {
+            const response = await fetch("api/admin-notifications/delete.php", {
                 method: "POST",
                 headers: { Accept: "application/json", "Content-Type": "application/json" },
                 credentials: "same-origin",
@@ -109,8 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
             deleteModal?.hide();
             pendingDelete = null;
             updateUnreadBadges(result.unread_total ?? result.data?.unread_total ?? 0);
-            if (notificationList && !notificationList.querySelector("[data-notification-item]")) {
-                notificationList.innerHTML = '<article class="client-notification-empty"><span class="client-notification-empty__icon" aria-hidden="true"><i class="bi bi-bell"></i></span><div><h2>No notifications yet</h2><p>Your booking and reservation updates will appear here after you submit a request.</p></div></article>';
+            if (notificationList && !notificationList.querySelector("[data-admin-notification-item]")) {
+                notificationList.innerHTML = '<article class="admin-notification-empty"><span class="admin-notification-empty__icon" aria-hidden="true"><i class="bi bi-bell"></i></span><div><h2>No notifications yet</h2></div></article>';
             }
         } catch (error) {
             window.alert(error.message || "Notification could not be deleted.");
@@ -124,31 +112,49 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const title = item.dataset.notificationTitle || "Notification";
-        const message = item.dataset.notificationMessage || "Your booking was updated.";
-        const reference = item.dataset.notificationReference || "Reference pending";
-        const time = item.dataset.notificationTime || "Just now";
-        const eventLabel = item.dataset.notificationEvent || "Booking";
-        const statusLabel = item.dataset.notificationStatusLabel || "Booking Update";
-
-        setText(modalFields.title, title);
-        setText(modalFields.message, message);
-        setText(modalFields.reference, reference);
-        setText(modalFields.time, time);
-        setText(modalFields.event, eventLabel);
-        setText(modalFields.status, statusLabel);
-
+        const message = item.dataset.notificationMessage || "Notification details";
+        const reference = item.dataset.notificationReference || "No reference";
+        const time = item.dataset.notificationTime || "";
+        const href = item.dataset.notificationHref || "admin-notifications.php";
+        const icon = item.dataset.notificationIcon || "bi-bell";
         const wasUnread = item.dataset.readStatus === "unread";
-        markItemRead(item);
+
+        if (modalTitle) {
+            modalTitle.textContent = title;
+        }
+
+        if (modalMessage) {
+            modalMessage.textContent = message;
+        }
+
+        if (modalReference) {
+            modalReference.textContent = reference;
+        }
+
+        if (modalTime) {
+            modalTime.textContent = time;
+        }
+
+        if (modalIcon) {
+            modalIcon.className = `bi ${icon}`;
+        }
+
+        if (modalOpenLink) {
+            modalOpenLink.href = href;
+            modalOpenLink.hidden = href === "" || href === "admin-notifications.php";
+        }
+
+        markReadLocally(item);
+
         if (wasUnread) {
-            void persistReadStatus(item);
+            const remainingUnread = items.filter((notificationItem) => notificationItem.dataset.readStatus === "unread").length;
+            updateUnreadBadges(remainingUnread);
+            void persistRead(item);
         }
 
         if (modal) {
             modal.show();
-            return;
         }
-
-        window.alert(`${title}\n\n${message}`);
     };
 
     items.forEach((item) => {

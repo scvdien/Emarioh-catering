@@ -9,6 +9,18 @@ $db = emarioh_db();
 $currentUser = emarioh_require_role('client');
 $data = emarioh_request_data();
 
+$unpaidBlockingBooking = emarioh_find_client_unpaid_active_booking($db, (int) $currentUser['id']);
+
+if ($unpaidBlockingBooking !== null) {
+    emarioh_fail(
+        emarioh_client_unpaid_booking_block_message($unpaidBlockingBooking),
+        409,
+        [
+            'blocking_booking' => emarioh_client_unpaid_booking_payload($unpaidBlockingBooking),
+        ]
+    );
+}
+
 $blockingBooking = emarioh_find_client_active_upcoming_booking($db, (int) $currentUser['id']);
 
 if ($blockingBooking !== null) {
@@ -56,7 +68,7 @@ if ($eventDate < $today) {
 }
 
 if (emarioh_booking_date_has_conflict($db, $eventDateValue)) {
-    emarioh_fail('The selected event date is already booked. Please choose another date.');
+    emarioh_fail('The selected event date is already reserved. Please choose another date.', 409);
 }
 
 $eventTime = DateTimeImmutable::createFromFormat('H:i', $eventTimeValue);
@@ -116,9 +128,24 @@ if ($packageRecord !== null) {
 }
 
 $reference = emarioh_generate_booking_reference($db);
+$dateLockAcquired = false;
 
 try {
+    $dateLockAcquired = emarioh_acquire_booking_date_lock($db, $eventDateValue);
+
+    if (!$dateLockAcquired) {
+        emarioh_fail('Another booking is being submitted for this date. Please try again in a moment.', 409);
+    }
+
     $db->beginTransaction();
+
+    if (emarioh_booking_date_has_conflict($db, $eventDateValue)) {
+        $db->rollBack();
+        emarioh_release_booking_date_lock($db, $eventDateValue);
+        $dateLockAcquired = false;
+
+        emarioh_fail('The selected event date was just reserved by another client. Please choose another date.', 409);
+    }
 
     emarioh_upsert_client_profile(
         $db,
@@ -219,9 +246,16 @@ try {
     );
 
     $db->commit();
+
+    emarioh_release_booking_date_lock($db, $eventDateValue);
+    $dateLockAcquired = false;
 } catch (Throwable $throwable) {
     if ($db->inTransaction()) {
         $db->rollBack();
+    }
+
+    if ($dateLockAcquired) {
+        emarioh_release_booking_date_lock($db, $eventDateValue);
     }
 
     emarioh_fail('Booking request could not be saved right now. Please try again in a moment.', 500);
@@ -231,6 +265,8 @@ try {
     $createdBooking = emarioh_find_booking_by_id($db, $bookingId);
 
     if ($createdBooking !== null) {
+        emarioh_create_admin_booking_notification($db, $createdBooking);
+
         emarioh_send_booking_sms_template(
             $db,
             $createdBooking,

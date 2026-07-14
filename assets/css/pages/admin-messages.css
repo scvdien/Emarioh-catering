@@ -31,6 +31,22 @@
     flex-shrink: 0;
 }
 
+@media (min-width: 1200px) {
+    .admin-inquiries-page .topbar-leading,
+    .admin-inquiries-page .topbar-copy,
+    .admin-inquiries-page .admin-inquiries-title-row {
+        width: 100%;
+    }
+
+    .admin-inquiries-page .topbar-leading {
+        flex: 1 1 auto;
+    }
+
+    .admin-inquiries-page .admin-message-count--topbar {
+        margin-left: auto;
+    }
+}
+
 .admin-messages-page .admin-message-cell__title {
     display: block;
     color: #2d211b;

@@ -14,14 +14,11 @@ if ($notificationId < 1) {
     emarioh_fail('Choose a valid notification first.');
 }
 
-$notification = emarioh_mark_client_notification_read($db, (int) $currentUser['id'], $notificationId);
-
-if ($notification === null) {
+if (!emarioh_delete_client_notification($db, (int) $currentUser['id'], $notificationId)) {
     emarioh_fail('The selected notification could not be found.', 404);
 }
 
 emarioh_success([
-    'message' => 'Notification marked as read.',
-    'notification' => $notification,
+    'message' => 'Notification deleted.',
     'unread_total' => emarioh_count_unread_client_notifications($db, (int) $currentUser['id']),
 ]);

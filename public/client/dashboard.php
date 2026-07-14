@@ -59,7 +59,7 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
     <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20260706d">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418i">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
 </head>
 <body class="dashboard-page client-dashboard-page client-dashboard-home" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -106,10 +106,7 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
                                 <span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span>
                                 <span>My Bookings</span>
                             </a>
-                            <a class="nav-link" href="client-notifications.php">
-                                <span class="nav-link__icon"><i class="bi bi-bell"></i></span>
-                                <span>Notifications</span>
-                            </a>
+                            <?= emarioh_render_client_notification_nav_link($db, (int) $currentUser['id']) ?>
                             <a class="nav-link" href="client-billing.php">
                                 <span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span>
                                 <span>Billing</span>
@@ -177,6 +174,6 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
     <script src="assets/js/package-catalog.js?v=20260412c"></script>
     <script src="assets/js/payment-settings-store.js?v=20260412a"></script>
     <script src="assets/js/client-portal-state.js?v=20260706b"></script>
-    <script src="assets/js/pages/client-dashboard.js?v=20260419a"></script>
+    <script src="assets/js/pages/client-dashboard.js?v=20260709a"></script>
 </body>
 </html>

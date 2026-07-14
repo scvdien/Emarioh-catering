@@ -1186,6 +1186,24 @@
     gap: 0;
 }
 
+.admin-settings-page .settings-desktop-title {
+    display: inline;
+}
+
+.admin-settings-page .settings-mobile-title {
+    display: none;
+}
+
+@media (max-width: 1199.98px) {
+    .admin-settings-page .settings-desktop-title {
+        display: none;
+    }
+
+    .admin-settings-page .settings-mobile-title {
+        display: inline;
+    }
+}
+
 .admin-settings-page .settings-panel {
     padding-top: 0.2rem;
 }
@@ -2115,8 +2133,166 @@
     grid-template-columns: 1fr;
 }
 
+.admin-settings-page .contact-field-card {
+    gap: 0.55rem;
+    padding: 0.9rem;
+    border: 1px solid rgba(231, 223, 209, 0.92);
+    border-radius: 0.9rem;
+    background: #fffdf9;
+}
+
+.admin-settings-page .contact-field-card__heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-settings-page .contact-field-card__heading i {
+    display: inline-grid;
+    place-items: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 0.55rem;
+    background: rgba(201, 162, 74, 0.12);
+    color: #a67c25;
+}
+
+.admin-settings-page .contact-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+.admin-settings-page .contact-editor-actions .action-btn:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .admin-settings-page .settings-field-grid--public-assets {
     gap: 0.95rem;
+}
+
+.admin-settings-page .hero-image-editor {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.admin-settings-page .hero-image-editor__panel {
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid rgba(231, 223, 209, 0.95);
+    border-radius: 1rem;
+    background: #fffdf9;
+}
+
+.admin-settings-page .hero-image-preview,
+.admin-settings-page .hero-image-new-preview {
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    background: #f3eee5;
+}
+
+.admin-settings-page .hero-image-preview img,
+.admin-settings-page .hero-image-new-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-settings-page .hero-image-preview__empty {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    height: 100%;
+    color: #756b61;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.admin-settings-page .hero-image-preview__empty i {
+    font-size: 1.5rem;
+}
+
+.admin-settings-page .hero-image-picker {
+    display: block;
+    min-height: 9rem;
+    padding: 1rem;
+    border: 1px dashed rgba(183, 142, 52, 0.55);
+    border-radius: 0.8rem;
+    background: rgba(201, 162, 74, 0.06);
+    color: var(--ink);
+    text-align: center;
+    cursor: pointer;
+}
+
+.admin-settings-page .hero-image-picker__prompt {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.35rem;
+    min-height: 7rem;
+}
+
+.admin-settings-page .hero-image-picker.has-preview {
+    padding: 0;
+    border-style: solid;
+}
+
+.admin-settings-page .hero-image-picker.has-preview .hero-image-picker__prompt {
+    display: none;
+}
+
+.admin-settings-page .hero-image-picker .hero-image-new-preview {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+    border-radius: 0.75rem;
+}
+
+.admin-settings-page .hero-image-picker .hero-image-new-preview[hidden] {
+    display: none;
+}
+
+.admin-settings-page .hero-image-picker:hover {
+    border-color: #b78e34;
+    background: rgba(201, 162, 74, 0.1);
+}
+
+.admin-settings-page .hero-image-picker i {
+    color: #b78e34;
+    font-size: 1.5rem;
+}
+
+.admin-settings-page .hero-image-picker span,
+.admin-settings-page .hero-image-editor__filename {
+    color: #756b61;
+    font-size: 0.76rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.admin-settings-page .hero-image-editor__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+.admin-settings-page .hero-image-editor__actions .action-btn:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    box-shadow: none;
 }
 
 .admin-settings-page .public-page-services-grid {
@@ -2137,6 +2313,91 @@
     box-shadow: 0 12px 24px rgba(46, 46, 46, 0.04);
 }
 
+.admin-settings-page .public-service-editor__preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    background: #f3eee5;
+}
+
+.admin-settings-page .public-service-editor__preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-settings-page .public-service-editor__preview-empty {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    height: 100%;
+    color: #756b61;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.admin-settings-page .public-service-editor__preview-empty i {
+    font-size: 1.35rem;
+}
+
+.admin-settings-page .public-service-editor__file-name {
+    margin-top: -0.35rem;
+    color: #756b61;
+    font-size: 0.72rem;
+    overflow-wrap: anywhere;
+}
+
+.admin-settings-page .public-service-editor__fields {
+    grid-template-columns: 1fr;
+}
+
+.admin-settings-page .public-service-image-picker .settings-field__label small {
+    color: #81766c;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.admin-settings-page .public-service-image-picker__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    min-height: 2.8rem;
+    padding: 0.65rem 0.9rem;
+    border: 1px dashed rgba(183, 142, 52, 0.55);
+    border-radius: 0.75rem;
+    background: rgba(201, 162, 74, 0.06);
+    color: #604b1e;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.admin-settings-page .public-service-image-picker:hover .public-service-image-picker__button {
+    border-color: #b78e34;
+    background: rgba(201, 162, 74, 0.1);
+}
+
+.admin-settings-page .service-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+.admin-settings-page .service-editor-actions .action-btn:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .admin-settings-page .public-service-editor .settings-field-grid {
     align-content: start;
 }
@@ -2152,21 +2413,120 @@
     font-weight: 800;
 }
 
+.admin-settings-page .gallery-upload-editor {
+    display: grid;
+    grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.2fr);
+    gap: 1rem;
+}
+
+.admin-settings-page #galleryUploadForm {
+    scroll-margin-top: 6rem;
+}
+
+.admin-settings-page .gallery-upload-editor__preview-panel {
+    display: grid;
+    align-content: start;
+    gap: 0.65rem;
+    padding: 1rem;
+    border: 1px solid rgba(231, 223, 209, 0.95);
+    border-radius: 1rem;
+    background: #fffdf9;
+}
+
+.admin-settings-page .gallery-upload-preview {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: 0.8rem;
+    background: #f3eee5;
+}
+
+.admin-settings-page .gallery-upload-preview > span {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+    color: #756b61;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.admin-settings-page .gallery-upload-preview > span i {
+    font-size: 1.5rem;
+}
+
+.admin-settings-page .gallery-upload-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-settings-page .gallery-upload-editor__filename {
+    color: #756b61;
+    font-size: 0.74rem;
+    overflow-wrap: anywhere;
+}
+
+.admin-settings-page .gallery-upload-editor__fields {
+    grid-template-columns: 1fr;
+    align-content: start;
+}
+
+.admin-settings-page .gallery-image-picker__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 3rem;
+    border: 1px dashed rgba(183, 142, 52, 0.55);
+    border-radius: 0.8rem;
+    background: rgba(201, 162, 74, 0.06);
+    color: #604b1e;
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.admin-settings-page .gallery-image-picker:hover .gallery-image-picker__button {
+    border-color: #b78e34;
+    background: rgba(201, 162, 74, 0.1);
+}
+
+.admin-settings-page .gallery-upload-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    margin-top: 1rem;
+}
+
+.admin-settings-page .gallery-upload-actions .action-btn:disabled {
+    opacity: 0.48;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
 .admin-settings-page .public-gallery-list {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(16rem, 19rem);
     gap: 0.85rem;
     margin-top: 1rem;
-    max-height: 20rem;
-    padding-right: 0.2rem;
-    overflow-y: auto;
+    max-width: 100%;
+    padding: 0 0 0.35rem;
+    overflow-x: auto;
+    overflow-y: hidden;
     overscroll-behavior: contain;
     scrollbar-width: thin;
     scrollbar-color: rgba(201, 162, 74, 0.3) transparent;
 }
 
 .admin-settings-page .public-gallery-list::-webkit-scrollbar {
-    width: 0.45rem;
+    height: 0.45rem;
 }
 
 .admin-settings-page .public-gallery-list::-webkit-scrollbar-thumb {
@@ -2175,15 +2535,37 @@
 }
 
 .admin-settings-page .public-gallery-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 0.95rem 1rem;
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 0.75rem;
     border: 1px solid rgba(231, 223, 209, 0.92);
     border-radius: 1rem;
     background: linear-gradient(180deg, #ffffff, #fffaf2);
     box-shadow: 0 10px 20px rgba(46, 46, 46, 0.04);
+}
+
+.admin-settings-page .public-gallery-card__image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    background: #f3eee5;
+}
+
+.admin-settings-page .public-gallery-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.admin-settings-page .public-gallery-card__image span {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    color: #897d70;
+    font-size: 1.4rem;
 }
 
 .admin-settings-page .public-gallery-card__meta {
@@ -2327,7 +2709,52 @@
 
 .admin-settings-page .package-down-payment-list {
     display: grid;
-    gap: 0.85rem;
+    gap: 1.15rem;
+}
+
+.admin-settings-page .package-down-payment-group {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    border: 1px solid rgba(231, 223, 209, 0.95);
+    border-radius: 1rem;
+    background: rgba(255, 253, 249, 0.72);
+}
+
+.admin-settings-page .package-down-payment-group__heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.15rem 0.2rem;
+}
+
+.admin-settings-page .package-down-payment-group__heading h4 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 1rem;
+    font-weight: 850;
+}
+
+.admin-settings-page .package-down-payment-group__heading p {
+    margin: 0.2rem 0 0;
+    color: #756b61;
+    font-size: 0.76rem;
+}
+
+.admin-settings-page .package-down-payment-group__heading > span {
+    flex: 0 0 auto;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(201, 162, 74, 0.12);
+    color: #80601d;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.admin-settings-page .package-down-payment-group__list {
+    display: grid;
+    gap: 0.75rem;
 }
 
 .admin-settings-page .package-down-payment-card {
@@ -2382,6 +2809,37 @@
     display: grid;
     gap: 0.42rem;
     min-width: 0;
+}
+
+
+.admin-settings-page .package-down-payment-money-field {
+    position: relative;
+    display: block;
+}
+
+.admin-settings-page .package-down-payment-money-field__prefix {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    z-index: 1;
+    transform: translateY(-50%);
+    color: #806f5f;
+    font-weight: 800;
+    pointer-events: none;
+}
+
+.admin-settings-page .package-down-payment-money-field .settings-input {
+    padding-left: 2.25rem;
+}
+
+.admin-settings-page .package-down-payment-money-field.is-percent .package-down-payment-money-field__prefix {
+    right: 1rem;
+    left: auto;
+}
+
+.admin-settings-page .package-down-payment-money-field.is-percent .settings-input {
+    padding-right: 2.4rem;
+    padding-left: 1rem;
 }
 
 .admin-settings-page .package-down-payment-card__tier-list {
@@ -2530,6 +2988,14 @@
 }
 
 @media (max-width: 991.98px) {
+    .admin-settings-page .gallery-upload-editor {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-settings-page .public-gallery-list {
+        grid-auto-columns: minmax(15rem, 76vw);
+    }
+
     .admin-settings-page .public-page-services-grid {
         grid-template-columns: 1fr;
     }
@@ -2548,9 +3014,50 @@
 }
 
 @media (max-width: 767.98px) {
-    .admin-settings-page .public-gallery-card {
-        flex-direction: column;
+    .admin-settings-page .contact-editor-actions {
         align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .admin-settings-page .contact-editor-actions .action-btn {
+        width: 100%;
+    }
+
+    .admin-settings-page .gallery-upload-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .admin-settings-page .gallery-upload-actions .action-btn {
+        width: 100%;
+    }
+
+    .admin-settings-page .hero-image-editor {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-settings-page .hero-image-editor__actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .admin-settings-page .hero-image-editor__actions .action-btn {
+        width: 100%;
+    }
+
+    .admin-settings-page .service-editor-actions {
+        align-items: stretch;
+        flex-direction: column-reverse;
+    }
+
+    .admin-settings-page .service-editor-actions .action-btn {
+        width: 100%;
+    }
+
+    .admin-settings-page .public-gallery-card {
+        align-content: start;
+        gap: 0.7rem;
+        padding: 0.7rem;
     }
 
     .admin-settings-page .public-gallery-card__controls {

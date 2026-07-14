@@ -145,6 +145,26 @@
     transform: translateX(2px);
 }
 
+.client-dashboard-page .client-notification-nav-link {
+    position: relative;
+}
+
+.client-dashboard-page .client-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    margin-left: auto;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: #d5ae4b;
+    color: #1f3b2f;
+    font-size: 0.66rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
 .client-dashboard-page .nav-link__icon,
 .client-dashboard-page .sidebar-logout__icon {
     width: 1.75rem;

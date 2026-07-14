@@ -37,7 +37,7 @@ function emarioh_render_client_notification_items(array $notifications, callable
         $eventLabel = (string) ($notification['eventLabel'] ?? 'Booking');
 
         $items[] = '
-            <article class="client-notification-item client-notification-item--' . $escape($statusClass) . ($isUnread ? ' is-unread' : ' is-read') . '" role="button" tabindex="0" data-notification-item data-notification-open data-read-status="' . $escape($readStatus) . '" data-notification-id="' . $escape((string) ($notification['id'] ?? 0)) . '" data-notification-title="' . $escape($title) . '" data-notification-message="' . $escape($message) . '" data-notification-reference="' . $escape($reference) . '" data-notification-time="' . $escape($timeLabel) . '" data-notification-status-label="' . $escape($statusLabel) . '" data-notification-event="' . $escape($eventLabel) . '" aria-label="Open notification: ' . $escape($title) . '">
+            <article class="client-notification-item client-notification-item--' . $escape($statusClass) . ($isUnread ? ' is-unread' : ' is-read') . '" role="group" tabindex="0" data-notification-item data-notification-open data-read-status="' . $escape($readStatus) . '" data-notification-id="' . $escape((string) ($notification['id'] ?? 0)) . '" data-notification-title="' . $escape($title) . '" data-notification-message="' . $escape($message) . '" data-notification-reference="' . $escape($reference) . '" data-notification-time="' . $escape($timeLabel) . '" data-notification-status-label="' . $escape($statusLabel) . '" data-notification-event="' . $escape($eventLabel) . '" aria-label="Open notification: ' . $escape($title) . '">
                 <span class="client-notification-item__icon" aria-hidden="true"><i class="bi ' . $escape($icon) . '"></i></span>
                 <div class="client-notification-item__body">
                     <div class="client-notification-item__head">
@@ -52,6 +52,7 @@ function emarioh_render_client_notification_items(array $notifications, callable
                         <span>' . $escape($statusLabel) . '</span>
                     </div>
                 </div>
+                <button class="notification-delete-button" type="button" data-delete-notification aria-label="Delete notification: ' . $escape($title) . '" title="Delete notification"><i class="bi bi-trash3" aria-hidden="true"></i></button>
             </article>
         ';
     }
@@ -66,10 +67,10 @@ function emarioh_render_client_notification_items(array $notifications, callable
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Client Notifications</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260714f">
     <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20260418d">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418h">
-    <link rel="stylesheet" href="assets/css/pages/client-notifications.css?v=20260419c">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/pages/client-notifications.css?v=20260714e">
 </head>
 <body class="dashboard-page client-dashboard-page client-notifications-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -100,7 +101,7 @@ function emarioh_render_client_notification_items(array $notifications, callable
                             <a class="nav-link" href="client-dashboard.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <a class="nav-link" href="client-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-plus"></i></span><span>Book Event</span></a>
                             <a class="nav-link" href="client-my-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span><span>My Bookings</span></a>
-                            <a class="nav-link active" href="client-notifications.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span></a>
+                            <?= emarioh_render_client_notification_nav_link($db, (int) $currentUser['id'], true) ?>
                             <a class="nav-link" href="client-billing.php"><span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span><span>Billing</span></a>
                             <a class="nav-link" href="client-preferences.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Account Settings</span></a>
                         </nav>
@@ -165,9 +166,25 @@ function emarioh_render_client_notification_items(array $notifications, callable
         </div>
     </div>
 
+    <div class="modal fade" id="notificationDeleteModal" tabindex="-1" aria-labelledby="notificationDeleteModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content client-notification-modal__content">
+                <div class="modal-header client-notification-modal__header">
+                    <h2 class="modal-title client-notification-modal__title" id="notificationDeleteModalTitle">Delete notification?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body client-notification-modal__body"><p>This notification will be removed from your list.</p></div>
+                <div class="modal-footer">
+                    <button class="action-btn action-btn--ghost" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="action-btn btn-danger" type="button" data-confirm-notification-delete>Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js?v=20260419c"></script>
     <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
-    <script src="assets/js/pages/client-notifications.js?v=20260419c"></script>
+    <script src="assets/js/pages/client-notifications.js?v=20260714g"></script>
 </body>
 </html>

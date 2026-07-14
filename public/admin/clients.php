@@ -273,8 +273,9 @@ function emarioh_render_admin_client_rows(array $clients, array $bookingsByUserI
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Clients</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
     <link rel="stylesheet" href="assets/css/pages/admin-clients.css?v=20260418c">
+    <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-clients-page" data-auth-guard="admin">
     <div class="dashboard-shell container-fluid">
@@ -311,9 +312,10 @@ function emarioh_render_admin_client_rows(array $clients, array $bookingsByUserI
 
                         <nav class="dashboard-nav nav flex-column" aria-label="Admin navigation">
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
+                            <?= emarioh_render_admin_notification_nav_link($db) ?>
+                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
                             <a class="nav-link" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
                             <a class="nav-link active" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
-                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Event Schedule</span></a>
                             <a class="nav-link" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
                             <a class="nav-link" href="admin-inquiries.php"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
                             <a class="nav-link" href="admin-settings.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
@@ -342,6 +344,7 @@ function emarioh_render_admin_client_rows(array $clients, array $bookingsByUserI
                             <h1 class="topbar-copy__title">Clients</h1>
                         </div>
                     </div>
+                    <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
 
                 <main class="dashboard-content">

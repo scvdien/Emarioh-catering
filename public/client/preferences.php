@@ -23,7 +23,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
     <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
     <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260418w">
     <link rel="stylesheet" href="assets/css/pages/client-preferences.css?v=20260418m">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418h">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
 </head>
 <body class="dashboard-page admin-settings-page client-dashboard-page client-settings-page" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -59,7 +59,7 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
                             <a class="nav-link" href="client-dashboard.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <a class="nav-link" href="client-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-plus"></i></span><span>Book Event</span></a>
                             <a class="nav-link" href="client-my-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span><span>My Bookings</span></a>
-                            <a class="nav-link" href="client-notifications.php"><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span></a>
+                            <?= emarioh_render_client_notification_nav_link($db, (int) $currentUser['id']) ?>
                             <a class="nav-link" href="client-billing.php"><span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span><span>Billing</span></a>
                             <a class="nav-link active" href="client-preferences.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Account Settings</span></a>
                         </nav>

@@ -59,12 +59,13 @@ $scheduleEvents = array_map(static function (array $booking): array {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emarioh Catering Services Events and Schedule</title>
+    <title>Emarioh Catering Services Booking Calendar</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
-    <link rel="stylesheet" href="assets/css/pages/admin-events.css?v=20260418o">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
+    <link rel="stylesheet" href="assets/css/pages/admin-events.css?v=20260709g">
+    <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
-<body class="admin-dashboard-page admin-events-page" data-schedule-default-filter="approved" data-auth-guard="admin">
+<body class="admin-dashboard-page admin-events-page" data-schedule-default-filter="all" data-auth-guard="admin">
     <div class="dashboard-shell container-fluid">
         <div class="dashboard-frame">
             <aside class="dashboard-sidebar offcanvas-xl offcanvas-start border-0" tabindex="-1" id="dashboardSidebar" aria-labelledby="dashboardSidebarLabel">
@@ -99,9 +100,10 @@ $scheduleEvents = array_map(static function (array $booking): array {
 
                         <nav class="dashboard-nav nav flex-column" aria-label="Admin navigation">
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
+                            <?= emarioh_render_admin_notification_nav_link($db) ?>
+                            <a class="nav-link active" href="admin-events.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
                             <a class="nav-link" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
                             <a class="nav-link" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
-                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Event Schedule</span></a>
                             <a class="nav-link" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
                             <a class="nav-link" href="admin-inquiries.php"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
                             <a class="nav-link" href="admin-settings.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
@@ -127,43 +129,66 @@ $scheduleEvents = array_map(static function (array $booking): array {
                         </button>
 
                         <div class="topbar-copy">
-                            <h1 class="topbar-copy__title">Event Schedule</h1>
+                            <h1 class="topbar-copy__title">Booking Calendar</h1>
+                            <p class="schedule-calendar-summary" id="dashboardCalendarHint">No bookings listed for <?= $escape(date('F Y')) ?></p>
                         </div>
-                        <p class="schedule-table-summary schedule-topbar-summary" id="scheduleTopbarSummary" hidden>0 upcoming events</p>
                     </div>
+                    <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
 
                 <main class="dashboard-content">
                     <section class="dashboard-primary">
-                        <section class="surface-card surface-card--schedule-table">
-                            <div class="panel-heading panel-heading--compact">
-                                <h2>Upcoming Booked Events</h2>
-                                <p class="schedule-table-summary" id="scheduleTableSummary">0 upcoming events</p>
+                        <section class="surface-card surface-card--schedule booking-calendar-card">
+                            <div class="schedule-toolbar" aria-label="Booking calendar controls">
+                                <div class="booking-filters schedule-filters" aria-label="Schedule status filters">
+                                    <button class="booking-filter-chip is-active" type="button" data-schedule-filter="all" aria-pressed="true">All</button>
+                                    <button class="booking-filter-chip" type="button" data-schedule-filter="pending" aria-pressed="false">Pending</button>
+                                    <button class="booking-filter-chip" type="button" data-schedule-filter="approved" aria-pressed="false">Booked</button>
+                                </div>
+                                <div class="schedule-toolbar__actions">
+                                    <div class="schedule-month-nav" aria-label="Schedule month controls">
+                                        <button class="schedule-icon-button" id="scheduleMonthPrev" type="button" aria-label="View previous month">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+                                        <div class="schedule-month-nav__copy">
+                                            <strong id="scheduleMonthLabel"><?= $escape(date('F Y')) ?></strong>
+                                        </div>
+                                        <button class="schedule-icon-button" id="scheduleMonthNext" type="button" aria-label="View next month">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="schedule-workspace">
+                            <div class="booking-calendar-layout">
+                                <section class="schedule-calendar-panel" aria-label="Booking month view">
+                                    <div class="schedule-calendar-panel__header">
+                                        <div>
+                                            <h3>Month View</h3>
+                                        </div>
+                                    </div>
 
-                                <div class="table-responsive dashboard-table-wrap schedule-desktop-table">
-                                    <table class="admin-table admin-table--events">
-                                        <thead>
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Client</th>
-                                                <th>Event</th>
-                                                <th>Venue</th>
-                                                <th>Status</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="scheduleEventTableBody"></tbody>
-                                    </table>
-                                </div>
+                                    <div class="event-legend" aria-label="Calendar legend">
+                                        <span class="event-legend__item"><span class="event-legend__dot event-legend__dot--approved"></span>Booked</span>
+                                        <span class="event-legend__item"><span class="event-legend__dot event-legend__dot--pending"></span>Pending</span>
+                                    </div>
 
-                                <div class="schedule-agenda-list" id="scheduleAgendaList"></div>
-                                <div class="schedule-empty-state" id="scheduleEmptyState" hidden>
-                                    <h4>No upcoming events</h4>
-                                    <p>Approved bookings will appear here once they are confirmed.</p>
-                                </div>
+                                    <div class="event-calendar-scroll">
+                                        <div class="event-calendar">
+                                            <div class="event-calendar__weekdays" aria-hidden="true">
+                                                <span class="event-calendar__weekday">Sun</span>
+                                                <span class="event-calendar__weekday">Mon</span>
+                                                <span class="event-calendar__weekday">Tue</span>
+                                                <span class="event-calendar__weekday">Wed</span>
+                                                <span class="event-calendar__weekday">Thu</span>
+                                                <span class="event-calendar__weekday">Fri</span>
+                                                <span class="event-calendar__weekday">Sat</span>
+                                            </div>
+                                            <div class="event-calendar__days" id="eventCalendarDays" aria-live="polite"></div>
+                                        </div>
+                                    </div>
+                                </section>
+
                             </div>
                         </section>
                     </section>
@@ -201,7 +226,7 @@ $scheduleEvents = array_map(static function (array $booking): array {
         window.EMARIOH_SCHEDULE_EVENTS = <?= json_encode($scheduleEvents, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
     </script>
     <script src="assets/js/pages/index.js?v=20260417c"></script>
-    <script src="assets/js/pages/admin-events.js?v=20260418d"></script>
+    <script src="assets/js/pages/admin-events.js?v=20260709b"></script>
 </body>
 </html>
 

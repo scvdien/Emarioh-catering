@@ -99,7 +99,7 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
     <title>Emarioh Catering Services Client My Bookings</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/pages/client-bookings.css?v=20260418u">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260418h">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
 </head>
 <body class="dashboard-page client-dashboard-page client-my-bookings-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -130,7 +130,7 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
                             <a class="nav-link" href="client-dashboard.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <a class="nav-link" href="client-bookings.php"><span class="nav-link__icon"><i class="bi bi-calendar2-plus"></i></span><span>Book Event</span></a>
                             <a class="nav-link active" href="client-my-bookings.php" aria-current="page"><span class="nav-link__icon"><i class="bi bi-calendar2-check"></i></span><span>My Bookings</span></a>
-                            <a class="nav-link" href="client-notifications.php"><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span></a>
+                            <?= emarioh_render_client_notification_nav_link($db, (int) $currentUser['id']) ?>
                             <a class="nav-link" href="client-billing.php"><span class="nav-link__icon"><i class="bi bi-receipt-cutoff"></i></span><span>Billing</span></a>
                             <a class="nav-link" href="client-preferences.php"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Account Settings</span></a>
                         </nav>

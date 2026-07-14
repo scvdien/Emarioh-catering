@@ -1491,6 +1491,11 @@ function renderBillingReceiptState(state, billingMeta, isApproved) {
         : parseCurrencyAmount(billingDetails.pendingBalance || billingMeta.pendingBalance);
     const isFullyPaid = billingDetails.statusPillClass === "approved" && pendingBalanceValue <= 0;
     const hasReceipt = Boolean(billingMeta.receiptHref);
+    const paymentProviderText = String(billingMeta.paymentProvider || billingDetails.paymentProvider || billingDetails.paymentMethod || "").toLowerCase();
+    const isManualPayment = paymentProviderText.includes("manual")
+        || paymentProviderText.includes("cash")
+        || paymentProviderText.includes("gcash")
+        || paymentProviderText.includes("bank transfer");
 
     if (!receiptSection) {
         return;
@@ -1503,11 +1508,15 @@ function renderBillingReceiptState(state, billingMeta, isApproved) {
     }
 
     if (receiptIntroText) {
-        receiptIntroText.textContent = "PayMongo already confirmed your payment. Your system receipt is ready to open, download, print, or screenshot.";
+        receiptIntroText.textContent = isManualPayment
+            ? "Admin recorded your manual payment. Your system receipt is ready to open, download, print, or screenshot."
+            : "PayMongo already confirmed your payment. Your system receipt is ready to open, download, print, or screenshot.";
     }
 
     if (receiptFeedback) {
-        receiptFeedback.textContent = "Payment posted successfully. The PayMongo checkout step is complete and your receipt is now available.";
+        receiptFeedback.textContent = isManualPayment
+            ? "Payment posted successfully. Your manual payment was recorded and your receipt is now available."
+            : "Payment posted successfully. The PayMongo checkout step is complete and your receipt is now available.";
     }
 
     if (receiptViewLink) {
@@ -1515,7 +1524,15 @@ function renderBillingReceiptState(state, billingMeta, isApproved) {
     }
 
     if (receiptDownloadLink) {
-        receiptDownloadLink.setAttribute("href", billingMeta.receiptDownloadHref || billingMeta.receiptHref);
+        let downloadHref = (billingMeta.receiptDownloadHref || billingMeta.receiptHref || "")
+            .replace(/([?&])print=1\b/, "$1download=1");
+
+        if (downloadHref && !/[?&]download=1\b/.test(downloadHref)) {
+            downloadHref += `${downloadHref.includes("?") ? "&" : "?"}download=1`;
+        }
+
+        receiptDownloadLink.setAttribute("href", downloadHref);
+        receiptDownloadLink.setAttribute("download", "");
     }
 
     if (receiptStatusValue) {

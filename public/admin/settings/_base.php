@@ -697,7 +697,7 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                             'placement_label' => $galleryCategoryOptions[$galleryForm['category']] ?? 'Gallery',
                         ]);
 
-                        emarioh_redirect($settingsSectionUrl('manage-public-page'));
+                        emarioh_redirect($settingsSectionUrl('manage-public-page', ['focus' => 'gallery']));
                     } catch (Throwable $throwable) {
                         if (isset($nextGalleryImageAbsolute) && is_file($nextGalleryImageAbsolute)) {
                             @unlink($nextGalleryImageAbsolute);
@@ -742,7 +742,7 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                     }
                 }
 
-                emarioh_redirect($settingsSectionUrl('manage-public-page'));
+                emarioh_redirect($settingsSectionUrl('manage-public-page', ['focus' => 'gallery']));
             }
         } catch (Throwable $throwable) {
             $galleryNoticeMessage = 'Gallery image could not be deleted right now. Please try again.';
@@ -841,9 +841,10 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services <?= $escape($settingsPageTitle) ?></title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260418o">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260706e">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260714o">
+    <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-settings-page<?= $settingsPageIsDetail ? ' admin-settings-detail-page' : '' ?>" data-auth-guard="admin" data-mobile-settings-view="<?= $settingsPageIsDetail ? 'detail' : 'hub' ?>"<?= $settingsPageIsDetail ? ' data-active-settings-section="' . $escape($settingsPageSection) . '"' : '' ?>>
     <div class="dashboard-shell container-fluid">
@@ -880,9 +881,10 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
 
                         <nav class="dashboard-nav nav flex-column" aria-label="Admin navigation">
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
+                            <?= emarioh_render_admin_notification_nav_link($db) ?>
+                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
                             <a class="nav-link" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
                             <a class="nav-link" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
-                            <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Event Schedule</span></a>
                             <a class="nav-link" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
                             <a class="nav-link" href="admin-inquiries.php"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
                             <a class="nav-link active" href="<?= $escape($settingsNavHref) ?>" aria-current="page"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
@@ -910,12 +912,13 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                         <div class="topbar-copy">
                             <p class="settings-mobile-topbar__eyebrow d-xl-none"><?= $escape($settingsPageEyebrow) ?></p>
                             <h1 class="topbar-copy__title">
-                                <span class="d-none d-xl-inline"><?= $escape($settingsPageTitle) ?></span>
-                                <span class="d-xl-none"><?= $escape($settingsPageTitle) ?></span>
+                                <span class="settings-desktop-title">Settings</span>
+                                <span class="settings-mobile-title"><?= $escape($settingsPageTitle) ?></span>
                             </h1>
                             <p class="settings-mobile-topbar__text d-xl-none"><?= $escape($settingsPageDescription) ?></p>
                         </div>
                     </div>
+                    <?= emarioh_render_admin_mobile_notification_button($db) ?>
 </header>
 
                 <main class="dashboard-content settings-dashboard-content">
@@ -964,6 +967,16 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                 <span class="settings-profile-shortcut__copy">
                     <strong>SMS Templates</strong>
                     <span>Review message templates and placeholders.</span>
+                </span>
+            </span>
+            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+        </a>
+        <a class="settings-profile-shortcut" href="admin-inquiries.php">
+            <span class="settings-profile-shortcut__content">
+                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-envelope-paper"></i></span>
+                <span class="settings-profile-shortcut__copy">
+                    <strong>Website Inquiries</strong>
+                    <span>Review customer messages from the public page.</span>
                 </span>
             </span>
             <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
@@ -1110,30 +1123,16 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
             </div>
         </section>
         <section class="settings-section" id="manage-public-page" data-settings-section="manage-public-page"<?= $settingsSectionHiddenAttr('manage-public-page') ?>>
-            <div class="settings-section__intro">
-                <div>
-                    <h2>Manage Public Page</h2>
-                </div>
-            </div>
-
             <div class="settings-manage-page">
-                <article class="settings-block settings-block--public-page-note">
-                    <div class="settings-block__heading">
-                        <h3>Manage Public Page</h3>
-                        <p>Only the hero image, the three service cards with images, the gallery, and the contact details are managed here. The public-facing layout and package section stay unchanged.</p>
-                    </div>
-                </article>
-
                 <article class="settings-block">
                     <form method="post" enctype="multipart/form-data" id="heroImageForm">
                         <input type="hidden" name="settings_action" value="save_hero_image">
 
                         <div class="settings-block__heading settings-block__heading--split">
                             <div>
-                                <h3>Hero Image</h3>
-                                <p>Update the main visual shown in the hero section without changing the current public-page layout.</p>
+                                <h3>Homepage Hero Image</h3>
+                                <p>Change the large image shown at the top of the public homepage.</p>
                             </div>
-                            <button class="action-btn action-btn--primary" type="button" id="heroImageSaveButton" data-bs-toggle="modal" data-bs-target="#heroImageConfirmModal"><i class="bi bi-image"></i><span>Save Hero Image</span></button>
                         </div>
 
                         <?php if ($heroNoticeMessage !== ''): ?>
@@ -1142,23 +1141,39 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                             </div>
                         <?php endif; ?>
 
-                        <div class="settings-field-grid settings-field-grid--public-assets">
-                                <label class="settings-field">
-                                    <span class="settings-field__label">Current Image</span>
-                                    <input class="settings-input" type="text" value="<?= $escape($heroImageFileName) ?>" readonly>
-                                    <span class="settings-field__hint">
-                                        <?php if ($hasHeroImage): ?>
-                                            Current live file: <a href="<?= $escape($heroImageUrl) ?>" target="_blank" rel="noopener"><?= $escape($heroImageFileName) ?></a>
-                                        <?php else: ?>
-                                            No live hero image uploaded yet.
-                                        <?php endif; ?>
+                        <div class="hero-image-editor">
+                            <section class="hero-image-editor__panel" aria-labelledby="currentHeroImageLabel">
+                                <span class="settings-field__label" id="currentHeroImageLabel">Current homepage image</span>
+                                <div class="hero-image-preview">
+                                    <?php if ($hasHeroImage): ?>
+                                        <img src="<?= $escape($heroImageUrl) ?>" alt="Current homepage hero image">
+                                    <?php else: ?>
+                                        <span class="hero-image-preview__empty"><i class="bi bi-image" aria-hidden="true"></i>No image uploaded</span>
+                                    <?php endif; ?>
+                                </div>
+                                <span class="hero-image-editor__filename"><?= $escape($heroImageFileName) ?></span>
+                            </section>
+
+                            <section class="hero-image-editor__panel" aria-labelledby="newHeroImageLabel">
+                                <span class="settings-field__label" id="newHeroImageLabel">Select a new image</span>
+                                <label class="hero-image-picker" for="heroImageInput">
+                                    <span class="hero-image-picker__prompt">
+                                        <i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>
+                                        <strong>Choose image</strong>
+                                        <span>JPG, PNG, WEBP or GIF · Maximum 5 MB</span>
+                                    </span>
+                                    <span class="hero-image-new-preview" id="heroImageNewPreview" hidden>
+                                        <img id="heroImageNewPreviewImage" src="" alt="Selected new hero image preview">
                                     </span>
                                 </label>
-                            <label class="settings-field">
-                                <span class="settings-field__label">Choose Image</span>
-                                <input class="settings-input" id="heroImageInput" type="file" name="hero_image" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
-                                <span class="settings-field__hint">Accepted formats: JPG, PNG, WEBP, GIF. Maximum file size: 5 MB.</span>
-                            </label>
+                                <input class="visually-hidden" id="heroImageInput" type="file" name="hero_image" accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" required>
+                                <span class="hero-image-editor__filename" id="heroImageSelectedFile">No new image selected</span>
+                            </section>
+                        </div>
+
+                        <div class="hero-image-editor__actions">
+                            <button class="action-btn action-btn--ghost" type="button" id="heroImageCancelButton" disabled><span>Cancel selection</span></button>
+                            <button class="action-btn action-btn--primary" type="button" id="heroImageSaveButton" data-bs-toggle="modal" data-bs-target="#heroImageConfirmModal" disabled><i class="bi bi-check2-circle"></i><span>Save changes</span></button>
                         </div>
                     </form>
                 </article>
@@ -1169,10 +1184,9 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
 
                         <div class="settings-block__heading settings-block__heading--split">
                             <div>
-                                <h3>Services With Images</h3>
-                                <p>Edit only the three service cards currently displayed on the public page.</p>
+                                <h3>Homepage Services</h3>
+                                <p>Edit the title, description, or image for each service shown on the homepage.</p>
                             </div>
-                            <button class="action-btn action-btn--primary" type="button" id="serviceCardsSaveButton"><i class="bi bi-stars"></i><span>Save Services</span></button>
                         </div>
 
                         <?php if ($servicesNoticeMessage !== ''): ?>
@@ -1191,9 +1205,19 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                 <article class="public-service-editor" data-service-card-editor>
                                     <h4 class="public-service-editor__title"><?= $escape($serviceLabel) ?></h4>
 
-                                    <div class="settings-field-grid">
+                                    <div class="public-service-editor__preview">
+                                        <?php if ($serviceImageMeta['has_asset']): ?>
+                                            <img src="<?= $escape((string) $serviceImageMeta['url']) ?>" data-current-src="<?= $escape((string) $serviceImageMeta['url']) ?>" alt="Current image for <?= $escape($serviceLabel) ?>" data-service-image-preview>
+                                        <?php else: ?>
+                                            <span class="public-service-editor__preview-empty" data-service-image-empty><i class="bi bi-image" aria-hidden="true"></i>No image uploaded</span>
+                                            <img src="" data-current-src="" alt="New image preview for <?= $escape($serviceLabel) ?>" data-service-image-preview hidden>
+                                        <?php endif; ?>
+                                    </div>
+                                    <span class="public-service-editor__file-name" data-service-file-name><?= $escape((string) $serviceImageMeta['file_name']) ?></span>
+
+                                    <div class="settings-field-grid public-service-editor__fields">
                                         <label class="settings-field">
-                                            <span class="settings-field__label">Title</span>
+                                            <span class="settings-field__label">Service title</span>
                                             <input
                                                 class="settings-input"
                                                 type="text"
@@ -1203,27 +1227,30 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                                 required
                                             >
                                         </label>
-                                        <label class="settings-field">
-                                            <span class="settings-field__label">Current Image</span>
-                                            <input class="settings-input" type="text" value="<?= $escape($serviceImageMeta['file_name']) ?>" readonly>
-                                        </label>
-                                        <label class="settings-field settings-field--full">
-                                            <span class="settings-field__label">Choose Image</span>
-                                            <input
-                                                class="settings-input"
-                                                type="file"
-                                                name="service_images[<?= $escape($slotKey) ?>]"
-                                                accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
-                                            >
-                                            <span class="settings-field__hint">Accepted formats: JPG, PNG, WEBP, GIF. Maximum file size: 5 MB.</span>
-                                        </label>
                                         <label class="settings-field settings-field--full">
                                             <span class="settings-field__label">Description</span>
                                             <textarea class="settings-textarea" name="service_cards[<?= $escape($slotKey) ?>][description]" required><?= $escape((string) ($serviceCard['description'] ?? '')) ?></textarea>
                                         </label>
+                                        <label class="settings-field settings-field--full public-service-image-picker">
+                                            <span class="settings-field__label">Replace image <small>(optional)</small></span>
+                                            <span class="public-service-image-picker__button"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>Choose a new image</span>
+                                            <input
+                                                class="visually-hidden"
+                                                type="file"
+                                                name="service_images[<?= $escape($slotKey) ?>]"
+                                                accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
+                                                data-service-image-input
+                                            >
+                                            <span class="settings-field__hint">JPG, PNG, WEBP or GIF · Maximum 5 MB</span>
+                                        </label>
                                     </div>
                                 </article>
                             <?php endforeach; ?>
+                        </div>
+
+                        <div class="service-editor-actions">
+                            <button class="action-btn action-btn--ghost" type="button" id="serviceCardsCancelButton" disabled>Cancel changes</button>
+                            <button class="action-btn action-btn--primary" type="button" id="serviceCardsSaveButton" disabled><i class="bi bi-check2-circle"></i><span>Save changes</span></button>
                         </div>
                     </form>
                 </article>
@@ -1235,10 +1262,9 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
 
                             <div class="settings-block__heading settings-block__heading--split">
                                 <div>
-                                    <h3>Gallery</h3>
-                                    <p>Add new gallery images here, then delete an existing one below when needed.</p>
+                                    <h3>Homepage Gallery</h3>
+                                    <p>Upload a new photo, then manage the existing gallery images below.</p>
                                 </div>
-                                <button class="action-btn action-btn--primary" type="button" id="gallerySaveButton"><i class="bi bi-images"></i><span>Add To Gallery</span></button>
                             </div>
 
                             <?php if ($galleryNoticeMessage !== ''): ?>
@@ -1247,21 +1273,31 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                 </div>
                             <?php endif; ?>
 
-                            <div class="settings-field-grid">
-                                <label class="settings-field settings-field--full">
-                                    <span class="settings-field__label">Choose New Image</span>
+                            <div class="gallery-upload-editor">
+                                <section class="gallery-upload-editor__preview-panel">
+                                    <span class="settings-field__label">New image preview</span>
+                                    <div class="gallery-upload-preview" id="galleryUploadPreview">
+                                        <span id="galleryUploadPreviewEmpty"><i class="bi bi-images" aria-hidden="true"></i>Select an image to preview it here</span>
+                                        <img id="galleryUploadPreviewImage" src="" alt="Selected gallery image preview" hidden>
+                                    </div>
+                                    <span class="gallery-upload-editor__filename" id="gallerySelectedFileName">No image selected</span>
+                                </section>
+                                <div class="settings-field-grid gallery-upload-editor__fields">
+                                <label class="settings-field settings-field--full gallery-image-picker">
+                                    <span class="settings-field__label">1. Select an image</span>
+                                    <span class="gallery-image-picker__button"><i class="bi bi-cloud-arrow-up" aria-hidden="true"></i>Choose gallery image</span>
                                     <input
-                                        class="settings-input"
+                                        class="visually-hidden"
                                         id="galleryImageInput"
                                         type="file"
                                         name="gallery_image"
                                         accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif"
                                         required
                                     >
-                                    <span class="settings-field__hint">Accepted formats: JPG, PNG, WEBP, GIF. Maximum file size: 5 MB.</span>
+                                    <span class="settings-field__hint">JPG, PNG, WEBP or GIF · Maximum 5 MB</span>
                                 </label>
                                 <label class="settings-field">
-                                    <span class="settings-field__label">Category</span>
+                                    <span class="settings-field__label">2. Choose category</span>
                                     <select class="settings-select" id="galleryCategoryFilter" name="gallery_category">
                                         <?php foreach ($galleryCategoryOptions as $galleryCategoryValue => $galleryCategoryLabel): ?>
                                             <option value="<?= $escape($galleryCategoryValue) ?>"<?= $galleryForm['category'] === $galleryCategoryValue ? ' selected' : '' ?>><?= $escape($galleryCategoryLabel) ?></option>
@@ -1269,7 +1305,7 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                     </select>
                                 </label>
                                 <label class="settings-field">
-                                    <span class="settings-field__label">Caption</span>
+                                    <span class="settings-field__label">3. Add a caption <small>(optional)</small></span>
                                     <input
                                         class="settings-input"
                                         id="galleryCaptionInput"
@@ -1277,9 +1313,14 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                         name="gallery_caption"
                                         value="<?= $escape((string) ($galleryForm['caption'] ?? '')) ?>"
                                         maxlength="150"
-                                        placeholder="Enter image caption"
+                                        placeholder="Example: Elegant wedding setup"
                                     >
                                 </label>
+                                </div>
+                            </div>
+                            <div class="gallery-upload-actions">
+                                <button class="action-btn action-btn--ghost" type="button" id="galleryCancelButton" disabled>Cancel selection</button>
+                                <button class="action-btn action-btn--primary" type="button" id="gallerySaveButton" disabled><i class="bi bi-plus-circle"></i><span>Add to gallery</span></button>
                             </div>
                         </form>
 
@@ -1290,14 +1331,23 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
 
                         <div class="public-gallery-list" id="galleryManagerList">
                             <?php foreach ($galleryItems as $galleryItem): ?>
+                                <?php $galleryItemUrl = emarioh_public_asset_url((string) ($galleryItem['image_path'] ?? '')); ?>
                                 <article
                                     class="public-gallery-card"
                                     data-gallery-manager-category="<?= $escape((string) ($galleryItem['category'] ?? '')) ?>"
                                     data-gallery-item-id="<?= (int) ($galleryItem['id'] ?? 0) ?>"
+                                    data-gallery-file-name="<?= $escape((string) ($galleryItem['file_name'] ?? 'Uploaded image')) ?>"
                                 >
+                                    <div class="public-gallery-card__image">
+                                        <?php if ($galleryItemUrl !== ''): ?>
+                                            <img src="<?= $escape($galleryItemUrl) ?>" alt="<?= $escape((string) ($galleryItem['image_alt'] ?? 'Gallery image')) ?>">
+                                        <?php else: ?>
+                                            <span><i class="bi bi-image" aria-hidden="true"></i></span>
+                                        <?php endif; ?>
+                                    </div>
                                     <div class="public-gallery-card__meta">
                                         <strong><?= $escape((string) ($galleryItem['title'] ?? 'Gallery image')) ?></strong>
-                                        <span><?= $escape((string) ($galleryItem['file_name'] ?? 'Uploaded image')) ?></span>
+                                        <span><?= $escape((string) ($galleryItem['category_label'] ?? 'Gallery')) ?></span>
                                     </div>
                                     <div class="public-gallery-card__controls">
                                         <div class="public-gallery-card__actions">
@@ -1319,10 +1369,9 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
 
                             <div class="settings-block__heading settings-block__heading--split">
                                 <div>
-                                    <h3>Contacts</h3>
-                                    <p>Keep only the contact details that appear on the public page updated.</p>
+                                    <h3>Homepage Contact Information</h3>
+                                    <p>These details are displayed publicly so customers can contact the business.</p>
                                 </div>
-                                <button class="action-btn action-btn--primary" type="button" id="contactDetailsSaveButton"><i class="bi bi-telephone"></i><span>Save Contacts</span></button>
                             </div>
 
                             <?php if ($contactsNoticeMessage !== ''): ?>
@@ -1332,8 +1381,8 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                             <?php endif; ?>
 
                             <div class="settings-field-grid settings-field-grid--contacts">
-                                <label class="settings-field">
-                                    <span class="settings-field__label">Service Area</span>
+                                <label class="settings-field contact-field-card">
+                                    <span class="contact-field-card__heading"><i class="bi bi-geo-alt" aria-hidden="true"></i><span class="settings-field__label">Service area</span></span>
                                     <input
                                         class="settings-input"
                                         id="contactServiceAreaInput"
@@ -1344,9 +1393,10 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                         maxlength="255"
                                         required
                                     >
+                                    <span class="settings-field__hint">The location or areas where catering services are available.</span>
                                 </label>
-                                <label class="settings-field">
-                                    <span class="settings-field__label">Public Email</span>
+                                <label class="settings-field contact-field-card">
+                                    <span class="contact-field-card__heading"><i class="bi bi-envelope" aria-hidden="true"></i><span class="settings-field__label">Public email</span></span>
                                     <input
                                         class="settings-input"
                                         id="contactPublicEmailInput"
@@ -1357,9 +1407,10 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                         maxlength="190"
                                         required
                                     >
+                                    <span class="settings-field__hint">Displayed publicly. Form messages go to Website Inquiries.</span>
                                 </label>
-                                <label class="settings-field">
-                                    <span class="settings-field__label">Mobile Number</span>
+                                <label class="settings-field contact-field-card">
+                                    <span class="contact-field-card__heading"><i class="bi bi-phone" aria-hidden="true"></i><span class="settings-field__label">Mobile number</span></span>
                                     <input
                                         class="settings-input"
                                         id="contactPrimaryMobileInput"
@@ -1370,9 +1421,10 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                         maxlength="20"
                                         required
                                     >
+                                    <span class="settings-field__hint">Public contact number shown to customers.</span>
                                 </label>
-                                <label class="settings-field">
-                                    <span class="settings-field__label">Business Hours</span>
+                                <label class="settings-field contact-field-card">
+                                    <span class="contact-field-card__heading"><i class="bi bi-clock" aria-hidden="true"></i><span class="settings-field__label">Business hours</span></span>
                                     <input
                                         class="settings-input"
                                         id="contactBusinessHoursInput"
@@ -1383,7 +1435,12 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                                         maxlength="190"
                                         required
                                     >
+                                    <span class="settings-field__hint">Example: Monday–Saturday, 9:00 AM–6:00 PM.</span>
                                 </label>
+                            </div>
+                            <div class="contact-editor-actions">
+                                <button class="action-btn action-btn--ghost" type="button" id="contactDetailsCancelButton" disabled>Cancel changes</button>
+                                <button class="action-btn action-btn--primary" type="button" id="contactDetailsSaveButton" disabled><i class="bi bi-check2-circle"></i><span>Save changes</span></button>
                             </div>
                         </form>
                     </article>
@@ -1763,8 +1820,8 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
             <article class="settings-block settings-block--package-down-payments">
                 <div class="settings-block__heading settings-block__heading--split">
                     <div>
-                        <h3>Service Down Payment Rules</h3>
-                        <p>Turn on or off per service, then enter the amount.</p>
+                        <h3>Package Down Payment Settings</h3>
+                        <p>Set the percentage collected first from each package’s actual booking total.</p>
                     </div>
                     <div class="package-down-payment-actions">
                         <p class="package-down-payment-feedback package-down-payment-feedback--inline" id="packageDownPaymentFeedback" aria-live="polite"></p>
@@ -2103,9 +2160,22 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
         <script>
             window.location.hash = "#sms-templates";
         </script>
-    <?php elseif ($heroNoticeMessage !== '' || $servicesNoticeMessage !== '' || $galleryNoticeMessage !== '' || $contactsNoticeMessage !== ''): ?>
+    <?php elseif ($galleryNoticeMessage !== ''): ?>
+        <script>
+            window.location.hash = "#galleryUploadForm";
+        </script>
+    <?php elseif ($heroNoticeMessage !== '' || $servicesNoticeMessage !== '' || $contactsNoticeMessage !== ''): ?>
         <script>
             window.location.hash = "#manage-public-page";
+        </script>
+    <?php endif; ?>
+    <?php if ((string) ($_GET['focus'] ?? '') === 'gallery'): ?>
+        <script>
+            window.addEventListener("load", function () {
+                window.requestAnimationFrame(function () {
+                    document.getElementById("galleryUploadForm")?.scrollIntoView({ block: "start" });
+                });
+            });
         </script>
     <?php endif; ?>
     <script>
@@ -2117,6 +2187,6 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/pages/index.js?v=20260417c"></script>
     <script src="assets/js/pages/admin-packages.js"></script>
-    <script src="assets/js/pages/admin-settings.js?v=20260418h"></script>
+    <script src="assets/js/pages/admin-settings.js?v=20260714i"></script>
 </body>
 </html>

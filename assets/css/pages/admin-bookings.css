@@ -153,6 +153,12 @@
 }
 
 @media (max-width: 767.98px) {
+    .admin-bookings-page .booking-action-modal__dialog {
+        width: calc(100% - 1.5rem);
+        margin-right: auto;
+        margin-left: auto;
+    }
+
     .admin-bookings-page .dashboard-main {
         min-height: 100dvh;
     }

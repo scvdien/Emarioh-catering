@@ -1188,6 +1188,7 @@ CREATE TABLE IF NOT EXISTS client_notification_reads (
     user_id INT UNSIGNED NOT NULL,
     booking_status_log_id BIGINT UNSIGNED NOT NULL,
     read_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
     UNIQUE KEY uq_client_notification_read (user_id, booking_status_log_id),
     KEY idx_client_notification_reads_user (user_id, read_at),
     CONSTRAINT fk_client_notification_reads_user
@@ -1196,6 +1197,27 @@ CREATE TABLE IF NOT EXISTS client_notification_reads (
     CONSTRAINT fk_client_notification_reads_log
         FOREIGN KEY (booking_status_log_id) REFERENCES booking_status_logs(id)
         ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+SQL,
+        <<<'SQL'
+CREATE TABLE IF NOT EXISTS admin_notifications (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    notification_type VARCHAR(100) NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    message VARCHAR(500) NULL,
+    link_href VARCHAR(190) NULL,
+    related_booking_id BIGINT UNSIGNED NULL,
+    related_reference VARCHAR(80) NULL,
+    status ENUM('unread', 'read', 'archived') NOT NULL DEFAULT 'unread',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    read_at DATETIME NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_admin_notifications_status (status, created_at),
+    KEY idx_admin_notifications_booking (related_booking_id),
+    KEY idx_admin_notifications_reference (notification_type, related_reference),
+    CONSTRAINT fk_admin_notifications_booking
+        FOREIGN KEY (related_booking_id) REFERENCES booking_requests(id)
+        ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 SQL,
         <<<'SQL'
@@ -1625,21 +1647,21 @@ function emarioh_admin_mobile_nav_items(): array
             ],
         ],
         [
+            'href' => 'admin-events.php',
+            'icon' => 'bi-calendar-event',
+            'label' => 'Calendar',
+            'active_paths' => [
+                'admin-events.php',
+                'events.php',
+            ],
+        ],
+        [
             'href' => 'admin-bookings.php',
             'icon' => 'bi-journal-check',
             'label' => 'Bookings',
             'active_paths' => [
                 'admin-bookings.php',
                 'bookings.php',
-            ],
-        ],
-        [
-            'href' => 'admin-events.php',
-            'icon' => 'bi-calendar-event',
-            'label' => 'Events',
-            'active_paths' => [
-                'admin-events.php',
-                'events.php',
             ],
         ],
         [
@@ -1784,6 +1806,36 @@ function emarioh_render_admin_mobile_nav(string $currentPath): string
     $markup .= '</nav>';
 
     return $markup;
+}
+
+function emarioh_render_admin_notification_nav_link(PDO $db, bool $isActive = false): string
+{
+    $unreadCount = emarioh_count_unread_admin_notifications($db);
+    $badge = $unreadCount > 0
+        ? '<span class="admin-nav-badge" aria-label="' . htmlspecialchars((string) $unreadCount, ENT_QUOTES, 'UTF-8') . ' unread notifications">' . htmlspecialchars((string) min($unreadCount, 99), ENT_QUOTES, 'UTF-8') . '</span>'
+        : '';
+
+    return '<a class="nav-link admin-notification-nav-link' . ($isActive ? ' active' : '') . '" href="admin-notifications.php"' . ($isActive ? ' aria-current="page"' : '') . '><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span>' . $badge . '</a>';
+}
+
+function emarioh_render_admin_mobile_notification_button(PDO $db, bool $isActive = false): string
+{
+    $unreadCount = emarioh_count_unread_admin_notifications($db);
+    $badge = $unreadCount > 0
+        ? '<span class="admin-mobile-notification-badge" aria-label="' . htmlspecialchars((string) $unreadCount, ENT_QUOTES, 'UTF-8') . ' unread notifications">' . htmlspecialchars((string) min($unreadCount, 99), ENT_QUOTES, 'UTF-8') . '</span>'
+        : '';
+
+    return '<a class="admin-mobile-notification-button d-xl-none' . ($isActive ? ' is-active' : '') . '" href="admin-notifications.php" aria-label="Open notifications"' . ($isActive ? ' aria-current="page"' : '') . '><i class="bi bi-bell-fill" aria-hidden="true"></i>' . $badge . '</a>';
+}
+
+function emarioh_render_client_notification_nav_link(PDO $db, int $userId, bool $isActive = false): string
+{
+    $unreadCount = emarioh_count_unread_client_notifications($db, $userId);
+    $badge = $unreadCount > 0
+        ? '<span class="client-nav-badge" data-client-notification-badge aria-label="' . htmlspecialchars((string) $unreadCount, ENT_QUOTES, 'UTF-8') . ' unread notifications">' . htmlspecialchars((string) min($unreadCount, 99), ENT_QUOTES, 'UTF-8') . '</span>'
+        : '';
+
+    return '<a class="nav-link client-notification-nav-link' . ($isActive ? ' active' : '') . '" href="client-notifications.php"' . ($isActive ? ' aria-current="page"' : '') . '><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span>' . $badge . '</a>';
 }
 
 function emarioh_render_client_mobile_nav(string $currentPath): string
@@ -4223,6 +4275,16 @@ function emarioh_booking_filter_key(string $status): string
     };
 }
 
+function emarioh_booking_reserved_statuses(): array
+{
+    return ['pending_review', 'approved', 'completed'];
+}
+
+function emarioh_booking_confirmed_statuses(): array
+{
+    return ['approved', 'completed'];
+}
+
 function emarioh_booking_venue_option_label(string $venueOption): string
 {
     return $venueOption === 'emarioh' ? 'Emarioh Venue' : 'Client Venue';
@@ -4715,10 +4777,15 @@ function emarioh_resolve_booking_down_payment_amount_label(array $booking, ?arra
 
 function emarioh_resolve_booking_down_payment_amount_value(array $booking, ?array $package = null): float
 {
-    $downPaymentAmount = emarioh_resolve_booking_down_payment_amount_label($booking, $package);
+    $downPaymentPercentage = emarioh_resolve_booking_down_payment_amount_label($booking, $package);
 
-    if ($downPaymentAmount !== '') {
-        return emarioh_parse_money_amount($downPaymentAmount);
+    if ($downPaymentPercentage !== '') {
+        $percentageValue = emarioh_parse_money_amount($downPaymentPercentage);
+        $fullAmountValue = emarioh_resolve_booking_full_amount_value($booking, $package);
+
+        if ($percentageValue > 0 && $percentageValue < 100 && $fullAmountValue > 0) {
+            return round($fullAmountValue * ($percentageValue / 100), 2);
+        }
     }
 
     return 0.0;
@@ -5352,7 +5419,7 @@ function emarioh_find_client_active_upcoming_booking(PDO $db, int $userId): ?arr
                 LIMIT 1
             )
         WHERE br.user_id = :user_id
-          AND br.status IN ('pending_review', 'approved', 'completed')
+          AND br.status = 'pending_review'
           AND br.event_date >= CURDATE()
         ORDER BY br.event_date ASC, br.id ASC
         LIMIT 1
@@ -5391,7 +5458,7 @@ function emarioh_client_active_booking_block_message(array $booking): string
     $bookingLabel = $reference !== '' ? $reference : 'your existing booking';
 
     return sprintf(
-        'You already have an active booking (%s for %s, %s). You can submit another booking after this event date has passed, or if the booking is cancelled or rejected.',
+        'You already have a booking pending review (%s for %s, %s). You can submit another booking after this request is approved, cancelled, or rejected.',
         $bookingLabel,
         $eventDateLabel,
         $statusLabel
@@ -5487,6 +5554,53 @@ function emarioh_payment_receipt_reference(string $invoiceNumber): string
     return 'RCT-' . $normalizedInvoiceNumber;
 }
 
+function emarioh_generate_manual_payment_reference(): string
+{
+    try {
+        $suffix = strtoupper(bin2hex(random_bytes(3)));
+    } catch (Throwable $throwable) {
+        $suffix = strtoupper(substr(hash('sha256', uniqid('', true)), 0, 6));
+    }
+
+    return 'MPAY-' . date('Ymd') . '-' . $suffix;
+}
+
+function emarioh_system_payment_receipt_reference(array $invoice, array $paymentSummary = []): string
+{
+    $referenceSource = trim((string) ($paymentSummary['reference_number'] ?? ''));
+
+    if ($referenceSource === '') {
+        $referenceSource = trim((string) ($paymentSummary['payment_id'] ?? ''));
+    }
+
+    if ($referenceSource === '') {
+        $referenceSource = trim((string) ($paymentSummary['checkout_reference'] ?? ''));
+    }
+
+    if ($referenceSource !== '') {
+        $referenceSource = strtoupper(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $referenceSource) ?? ''));
+        $referenceSource = trim($referenceSource, '-');
+
+        if ($referenceSource !== '') {
+            return substr(str_starts_with($referenceSource, 'RCT-') ? $referenceSource : 'RCT-' . $referenceSource, 0, 100);
+        }
+    }
+
+    $invoiceNumber = trim((string) ($invoice['invoice_number'] ?? 'INV-TBA'));
+
+    if (str_starts_with($invoiceNumber, 'INV-')) {
+        $invoiceNumber = substr($invoiceNumber, 4);
+    }
+
+    try {
+        $suffix = strtoupper(bin2hex(random_bytes(2)));
+    } catch (Throwable $throwable) {
+        $suffix = strtoupper(substr(hash('sha256', uniqid('', true)), 0, 4));
+    }
+
+    return substr('RCT-' . $invoiceNumber . '-' . date('YmdHis') . '-' . $suffix, 0, 100);
+}
+
 function emarioh_find_payment_receipt_by_invoice(PDO $db, int $invoiceId): ?array
 {
     if ($invoiceId < 1) {
@@ -5508,7 +5622,47 @@ function emarioh_find_payment_receipt_by_invoice(PDO $db, int $invoiceId): ?arra
     return is_array($receipt) ? $receipt : null;
 }
 
-function emarioh_upsert_system_payment_receipt(
+function emarioh_fetch_payment_receipts_for_invoice(PDO $db, int $invoiceId): array
+{
+    if ($invoiceId < 1) {
+        return [];
+    }
+
+    $statement = $db->prepare('
+        SELECT *
+        FROM payment_receipts
+        WHERE invoice_id = :invoice_id
+        ORDER BY created_at ASC, id ASC
+    ');
+    $statement->execute([
+        ':invoice_id' => $invoiceId,
+    ]);
+
+    $receipts = $statement->fetchAll();
+    return is_array($receipts) ? $receipts : [];
+}
+
+function emarioh_find_payment_receipt_by_id(PDO $db, int $receiptId): ?array
+{
+    if ($receiptId < 1) {
+        return null;
+    }
+
+    $statement = $db->prepare('
+        SELECT *
+        FROM payment_receipts
+        WHERE id = :id
+        LIMIT 1
+    ');
+    $statement->execute([
+        ':id' => $receiptId,
+    ]);
+
+    $receipt = $statement->fetch();
+    return is_array($receipt) ? $receipt : null;
+}
+
+function emarioh_create_system_payment_receipt(
     PDO $db,
     array $invoice,
     ?array $booking = null,
@@ -5527,8 +5681,7 @@ function emarioh_upsert_system_payment_receipt(
         return null;
     }
 
-    $existingReceipt = emarioh_find_payment_receipt_by_invoice($db, $invoiceId);
-    $receiptReference = emarioh_payment_receipt_reference((string) ($invoice['invoice_number'] ?? ''));
+    $receiptReference = emarioh_system_payment_receipt_reference($invoice, $paymentSummary);
     $amountReported = max(0, (float) ($paymentSummary['amount_paid'] ?? 0));
 
     if ($amountReported <= 0) {
@@ -5540,75 +5693,61 @@ function emarioh_upsert_system_payment_receipt(
     }
     $senderName = trim((string) ($booking['primary_contact'] ?? ''));
     $senderMobile = trim((string) ($booking['primary_mobile'] ?? ''));
-    $receiptNotes = 'System-generated receipt after PayMongo confirmed the payment.';
+    $providerLabel = trim((string) ($paymentSummary['provider_label'] ?? $invoice['gateway_provider'] ?? 'PayMongo'));
+    $methodLabel = trim((string) ($paymentSummary['payment_method'] ?? $invoice['payment_method'] ?? 'PayMongo QRPh'));
+    $referenceLabel = trim((string) ($paymentSummary['reference_number'] ?? ''));
+    $receiptSourceLabel = strtolower(trim($providerLabel . ' ' . $methodLabel));
+    $receiptNotes = str_contains($receiptSourceLabel, 'manual')
+        ? 'System-generated receipt after admin recorded a manual payment.'
+        : 'System-generated receipt after PayMongo confirmed the payment.';
 
-    if ($existingReceipt === null) {
-        $db->prepare('
-            INSERT INTO payment_receipts (
-                invoice_id,
-                booking_id,
-                uploaded_by_user_id,
-                original_file_name,
-                stored_file_path,
-                receipt_reference,
-                sender_name,
-                sender_mobile,
-                amount_reported,
-                notes,
-                status,
-                reviewed_at,
-                reviewed_by_user_id
-            ) VALUES (
-                :invoice_id,
-                :booking_id,
-                NULL,
-                NULL,
-                NULL,
-                :receipt_reference,
-                :sender_name,
-                :sender_mobile,
-                :amount_reported,
-                :notes,
-                :status,
-                :reviewed_at,
-                NULL
-            )
-        ')->execute([
-            ':invoice_id' => $invoiceId,
-            ':booking_id' => $bookingId,
-            ':receipt_reference' => $receiptReference,
-            ':sender_name' => emarioh_trim_or_null($senderName),
-            ':sender_mobile' => emarioh_trim_or_null($senderMobile),
-            ':amount_reported' => number_format($amountReported, 2, '.', ''),
-            ':notes' => $receiptNotes,
-            ':status' => 'verified',
-            ':reviewed_at' => date('Y-m-d H:i:s'),
-        ]);
-    } else {
-        $db->prepare('
-            UPDATE payment_receipts
-            SET receipt_reference = :receipt_reference,
-                sender_name = :sender_name,
-                sender_mobile = :sender_mobile,
-                amount_reported = :amount_reported,
-                notes = :notes,
-                status = :status,
-                reviewed_at = COALESCE(reviewed_at, :reviewed_at),
-                reviewed_by_user_id = NULL
-            WHERE id = :id
-        ')->execute([
-            ':receipt_reference' => $receiptReference,
-            ':sender_name' => emarioh_trim_or_null($senderName),
-            ':sender_mobile' => emarioh_trim_or_null($senderMobile),
-            ':amount_reported' => number_format($amountReported, 2, '.', ''),
-            ':notes' => $receiptNotes,
-            ':status' => 'verified',
-            ':reviewed_at' => date('Y-m-d H:i:s'),
-            ':id' => (int) $existingReceipt['id'],
-        ]);
+    if ($referenceLabel !== '') {
+        $receiptNotes .= ' Reference: ' . $referenceLabel . '.';
     }
 
-    return emarioh_find_payment_receipt_by_invoice($db, $invoiceId);
+    $db->prepare('
+        INSERT INTO payment_receipts (
+            invoice_id,
+            booking_id,
+            uploaded_by_user_id,
+            original_file_name,
+            stored_file_path,
+            receipt_reference,
+            sender_name,
+            sender_mobile,
+            amount_reported,
+            notes,
+            status,
+            reviewed_at,
+            reviewed_by_user_id
+        ) VALUES (
+            :invoice_id,
+            :booking_id,
+            NULL,
+            NULL,
+            NULL,
+            :receipt_reference,
+            :sender_name,
+            :sender_mobile,
+            :amount_reported,
+            :notes,
+            :status,
+            :reviewed_at,
+            NULL
+        )
+    ')->execute([
+        ':invoice_id' => $invoiceId,
+        ':booking_id' => $bookingId,
+        ':receipt_reference' => $receiptReference,
+        ':sender_name' => emarioh_trim_or_null($senderName),
+        ':sender_mobile' => emarioh_trim_or_null($senderMobile),
+        ':amount_reported' => number_format($amountReported, 2, '.', ''),
+        ':notes' => $receiptNotes,
+        ':status' => 'verified',
+        ':reviewed_at' => date('Y-m-d H:i:s'),
+    ]);
+
+    return emarioh_find_payment_receipt_by_id($db, (int) $db->lastInsertId());
 }
 
 function emarioh_fetch_payment_logs_for_invoice(PDO $db, int $invoiceId): array
@@ -6185,11 +6324,23 @@ function emarioh_mark_payment_invoice_paid(PDO $db, array $invoice, array $payme
     $booking = emarioh_find_booking_by_id($db, $bookingId);
 
     if ($updatedInvoice !== null && max(0, (float) ($updatedInvoice['amount_paid'] ?? 0)) > 0) {
-        emarioh_upsert_system_payment_receipt(
+        emarioh_create_system_payment_receipt(
             $db,
             $updatedInvoice,
             $booking,
             $paymentSummary
+        );
+    }
+
+    if ($updatedInvoice !== null && $booking !== null) {
+        emarioh_create_admin_payment_notification(
+            $db,
+            $booking,
+            $updatedInvoice,
+            array_merge($paymentSummary, [
+                'amount_paid' => $newPaymentAmountValue,
+            ]),
+            'payment_received'
         );
     }
 
@@ -6207,6 +6358,166 @@ function emarioh_mark_payment_invoice_paid(PDO $db, array $invoice, array $payme
         } catch (Throwable $throwable) {
             // Keep payment sync successful even when the SMS gateway is unavailable.
         }
+    }
+
+    return $updatedInvoice;
+}
+
+function emarioh_record_manual_payment(
+    PDO $db,
+    array $invoice,
+    int $actorUserId,
+    float $paymentAmountValue,
+    string $paymentMethodLabel,
+    ?string $referenceNumber = null,
+    ?string $notes = null
+): ?array {
+    $invoiceId = (int) ($invoice['id'] ?? 0);
+    $bookingId = (int) ($invoice['booking_id'] ?? 0);
+
+    if ($invoiceId < 1 || $bookingId < 1) {
+        return null;
+    }
+
+    $amountDueValue = max(0, (float) ($invoice['amount_due'] ?? 0));
+    $existingAmountPaidValue = max(0, (float) ($invoice['amount_paid'] ?? 0));
+    $remainingBalanceValue = max(0, (float) ($invoice['balance_due'] ?? 0));
+
+    if ($remainingBalanceValue <= 0.00001) {
+        $remainingBalanceValue = max(0, $amountDueValue - $existingAmountPaidValue);
+    }
+
+    if ($amountDueValue <= 0.00001) {
+        throw new InvalidArgumentException('This invoice does not have a payable amount.', 422);
+    }
+
+    if ($remainingBalanceValue <= 0.00001) {
+        throw new InvalidArgumentException('This invoice is already fully paid.', 409);
+    }
+
+    if ($paymentAmountValue <= 0.00001) {
+        throw new InvalidArgumentException('Enter a valid manual payment amount.', 422);
+    }
+
+    if ($paymentAmountValue - $remainingBalanceValue > 0.00001) {
+        throw new InvalidArgumentException('Manual payment amount cannot exceed the remaining balance.', 422);
+    }
+
+    $paidAt = date('Y-m-d H:i:s');
+    $amountPaidValue = min($amountDueValue, $existingAmountPaidValue + $paymentAmountValue);
+    $updatedBalanceValue = max(0, $amountDueValue - $amountPaidValue);
+    $isFullyPaid = $updatedBalanceValue <= 0.00001;
+    $manualMethodLabel = trim($paymentMethodLabel) !== '' ? trim($paymentMethodLabel) : 'Manual Payment';
+    $referenceNumber = trim((string) $referenceNumber);
+
+    if ($referenceNumber === '' || preg_match('/^MPAY-\d{8}-[A-F0-9]{6}$/', $referenceNumber) !== 1) {
+        $referenceNumber = emarioh_generate_manual_payment_reference();
+    }
+
+    $notes = trim((string) $notes);
+    $existingPaymentMethod = trim((string) ($invoice['payment_method'] ?? ''));
+    $paymentMethodValue = $manualMethodLabel;
+
+    if ($existingAmountPaidValue > 0.00001
+        && $existingPaymentMethod !== ''
+        && !str_contains(strtolower($existingPaymentMethod), strtolower($manualMethodLabel))) {
+        $paymentMethodValue = 'Mixed Manual Payment';
+    }
+
+    $gatewayProviderValue = trim((string) ($invoice['gateway_provider'] ?? ''));
+
+    if ($gatewayProviderValue === '' || $existingAmountPaidValue <= 0.00001) {
+        $gatewayProviderValue = 'Manual';
+    }
+
+    $status = $isFullyPaid ? 'approved' : 'review';
+    $statusClass = $isFullyPaid ? 'approved' : 'review';
+    $statusLabel = $isFullyPaid ? 'Paid' : 'Partially Paid';
+    $stageLabel = $isFullyPaid ? 'Paid manually' : 'Partially paid manually';
+    $noteParts = ['Manual payment recorded by admin.', 'Method: ' . $manualMethodLabel . '.'];
+
+    if ($referenceNumber !== '') {
+        $noteParts[] = 'Reference: ' . $referenceNumber . '.';
+    }
+
+    if ($notes !== '') {
+        $noteParts[] = 'Note: ' . $notes;
+    }
+
+    $noteText = implode(' ', $noteParts);
+
+    $db->prepare('
+        UPDATE payment_invoices
+        SET amount_paid = :amount_paid,
+            balance_due = :balance_due,
+            status = :status,
+            stage_label = :stage_label,
+            last_payment_at = :last_payment_at,
+            payment_method = :payment_method,
+            gateway_provider = :gateway_provider,
+            gateway_checkout_session_id = NULL,
+            gateway_checkout_reference = NULL,
+            gateway_checkout_url = NULL,
+            gateway_checkout_status = NULL,
+            note_text = :note_text
+        WHERE id = :id
+    ')->execute([
+        ':amount_paid' => number_format($amountPaidValue, 2, '.', ''),
+        ':balance_due' => number_format($updatedBalanceValue, 2, '.', ''),
+        ':status' => $status,
+        ':stage_label' => $stageLabel,
+        ':last_payment_at' => $paidAt,
+        ':payment_method' => $paymentMethodValue,
+        ':gateway_provider' => $gatewayProviderValue,
+        ':note_text' => $noteText,
+        ':id' => $invoiceId,
+    ]);
+
+    emarioh_log_payment_status(
+        $db,
+        $invoiceId,
+        $bookingId,
+        $actorUserId > 0 ? $actorUserId : null,
+        'Manual Payment Recorded',
+        $isFullyPaid
+            ? 'Admin recorded a manual payment and fully settled this invoice.'
+            : 'Admin recorded a manual payment for this invoice.',
+        trim($manualMethodLabel . ($referenceNumber !== '' ? ' | ' . $referenceNumber : '')),
+        emarioh_format_money_amount($paymentAmountValue),
+        $statusClass,
+        $statusLabel,
+        $noteText
+    );
+
+    $updatedInvoice = emarioh_find_payment_invoice_by_booking($db, $bookingId);
+    $booking = emarioh_find_booking_by_id($db, $bookingId);
+
+    if ($updatedInvoice !== null && max(0, (float) ($updatedInvoice['amount_paid'] ?? 0)) > 0) {
+        emarioh_create_system_payment_receipt(
+            $db,
+            $updatedInvoice,
+            $booking,
+            [
+                'amount_paid' => $paymentAmountValue,
+                'provider_label' => 'Manual',
+                'payment_method' => $manualMethodLabel,
+                'reference_number' => $referenceNumber,
+            ]
+        );
+    }
+
+    if ($updatedInvoice !== null && $booking !== null) {
+        emarioh_create_admin_payment_notification(
+            $db,
+            $booking,
+            $updatedInvoice,
+            [
+                'amount_paid' => $paymentAmountValue,
+                'payment_method' => $manualMethodLabel,
+                'reference_number' => $referenceNumber,
+            ],
+            'manual_payment'
+        );
     }
 
     return $updatedInvoice;
@@ -6291,13 +6602,13 @@ function emarioh_build_client_portal_billing_details(PDO $db, array $booking, ?a
     $balanceDueValue = max(0, (float) ($invoice['balance_due'] ?? 0));
     $amountToPayNowValue = max(0, (float) ($paymentPlan['charge_amount_value'] ?? $balanceDueValue));
     $receipt = $amountPaidValue > 0
-        ? emarioh_upsert_system_payment_receipt($db, $invoice, $booking)
+        ? emarioh_find_payment_receipt_by_invoice($db, (int) ($invoice['id'] ?? 0))
         : null;
     $receiptHref = $receipt !== null
-        ? 'client-payment-receipt.php?invoice=' . rawurlencode((string) ($invoice['invoice_number'] ?? ''))
+        ? 'client-payment-receipt.php?invoice=' . rawurlencode((string) ($invoice['invoice_number'] ?? '')) . '&receipt=' . (int) ($receipt['id'] ?? 0)
         : '';
     $receiptDownloadHref = $receipt !== null
-        ? $receiptHref . '&print=1'
+        ? $receiptHref . '&download=1'
         : '';
 
     $statusMeta = match ($invoiceStatus) {
@@ -6310,7 +6621,9 @@ function emarioh_build_client_portal_billing_details(PDO $db, array $booking, ?a
 
     return [
         'invoiceNumber' => (string) ($invoice['invoice_number'] ?? emarioh_client_invoice_reference((string) ($booking['reference'] ?? ''))),
-        'paymentMethod' => 'PayMongo QRPh',
+        'paymentMethod' => trim((string) ($invoice['payment_method'] ?? '')) !== ''
+            ? trim((string) $invoice['payment_method'])
+            : 'PayMongo QRPh',
         'amountDue' => emarioh_format_money_amount($amountToPayNowValue),
         'amountDueValue' => $amountToPayNowValue,
         'amountToPayNow' => emarioh_format_money_amount($amountToPayNowValue),
@@ -6344,7 +6657,9 @@ function emarioh_build_client_portal_billing_details(PDO $db, array $booking, ?a
         'invoiceCreatedAt' => (string) ($invoice['created_at'] ?? ''),
         'lastPayment' => (string) ($invoice['last_payment_at'] ?? ''),
         'paymentNote' => trim((string) ($invoice['note_text'] ?? '')),
-        'paymentProvider' => 'PayMongo',
+        'paymentProvider' => trim((string) ($invoice['gateway_provider'] ?? '')) !== ''
+            ? trim((string) $invoice['gateway_provider'])
+            : 'PayMongo',
         'gatewayCheckoutSessionId' => (string) ($invoice['gateway_checkout_session_id'] ?? ''),
         'gatewayCheckoutReference' => (string) ($invoice['gateway_checkout_reference'] ?? ''),
         'gatewayCheckoutStatus' => (string) ($invoice['gateway_checkout_status'] ?? ''),
@@ -6699,13 +7014,35 @@ function emarioh_build_client_booking_notification(array $booking, ?array $statu
 
 function emarioh_ensure_client_notification_reads_table(PDO $db): bool
 {
+    static $isReady = false;
+
+    if ($isReady) {
+        return true;
+    }
+
     try {
+        try {
+            $db->query('SELECT deleted_at FROM client_notification_reads LIMIT 1');
+            $isReady = true;
+
+            return true;
+        } catch (Throwable $throwable) {
+            if ($db->inTransaction()) {
+                emarioh_write_runtime_log('client-notifications', 'Client notification read table check skipped during an active transaction.', [
+                    'error' => $throwable->getMessage(),
+                ]);
+
+                return false;
+            }
+        }
+
         $db->exec(<<<'SQL'
 CREATE TABLE IF NOT EXISTS client_notification_reads (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
     booking_status_log_id BIGINT UNSIGNED NOT NULL,
     read_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME NULL,
     UNIQUE KEY uq_client_notification_read (user_id, booking_status_log_id),
     KEY idx_client_notification_reads_user (user_id, read_at),
     CONSTRAINT fk_client_notification_reads_user
@@ -6717,6 +7054,14 @@ CREATE TABLE IF NOT EXISTS client_notification_reads (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 SQL);
 
+        try {
+            $db->query('SELECT deleted_at FROM client_notification_reads LIMIT 1');
+        } catch (Throwable $missingDeletedAt) {
+            $db->exec('ALTER TABLE client_notification_reads ADD COLUMN deleted_at DATETIME NULL AFTER read_at');
+        }
+
+        $isReady = true;
+
         return true;
     } catch (Throwable $throwable) {
         emarioh_write_runtime_log('client-notifications', 'Client notification read table is not available.', [
@@ -6724,6 +7069,40 @@ SQL);
         ]);
 
         return false;
+    }
+}
+
+function emarioh_count_unread_client_notifications(PDO $db, int $userId): int
+{
+    if ($userId < 1 || !emarioh_ensure_client_notification_reads_table($db)) {
+        return 0;
+    }
+
+    try {
+        $statement = $db->prepare('
+            SELECT COUNT(*)
+            FROM booking_status_logs bsl
+            INNER JOIN booking_requests br
+                ON br.id = bsl.booking_id
+            LEFT JOIN client_notification_reads cnr
+                ON cnr.booking_status_log_id = bsl.id
+               AND cnr.user_id = br.user_id
+            WHERE br.user_id = :user_id
+              AND (cnr.id IS NULL OR cnr.read_at IS NULL)
+              AND cnr.deleted_at IS NULL
+        ');
+        $statement->execute([
+            ':user_id' => $userId,
+        ]);
+
+        return (int) $statement->fetchColumn();
+    } catch (Throwable $throwable) {
+        emarioh_write_runtime_log('client-notifications', 'Unread client notification count failed.', [
+            'error' => $throwable->getMessage(),
+            'user_id' => $userId,
+        ]);
+
+        return 0;
     }
 }
 
@@ -6756,6 +7135,7 @@ function emarioh_fetch_client_notifications(PDO $db, int $userId, int $limit = 8
             ON br.id = bsl.booking_id
         ' . $readJoin . '
         WHERE br.user_id = :user_id
+        ' . ($hasReadTracking ? 'AND cnr.deleted_at IS NULL' : '') . '
         ORDER BY bsl.created_at DESC, bsl.id DESC
         LIMIT ' . $limit
     );
@@ -6860,7 +7240,7 @@ function emarioh_mark_client_notification_read(PDO $db, int $userId, int $notifi
     $db->prepare('
         INSERT INTO client_notification_reads (user_id, booking_status_log_id, read_at)
         VALUES (:user_id, :notification_id, CURRENT_TIMESTAMP)
-        ON DUPLICATE KEY UPDATE read_at = VALUES(read_at)
+        ON DUPLICATE KEY UPDATE read_at = VALUES(read_at), deleted_at = NULL
     ')->execute([
         ':user_id' => $userId,
         ':notification_id' => $notificationId,
@@ -6873,6 +7253,447 @@ function emarioh_mark_client_notification_read(PDO $db, int $userId, int $notifi
     }
 
     return null;
+}
+
+function emarioh_delete_client_notification(PDO $db, int $userId, int $notificationId): bool
+{
+    if ($userId < 1 || $notificationId < 1 || !emarioh_ensure_client_notification_reads_table($db)) {
+        return false;
+    }
+
+    $statement = $db->prepare('
+        INSERT INTO client_notification_reads (user_id, booking_status_log_id, read_at, deleted_at)
+        SELECT :user_id, bsl.id, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        FROM booking_status_logs bsl
+        INNER JOIN booking_requests br ON br.id = bsl.booking_id
+        WHERE bsl.id = :notification_id
+          AND br.user_id = :user_id_check
+        ON DUPLICATE KEY UPDATE deleted_at = CURRENT_TIMESTAMP
+    ');
+    $statement->execute([
+        ':user_id' => $userId,
+        ':notification_id' => $notificationId,
+        ':user_id_check' => $userId,
+    ]);
+
+    return $statement->rowCount() > 0;
+}
+
+function emarioh_ensure_admin_notifications_table(PDO $db): bool
+{
+    static $isReady = false;
+
+    if ($isReady) {
+        return true;
+    }
+
+    try {
+        try {
+            $db->query('SELECT 1 FROM admin_notifications LIMIT 1');
+            $isReady = true;
+            return true;
+        } catch (Throwable $tableMissing) {
+            if ($db->inTransaction()) {
+                emarioh_write_runtime_log('admin-notifications', 'Admin notifications table check skipped during an active transaction.', [
+                    'error' => $tableMissing->getMessage(),
+                ]);
+
+                return false;
+            }
+        }
+
+        $db->exec(<<<'SQL'
+CREATE TABLE IF NOT EXISTS admin_notifications (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    notification_type VARCHAR(100) NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    message VARCHAR(500) NULL,
+    link_href VARCHAR(190) NULL,
+    related_booking_id BIGINT UNSIGNED NULL,
+    related_reference VARCHAR(80) NULL,
+    status ENUM('unread', 'read', 'archived') NOT NULL DEFAULT 'unread',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    read_at DATETIME NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_admin_notifications_status (status, created_at),
+    KEY idx_admin_notifications_booking (related_booking_id),
+    KEY idx_admin_notifications_reference (notification_type, related_reference),
+    CONSTRAINT fk_admin_notifications_booking
+        FOREIGN KEY (related_booking_id) REFERENCES booking_requests(id)
+        ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+SQL);
+
+        $isReady = true;
+        return true;
+    } catch (Throwable $throwable) {
+        emarioh_write_runtime_log('admin-notifications', 'Admin notifications table is not available.', [
+            'error' => $throwable->getMessage(),
+        ]);
+
+        return false;
+    }
+}
+
+function emarioh_create_admin_notification(PDO $db, array $notification): ?int
+{
+    if (!emarioh_ensure_admin_notifications_table($db)) {
+        return null;
+    }
+
+    $title = trim((string) ($notification['title'] ?? ''));
+    $type = trim((string) ($notification['type'] ?? $notification['notification_type'] ?? 'system'));
+    $normalizedType = $type !== '' ? $type : 'system';
+    $message = substr(trim((string) ($notification['message'] ?? '')), 0, 500);
+    $linkHref = substr(trim((string) ($notification['href'] ?? $notification['link_href'] ?? '')), 0, 190);
+    $reference = substr(trim((string) ($notification['reference'] ?? $notification['related_reference'] ?? '')), 0, 80);
+    $relatedBookingId = (int) ($notification['booking_id'] ?? $notification['related_booking_id'] ?? 0);
+
+    if ($title === '') {
+        return null;
+    }
+
+    try {
+        if ($reference !== '') {
+            $existingStatement = $db->prepare('
+                SELECT id
+                FROM admin_notifications
+                WHERE notification_type = :notification_type
+                  AND related_reference = :related_reference
+                  AND status <> \'archived\'
+                ORDER BY id DESC
+                LIMIT 1
+            ');
+            $existingStatement->execute([
+                ':notification_type' => $normalizedType,
+                ':related_reference' => $reference,
+            ]);
+
+            $existingId = (int) ($existingStatement->fetchColumn() ?: 0);
+
+            if ($existingId > 0) {
+                return $existingId;
+            }
+        }
+
+        $db->prepare('
+            INSERT INTO admin_notifications (
+                notification_type,
+                title,
+                message,
+                link_href,
+                related_booking_id,
+                related_reference,
+                status
+            ) VALUES (
+                :notification_type,
+                :title,
+                :message,
+                :link_href,
+                :related_booking_id,
+                :related_reference,
+                :status
+            )
+        ')->execute([
+            ':notification_type' => $normalizedType,
+            ':title' => $title,
+            ':message' => emarioh_trim_or_null($message),
+            ':link_href' => emarioh_trim_or_null($linkHref),
+            ':related_booking_id' => $relatedBookingId > 0
+                ? $relatedBookingId
+                : null,
+            ':related_reference' => emarioh_trim_or_null($reference),
+            ':status' => 'unread',
+        ]);
+
+        return (int) $db->lastInsertId();
+    } catch (Throwable $throwable) {
+        emarioh_write_runtime_log('admin-notifications', 'Admin notification could not be created.', [
+            'error' => $throwable->getMessage(),
+            'title' => $title,
+        ]);
+
+        return null;
+    }
+}
+
+function emarioh_create_admin_payment_notification(
+    PDO $db,
+    array $booking,
+    array $invoice,
+    array $paymentSummary = [],
+    string $type = 'payment_received'
+): ?int {
+    $bookingId = (int) ($booking['id'] ?? $invoice['booking_id'] ?? 0);
+    $clientName = trim((string) ($booking['primary_contact'] ?? 'Client')) ?: 'Client';
+    $bookingReference = trim((string) ($booking['reference'] ?? ''));
+    $invoiceNumber = trim((string) ($invoice['invoice_number'] ?? ''));
+    $targetReference = $bookingReference !== '' ? $bookingReference : ($invoiceNumber !== '' ? $invoiceNumber : 'this booking');
+    $amountValue = max(0, (float) ($paymentSummary['amount_paid'] ?? $paymentSummary['amount'] ?? 0));
+    $balanceDueValue = max(0, (float) ($invoice['balance_due'] ?? 0));
+    $amountDueValue = max(0, (float) ($invoice['amount_due'] ?? 0));
+    $invoiceAmountPaidValue = max(0, (float) ($invoice['amount_paid'] ?? 0));
+    $paymentReference = trim((string) (
+        $paymentSummary['reference_number']
+        ?? $paymentSummary['payment_id']
+        ?? $paymentSummary['checkout_reference']
+        ?? $invoice['gateway_payment_id']
+        ?? ''
+    ));
+
+    if ($balanceDueValue <= 0.00001 && $amountDueValue > 0.00001) {
+        $balanceDueValue = max(0, $amountDueValue - $invoiceAmountPaidValue);
+    }
+
+    if ($paymentReference === '') {
+        $paymentReference = $invoiceNumber !== '' ? $invoiceNumber : $targetReference;
+    } elseif ($invoiceNumber !== '') {
+        $paymentReference = $invoiceNumber . ' | ' . $paymentReference;
+    }
+
+    $title = $type === 'manual_payment' ? 'Manual payment recorded' : 'Payment received';
+    $message = $amountValue > 0.00001
+        ? $clientName . ' paid ' . emarioh_format_money_amount($amountValue) . ' for ' . $targetReference . '.'
+        : 'A payment was posted for ' . $targetReference . '.';
+
+    $message .= $balanceDueValue > 0.00001
+        ? ' Remaining balance: ' . emarioh_format_money_amount($balanceDueValue) . '.'
+        : ' Invoice is fully paid.';
+
+    return emarioh_create_admin_notification($db, [
+        'type' => $type === 'manual_payment' ? 'manual_payment' : 'payment_received',
+        'title' => $title,
+        'message' => $message,
+        'href' => 'admin-payments.php' . ($invoiceNumber !== '' ? '#' . rawurlencode($invoiceNumber) : ''),
+        'booking_id' => $bookingId,
+        'reference' => $paymentReference,
+    ]);
+}
+
+function emarioh_create_admin_booking_notification(PDO $db, array $booking): ?int
+{
+    $bookingId = (int) ($booking['id'] ?? 0);
+    $reference = trim((string) ($booking['reference'] ?? ''));
+    $clientName = trim((string) ($booking['primary_contact'] ?? 'Client'));
+    $eventType = trim((string) ($booking['event_type'] ?? 'event'));
+    $schedule = emarioh_booking_sms_schedule_label($booking);
+    $href = 'admin-bookings.php' . ($reference !== '' ? '#' . rawurlencode($reference) : '');
+
+    return emarioh_create_admin_notification($db, [
+        'type' => 'new_booking',
+        'title' => 'New booking request',
+        'message' => $clientName . ' submitted a ' . $eventType . ' booking for ' . $schedule . '.',
+        'href' => $href,
+        'booking_id' => $bookingId,
+        'reference' => $reference,
+    ]);
+}
+
+function emarioh_create_admin_overdue_payment_notification(PDO $db, array $booking, array $invoice): ?int
+{
+    $invoiceStatus = strtolower(trim((string) ($invoice['status'] ?? 'pending')));
+
+    if (in_array($invoiceStatus, ['approved', 'cancelled'], true)) {
+        return null;
+    }
+
+    $invoiceNumber = trim((string) ($invoice['invoice_number'] ?? ''));
+    $bookingReference = trim((string) ($booking['reference'] ?? ''));
+    $clientName = trim((string) ($booking['primary_contact'] ?? 'Client')) ?: 'Client';
+    $amountDueValue = max(0, (float) ($invoice['amount_due'] ?? 0));
+    $amountPaidValue = max(0, (float) ($invoice['amount_paid'] ?? 0));
+    $balanceDueValue = max(0, (float) ($invoice['balance_due'] ?? 0));
+    $dueDateValue = trim((string) ($invoice['due_date'] ?? ''));
+    $eventDateValue = trim((string) ($booking['event_date'] ?? ''));
+    $today = new DateTimeImmutable('today');
+    $isOverdue = false;
+    $isExpiredWithoutPayment = false;
+    $dueDateLabel = '';
+    $eventDateLabel = '';
+
+    if ($balanceDueValue <= 0.00001 && $amountDueValue > 0.00001) {
+        $balanceDueValue = max(0, $amountDueValue - $amountPaidValue);
+    }
+
+    if ($balanceDueValue <= 0.00001) {
+        return null;
+    }
+
+    if ($dueDateValue !== '') {
+        try {
+            $dueDate = new DateTimeImmutable($dueDateValue);
+            $isOverdue = $dueDate < $today;
+            $dueDateLabel = $dueDate->format('F j, Y');
+        } catch (Throwable $throwable) {
+            $isOverdue = false;
+        }
+    }
+
+    if ($eventDateValue !== '' && $amountPaidValue <= 0.00001) {
+        try {
+            $eventDate = new DateTimeImmutable($eventDateValue);
+            $isExpiredWithoutPayment = $eventDate < $today;
+            $eventDateLabel = $eventDate->format('F j, Y');
+        } catch (Throwable $throwable) {
+            $isExpiredWithoutPayment = false;
+        }
+    }
+
+    if (!$isOverdue && !$isExpiredWithoutPayment) {
+        return null;
+    }
+
+    $targetReference = $bookingReference !== '' ? $bookingReference : ($invoiceNumber !== '' ? $invoiceNumber : 'this booking');
+    $message = $clientName . ' has an overdue balance of ' . emarioh_format_money_amount($balanceDueValue) . ' for ' . $targetReference . '.';
+
+    if ($dueDateLabel !== '') {
+        $message .= ' Due date: ' . $dueDateLabel . '.';
+    } elseif ($eventDateLabel !== '') {
+        $message .= ' Event date: ' . $eventDateLabel . '.';
+    }
+
+    return emarioh_create_admin_notification($db, [
+        'type' => 'overdue_payment',
+        'title' => 'Payment overdue',
+        'message' => $message,
+        'href' => 'admin-payments.php' . ($invoiceNumber !== '' ? '#' . rawurlencode($invoiceNumber) : ''),
+        'booking_id' => (int) ($booking['id'] ?? $invoice['booking_id'] ?? 0),
+        'reference' => $invoiceNumber !== '' ? $invoiceNumber : $targetReference,
+    ]);
+}
+
+function emarioh_count_unread_admin_notifications(PDO $db): int
+{
+    if (!emarioh_ensure_admin_notifications_table($db)) {
+        return 0;
+    }
+
+    try {
+        return (int) $db->query("SELECT COUNT(*) FROM admin_notifications WHERE status = 'unread'")->fetchColumn();
+    } catch (Throwable $throwable) {
+        emarioh_write_runtime_log('admin-notifications', 'Unread admin notification count failed.', [
+            'error' => $throwable->getMessage(),
+        ]);
+
+        return 0;
+    }
+}
+
+function emarioh_admin_notification_icon(string $type): string
+{
+    return match ($type) {
+        'new_booking' => 'bi-calendar2-plus',
+        'payment', 'payment_received', 'manual_payment' => 'bi-wallet2',
+        'inquiry' => 'bi-envelope-paper',
+        'overdue_payment' => 'bi-exclamation-triangle',
+        default => 'bi-bell',
+    };
+}
+
+function emarioh_fetch_admin_notifications(PDO $db, int $limit = 80): array
+{
+    if (!emarioh_ensure_admin_notifications_table($db)) {
+        return [];
+    }
+
+    $limit = max(1, min(200, $limit));
+
+    try {
+        $statement = $db->query('
+            SELECT
+                an.*,
+                br.reference AS booking_reference,
+                br.event_type,
+                br.event_date,
+                br.event_time,
+                br.primary_contact
+            FROM admin_notifications an
+            LEFT JOIN booking_requests br
+                ON br.id = an.related_booking_id
+            WHERE an.status <> \'archived\'
+            ORDER BY an.created_at DESC, an.id DESC
+            LIMIT ' . $limit
+        );
+    } catch (Throwable $throwable) {
+        emarioh_write_runtime_log('admin-notifications', 'Admin notifications could not be fetched.', [
+            'error' => $throwable->getMessage(),
+        ]);
+
+        return [];
+    }
+
+    $notifications = [];
+
+    foreach ($statement->fetchAll() as $row) {
+        $type = trim((string) ($row['notification_type'] ?? 'system')) ?: 'system';
+        $status = trim((string) ($row['status'] ?? 'unread')) === 'read' ? 'read' : 'unread';
+        $reference = trim((string) ($row['related_reference'] ?? $row['booking_reference'] ?? ''));
+        $href = trim((string) ($row['link_href'] ?? ''));
+
+        if ($href === '' && $reference !== '') {
+            $href = 'admin-bookings.php#' . rawurlencode($reference);
+        }
+
+        $notifications[] = [
+            'id' => (int) ($row['id'] ?? 0),
+            'type' => $type,
+            'title' => trim((string) ($row['title'] ?? 'Notification')) ?: 'Notification',
+            'message' => trim((string) ($row['message'] ?? '')),
+            'href' => $href !== '' ? $href : 'admin-notifications.php',
+            'reference' => $reference !== '' ? $reference : 'No reference',
+            'status' => $status,
+            'readStatus' => $status,
+            'readAt' => trim((string) ($row['read_at'] ?? '')),
+            'time' => trim((string) ($row['created_at'] ?? '')),
+            'timeLabel' => emarioh_format_log_datetime((string) ($row['created_at'] ?? '')),
+            'icon' => emarioh_admin_notification_icon($type),
+        ];
+    }
+
+    return $notifications;
+}
+
+function emarioh_mark_admin_notification_read(PDO $db, int $notificationId): ?array
+{
+    if ($notificationId < 1 || !emarioh_ensure_admin_notifications_table($db)) {
+        return null;
+    }
+
+    $statement = $db->prepare('
+        UPDATE admin_notifications
+        SET status = \'read\',
+            read_at = COALESCE(read_at, CURRENT_TIMESTAMP)
+        WHERE id = :id
+          AND status <> \'archived\'
+    ');
+    $statement->execute([
+        ':id' => $notificationId,
+    ]);
+
+    foreach (emarioh_fetch_admin_notifications($db, 200) as $notification) {
+        if ((int) ($notification['id'] ?? 0) === $notificationId) {
+            return $notification;
+        }
+    }
+
+    return null;
+}
+
+function emarioh_delete_admin_notification(PDO $db, int $notificationId): bool
+{
+    if ($notificationId < 1 || !emarioh_ensure_admin_notifications_table($db)) {
+        return false;
+    }
+
+    $statement = $db->prepare('
+        UPDATE admin_notifications
+        SET status = \'archived\'
+        WHERE id = :id
+          AND status <> \'archived\'
+    ');
+    $statement->execute([':id' => $notificationId]);
+
+    return $statement->rowCount() > 0;
 }
 
 function emarioh_fetch_client_portal_state(PDO $db, int $userId, ?string $clientName = null): array
@@ -6999,12 +7820,23 @@ function emarioh_find_booking_by_id(PDO $db, int $bookingId): ?array
 
 function emarioh_fetch_booked_event_dates(PDO $db): array
 {
-    $statement = $db->query("
+    $statuses = emarioh_booking_reserved_statuses();
+    $statusPlaceholders = [];
+    $params = [];
+
+    foreach ($statuses as $index => $status) {
+        $placeholder = ':status_' . $index;
+        $statusPlaceholders[] = $placeholder;
+        $params[$placeholder] = $status;
+    }
+
+    $statement = $db->prepare("
         SELECT DISTINCT DATE_FORMAT(event_date, '%Y-%m-%d') AS event_date
         FROM booking_requests
-        WHERE status IN ('approved', 'completed')
+        WHERE status IN (" . implode(', ', $statusPlaceholders) . ")
         ORDER BY event_date ASC
     ");
+    $statement->execute($params);
 
     $dates = [];
 
@@ -7019,17 +7851,35 @@ function emarioh_fetch_booked_event_dates(PDO $db): array
     return $dates;
 }
 
-function emarioh_booking_date_has_conflict(PDO $db, string $eventDate, ?int $excludeBookingId = null): bool
+function emarioh_booking_date_has_conflict(PDO $db, string $eventDate, ?int $excludeBookingId = null, ?array $statuses = null): bool
 {
+    $statuses = $statuses ?? emarioh_booking_reserved_statuses();
+    $statuses = array_values(array_filter(array_map(
+        static fn ($status): string => trim((string) $status),
+        $statuses
+    )));
+
+    if ($statuses === []) {
+        return false;
+    }
+
+    $statusPlaceholders = [];
+    $params = [
+        ':event_date' => $eventDate,
+    ];
+
+    foreach ($statuses as $index => $status) {
+        $placeholder = ':status_' . $index;
+        $statusPlaceholders[] = $placeholder;
+        $params[$placeholder] = $status;
+    }
+
     $sql = "
         SELECT 1
         FROM booking_requests
         WHERE event_date = :event_date
-          AND status IN ('approved', 'completed')
+          AND status IN (" . implode(', ', $statusPlaceholders) . ")
     ";
-    $params = [
-        ':event_date' => $eventDate,
-    ];
 
     if ($excludeBookingId !== null && $excludeBookingId > 0) {
         $sql .= ' AND id <> :exclude_booking_id';
@@ -7042,6 +7892,37 @@ function emarioh_booking_date_has_conflict(PDO $db, string $eventDate, ?int $exc
     $statement->execute($params);
 
     return (bool) $statement->fetchColumn();
+}
+
+function emarioh_booking_date_lock_name(string $eventDate): string
+{
+    $normalizedDate = preg_replace('/[^0-9-]/', '', $eventDate) ?: 'unknown';
+
+    return 'emarioh_booking_date_' . $normalizedDate;
+}
+
+function emarioh_acquire_booking_date_lock(PDO $db, string $eventDate, int $timeoutSeconds = 5): bool
+{
+    $statement = $db->prepare('SELECT GET_LOCK(:lock_name, :timeout_seconds)');
+    $statement->bindValue(':lock_name', emarioh_booking_date_lock_name($eventDate), PDO::PARAM_STR);
+    $statement->bindValue(':timeout_seconds', max(0, $timeoutSeconds), PDO::PARAM_INT);
+    $statement->execute();
+
+    return (int) $statement->fetchColumn() === 1;
+}
+
+function emarioh_release_booking_date_lock(PDO $db, string $eventDate): bool
+{
+    try {
+        $statement = $db->prepare('SELECT RELEASE_LOCK(:lock_name)');
+        $statement->execute([
+            ':lock_name' => emarioh_booking_date_lock_name($eventDate),
+        ]);
+
+        return (int) $statement->fetchColumn() === 1;
+    } catch (Throwable $throwable) {
+        return false;
+    }
 }
 
 function emarioh_log_booking_status(

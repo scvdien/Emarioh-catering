@@ -180,8 +180,8 @@ function initializeBookingDatePicker() {
 
             if (isBooked) {
                 dayButton.classList.add("booking-date-picker__day--booked");
-                dayButton.dataset.tooltip = "Booked";
-                dayButton.setAttribute("aria-label", `${formatDisplayDate(dateValue)} booked`);
+                dayButton.dataset.tooltip = "Reserved";
+                dayButton.setAttribute("aria-label", `${formatDisplayDate(dateValue)} reserved`);
                 dayButton.setAttribute("aria-disabled", "true");
                 dayButton.tabIndex = -1;
             }

@@ -293,6 +293,7 @@ CREATE TABLE IF NOT EXISTS `client_notification_reads` (
     `user_id` INT UNSIGNED NOT NULL,
     `booking_status_log_id` BIGINT UNSIGNED NOT NULL,
     `read_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `deleted_at` DATETIME DEFAULT NULL,
     PRIMARY KEY (`id`),
     UNIQUE KEY `uq_client_notification_read` (`user_id`, `booking_status_log_id`),
     KEY `idx_client_notification_reads_user` (`user_id`, `read_at`),
@@ -302,6 +303,27 @@ CREATE TABLE IF NOT EXISTS `client_notification_reads` (
     CONSTRAINT `fk_client_notification_reads_log`
         FOREIGN KEY (`booking_status_log_id`) REFERENCES `booking_status_logs` (`id`)
         ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `admin_notifications` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `notification_type` VARCHAR(100) NOT NULL,
+    `title` VARCHAR(150) NOT NULL,
+    `message` VARCHAR(500) DEFAULT NULL,
+    `link_href` VARCHAR(190) DEFAULT NULL,
+    `related_booking_id` BIGINT UNSIGNED DEFAULT NULL,
+    `related_reference` VARCHAR(80) DEFAULT NULL,
+    `status` ENUM('unread', 'read', 'archived') NOT NULL DEFAULT 'unread',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `read_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_admin_notifications_status` (`status`, `created_at`),
+    KEY `idx_admin_notifications_booking` (`related_booking_id`),
+    KEY `idx_admin_notifications_reference` (`notification_type`, `related_reference`),
+    CONSTRAINT `fk_admin_notifications_booking`
+        FOREIGN KEY (`related_booking_id`) REFERENCES `booking_requests` (`id`)
+        ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `client_activity_logs` (

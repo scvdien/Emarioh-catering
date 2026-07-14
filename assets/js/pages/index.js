@@ -39,6 +39,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const paymentDetailsOpenReceiptButton = document.getElementById("paymentDetailsOpenReceiptButton");
     const paymentDetailsReminderButton = document.getElementById("paymentDetailsReminderButton");
     const paymentDetailsConfirmButton = document.getElementById("paymentDetailsConfirmButton");
+    const paymentDetailsManualPaymentButton = document.getElementById("paymentDetailsManualPaymentButton");
+    const paymentManualPaymentCard = document.getElementById("paymentManualPaymentCard");
+    const paymentManualPaymentForm = document.getElementById("paymentManualPaymentForm");
+    const paymentManualAmountField = document.getElementById("paymentManualAmount");
+    const paymentManualMethodField = document.getElementById("paymentManualMethod");
+    const paymentManualReferenceField = document.getElementById("paymentManualReference");
+    const paymentManualNoteField = document.getElementById("paymentManualNote");
+    const paymentManualPaymentFeedback = document.getElementById("paymentManualPaymentFeedback");
+    const paymentManualCancelButton = document.getElementById("paymentManualCancelButton");
+    const paymentManualSubmitButton = document.getElementById("paymentManualSubmitButton");
     const paymentActionFeedbackModalElement = document.getElementById("paymentActionFeedbackModal");
     const paymentActionFeedbackModalLabel = document.getElementById("paymentActionFeedbackModalLabel");
     const paymentActionFeedbackText = document.getElementById("paymentActionFeedbackText");
@@ -231,6 +241,64 @@ document.addEventListener("DOMContentLoaded", () => {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(value)}`;
+    };
+
+    const formatPaymentInputAmount = (value) => {
+        const normalizedValue = Number.parseFloat(String(value || ""));
+
+        return Number.isFinite(normalizedValue) && normalizedValue > 0
+            ? normalizedValue.toFixed(2)
+            : "";
+    };
+
+    const setManualPaymentFeedback = (message = "", state = "") => {
+        if (!paymentManualPaymentFeedback) {
+            return;
+        }
+
+        paymentManualPaymentFeedback.textContent = message;
+        paymentManualPaymentFeedback.classList.toggle("is-error", state === "error");
+    };
+
+    const hideManualPaymentForm = () => {
+        if (paymentManualPaymentCard) {
+            paymentManualPaymentCard.hidden = true;
+        }
+
+        paymentManualPaymentForm?.reset();
+        setManualPaymentFeedback();
+        setAsyncButtonState(paymentManualSubmitButton, false);
+    };
+
+    const showManualPaymentForm = () => {
+        if (!paymentManualPaymentCard || !activePaymentViewButton) {
+            return;
+        }
+
+        const balanceValue = Number.parseFloat(activePaymentViewButton.dataset.paymentPendingBalanceValue || "");
+        const fallbackBalanceValue = parseCurrencyAmount(activePaymentViewButton.dataset.paymentPendingBalance);
+        const defaultAmountValue = Number.isFinite(balanceValue) && balanceValue > 0
+            ? balanceValue
+            : fallbackBalanceValue;
+
+        paymentManualPaymentCard.hidden = false;
+
+        if (paymentManualAmountField) {
+            paymentManualAmountField.value = formatPaymentInputAmount(defaultAmountValue);
+            paymentManualAmountField.max = formatPaymentInputAmount(defaultAmountValue);
+            paymentManualAmountField.focus();
+            paymentManualAmountField.select();
+        }
+
+        if (paymentManualMethodField && !paymentManualMethodField.value) {
+            paymentManualMethodField.value = "personal_gcash";
+        }
+
+        if (paymentManualReferenceField) {
+            paymentManualReferenceField.value = activePaymentViewButton.dataset.manualPaymentReference || "";
+        }
+
+        setManualPaymentFeedback(`Remaining balance: ${formatCurrencyAmount(defaultAmountValue)}`);
     };
 
     const formatPortalDateLabel = (dateValue) => {
@@ -480,6 +548,7 @@ document.addEventListener("DOMContentLoaded", () => {
             button?.dataset.paymentReminderTemplate?.trim()
             && button?.dataset.bookingId?.trim()
         );
+        const canRecordManualPayment = button?.dataset.paymentCanRecordManual === "true";
         const reminderLabel = button?.dataset.paymentReminderLabel?.trim() || "Send Reminder";
 
         if (!paymentDetailsReceiptEmptyElement
@@ -502,6 +571,14 @@ document.addEventListener("DOMContentLoaded", () => {
         paymentDetailsOpenReceiptButton.hidden = !hasReceipt;
         paymentDetailsReminderButton.hidden = !canSendReminder;
         paymentDetailsConfirmButton.hidden = !canConfirm;
+
+        if (paymentDetailsManualPaymentButton) {
+            paymentDetailsManualPaymentButton.hidden = !canRecordManualPayment;
+        }
+
+        if (!canRecordManualPayment) {
+            hideManualPaymentForm();
+        }
 
         if (!hasReceiptPreview) {
             paymentDetailsReceiptImageElement.removeAttribute("src");
@@ -568,6 +645,110 @@ document.addEventListener("DOMContentLoaded", () => {
     const findPaymentViewButtonByTitle = (paymentTitle) => paymentViewButtons.find(
         (button) => button.dataset.paymentTitle === paymentTitle
     ) || null;
+
+    const normalizeRecordTarget = (value = "") => {
+        const rawValue = String(value || "").replace(/^#/, "").trim();
+
+        try {
+            return decodeURIComponent(rawValue).trim().toLowerCase();
+        } catch (error) {
+            return rawValue.toLowerCase();
+        }
+    };
+
+    const highlightRecordRow = (row) => {
+        if (!(row instanceof HTMLElement)) {
+            return;
+        }
+
+        row.hidden = false;
+        row.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+        row.classList.add("is-record-target");
+        window.setTimeout(() => {
+            row.classList.remove("is-record-target");
+        }, 2200);
+    };
+
+    const findPaymentViewButtonByRecordTarget = (targetValue) => {
+        const target = normalizeRecordTarget(targetValue);
+
+        if (!target) {
+            return null;
+        }
+
+        return paymentViewButtons.find((button) => [
+            button.dataset.paymentInvoiceNumber,
+            button.dataset.paymentTitle,
+            button.dataset.bookingReference,
+            button.dataset.clientName
+        ].some((candidate) => normalizeRecordTarget(candidate) === target)) || null;
+    };
+
+    const openPaymentRecordFromTarget = (targetValue) => {
+        const targetButton = findPaymentViewButtonByRecordTarget(targetValue);
+
+        if (!targetButton) {
+            return false;
+        }
+
+        if (paymentSearchInput) {
+            paymentSearchInput.value = "";
+        }
+
+        if (paymentStatusSelect) {
+            paymentStatusSelect.value = "all";
+        }
+
+        applyPaymentFilter("all");
+        highlightRecordRow(targetButton.closest("[data-payment-row]"));
+        openPaymentDetails(targetButton);
+        return true;
+    };
+
+    const openBookingRecordFromTarget = (targetValue) => {
+        const target = normalizeRecordTarget(targetValue);
+
+        if (!target || !bookingRows.length) {
+            return false;
+        }
+
+        const targetRow = Array.from(bookingRows).find((row) => normalizeRecordTarget(row.dataset.reference) === target);
+
+        if (!targetRow) {
+            return false;
+        }
+
+        if (bookingStatusSelect) {
+            bookingStatusSelect.value = "all";
+        }
+
+        applyBookingFilter("all");
+        highlightRecordRow(targetRow);
+        openBookingDetails(targetRow);
+        return true;
+    };
+
+    const openRecordFromLocationHash = () => {
+        const target = normalizeRecordTarget(window.location.hash);
+
+        if (!target) {
+            return;
+        }
+
+        window.setTimeout(() => {
+            if (currentPath === "admin-payments.php" || currentPath === "payments.php") {
+                openPaymentRecordFromTarget(target);
+                return;
+            }
+
+            if (currentPath === "admin-bookings.php" || currentPath === "bookings.php") {
+                openBookingRecordFromTarget(target);
+            }
+        }, 120);
+    };
 
     const renderClientHistory = (historyValue = "") => {
         const historyContainer = document.getElementById("clientDetailsHistory");
@@ -945,7 +1126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const activeFilter = filterValue || Array.from(paymentFilterButtons)
             .find((button) => button.classList.contains("is-active"))
-            ?.dataset.paymentFilter || "all";
+            ?.dataset.paymentFilter || paymentStatusSelect?.value || "all";
         const searchTerm = paymentSearchInput?.value.trim().toLowerCase() || "";
         let visibleCount = 0;
 
@@ -1085,6 +1266,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         activePaymentViewButton = button;
+        hideManualPaymentForm();
 
         const {
             paymentTitle,
@@ -1301,6 +1483,73 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
+    const recordManualPayment = async () => {
+        const invoiceNumber = activePaymentViewButton?.dataset.paymentInvoiceNumber?.trim() || "";
+        const amountValue = Number.parseFloat(paymentManualAmountField?.value || "0");
+        const balanceValue = Number.parseFloat(activePaymentViewButton?.dataset.paymentPendingBalanceValue || "");
+
+        if (!invoiceNumber || !paymentManualSubmitButton) {
+            return;
+        }
+
+        if (!Number.isFinite(amountValue) || amountValue <= 0) {
+            setManualPaymentFeedback("Enter a valid payment amount.", "error");
+            paymentManualAmountField?.focus();
+            return;
+        }
+
+        if (Number.isFinite(balanceValue) && amountValue - balanceValue > 0.00001) {
+            setManualPaymentFeedback("Amount cannot exceed the remaining balance.", "error");
+            paymentManualAmountField?.focus();
+            return;
+        }
+
+        setManualPaymentFeedback("Saving manual payment...");
+        setAsyncButtonState(paymentManualSubmitButton, true, "Saving...");
+
+        try {
+            const response = await window.fetch(
+                window.EmariohRuntime?.resolveUrl
+                    ? window.EmariohRuntime.resolveUrl("api/payments/record-manual.php")
+                    : "api/payments/record-manual.php",
+                {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    credentials: "same-origin",
+                    body: JSON.stringify({
+                        invoice_number: invoiceNumber,
+                        amount: paymentManualAmountField?.value || "",
+                        payment_method: paymentManualMethodField?.value || "personal_gcash",
+                        reference_number: paymentManualReferenceField?.value || "",
+                        notes: paymentManualNoteField?.value || ""
+                    })
+                }
+            );
+            const payload = await response.json().catch(() => ({}));
+
+            if (!response.ok || payload?.ok === false) {
+                throw new Error(payload?.message || "Manual payment could not be recorded.");
+            }
+
+            setManualPaymentFeedback(payload?.message || "Manual payment recorded successfully.");
+            showPaymentActionFeedback(
+                "Manual Payment Recorded",
+                payload?.message || "Manual payment recorded successfully.",
+                "success"
+            );
+            window.setTimeout(() => window.location.reload(), 700);
+        } catch (error) {
+            setAsyncButtonState(paymentManualSubmitButton, false);
+            setManualPaymentFeedback(
+                error?.message || "Manual payment could not be recorded.",
+                "error"
+            );
+        }
+    };
+
     const sendPaymentReminder = async () => {
         const bookingId = Number.parseInt(activePaymentViewButton?.dataset.bookingId || "0", 10);
         const templateKey = activePaymentViewButton?.dataset.paymentReminderTemplate?.trim() || "";
@@ -1378,6 +1627,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    paymentDetailsManualPaymentButton?.addEventListener("click", () => {
+        showManualPaymentForm();
+    });
+
+    paymentManualCancelButton?.addEventListener("click", () => {
+        hideManualPaymentForm();
+    });
+
+    paymentManualPaymentForm?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        void recordManualPayment();
+    });
+
     paymentDetailsReminderButton?.addEventListener("click", () => {
         void sendPaymentReminder();
     });
@@ -1386,6 +1648,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activePaymentViewButton = null;
         setAsyncButtonState(paymentDetailsConfirmButton, false);
         setAsyncButtonState(paymentDetailsReminderButton, false);
+        hideManualPaymentForm();
     });
 
     navLinks.forEach((link) => {
@@ -1503,8 +1766,8 @@ document.addEventListener("DOMContentLoaded", () => {
         applyPaymentFilter(paymentStatusSelect.value || "all");
     });
 
-    if (paymentFilterButtons.length && paymentRows.length) {
-        applyPaymentFilter("all");
+    if ((paymentFilterButtons.length || paymentStatusSelect) && paymentRows.length) {
+        applyPaymentFilter(paymentStatusSelect?.value || "all");
     }
 
     clientFilterButtons.forEach((button) => {
@@ -1552,6 +1815,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     bindPaymentViewButtons();
+    openRecordFromLocationHash();
+    window.addEventListener("hashchange", openRecordFromLocationHash);
 
     window.addEventListener("storage", (event) => {
         if (event.key !== CLIENT_PORTAL_STORAGE_KEY || !paymentTableBody) {
