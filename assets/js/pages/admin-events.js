@@ -1,4 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
+    let appHiddenAt = 0;
+
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") {
+            appHiddenAt = Date.now();
+            return;
+        }
+
+        if (appHiddenAt && Date.now() - appHiddenAt >= 5000) {
+            window.location.reload();
+        }
+    });
+
     const STATUS_META = {
         pending: {
             label: "Pending",

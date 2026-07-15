@@ -17,7 +17,7 @@ if ($registrationSetupMode === 'admin' && emarioh_admin_exists($registrationDb))
     <title>Client Registration | Emarioh Catering Services</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/auth.css?v=20260331f">
-    <link rel="stylesheet" href="assets/css/pages/registration.css?v=20260706a">
+    <link rel="stylesheet" href="assets/css/pages/registration.css?v=20260716a">
 </head>
 <body class="auth-page auth-page--register" data-auth-guard="guest">
     <main class="register-shell">

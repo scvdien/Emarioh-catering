@@ -1545,6 +1545,11 @@
     color: var(--accent-strong);
 }
 
+.admin-events-page .event-calendar__day--today .event-calendar__date {
+    background: transparent;
+    color: var(--ink);
+}
+
 .admin-dashboard-home .event-calendar__day--today .event-calendar__date {
     background: transparent;
     color: var(--ink);
@@ -2777,6 +2782,23 @@
         margin-bottom: 0.42rem;
         padding: 0.72rem 0.78rem;
         border-radius: 1rem;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .admin-events-page .schedule-filters,
+    .admin-events-page .schedule-toolbar__actions,
+    .admin-events-page .schedule-month-nav {
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .admin-events-page .schedule-filters {
+        justify-content: center;
+    }
+
+    .admin-events-page .schedule-toolbar__actions {
+        justify-content: center;
     }
 
     .admin-events-page .booking-calendar-layout {

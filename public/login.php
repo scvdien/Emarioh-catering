@@ -13,7 +13,7 @@ $loginAdminExists = emarioh_admin_exists($loginDb);
     <title>Log In | Emarioh Catering Services</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/auth.css?v=20260331f">
-    <link rel="stylesheet" href="assets/css/pages/login.css?v=20260706a">
+    <link rel="stylesheet" href="assets/css/pages/login.css?v=20260716b">
 </head>
 <body class="auth-page auth-page--login" data-auth-guard="guest">
     <main class="login-shell">

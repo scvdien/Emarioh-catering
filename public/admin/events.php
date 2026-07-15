@@ -62,7 +62,7 @@ $scheduleEvents = array_map(static function (array $booking): array {
     <title>Emarioh Catering Services Booking Calendar</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
-    <link rel="stylesheet" href="assets/css/pages/admin-events.css?v=20260709g">
+    <link rel="stylesheet" href="assets/css/pages/admin-events.css?v=20260716b">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-events-page" data-schedule-default-filter="all" data-auth-guard="admin">
@@ -226,7 +226,7 @@ $scheduleEvents = array_map(static function (array $booking): array {
         window.EMARIOH_SCHEDULE_EVENTS = <?= json_encode($scheduleEvents, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
     </script>
     <script src="assets/js/pages/index.js?v=20260417c"></script>
-    <script src="assets/js/pages/admin-events.js?v=20260709b"></script>
+    <script src="assets/js/pages/admin-events.js?v=20260716c"></script>
 </body>
 </html>
 
