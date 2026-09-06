@@ -173,7 +173,7 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
     </script>
     <script src="assets/js/package-catalog.js?v=20260412c"></script>
     <script src="assets/js/payment-settings-store.js?v=20260412a"></script>
-    <script src="assets/js/client-portal-state.js?v=20260706b"></script>
+    <script src="assets/js/client-portal-state.js?v=20260903b"></script>
     <script src="assets/js/pages/client-dashboard.js?v=20260709a"></script>
 </body>
 </html>

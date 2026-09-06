@@ -803,23 +803,26 @@ function applyDashboardState(state) {
     const clientFirstName = getClientFirstName(resolveClientDisplayName(state));
     const isClosedBooking = bookingRequest?.status === "cancelled" || bookingRequest?.status === "rejected";
     const isApproved = bookingRequest?.status === "approved";
+    const isCompleted = bookingRequest?.status === "completed";
     const pendingBalanceValue = Number.isFinite(billingDetails?.pendingBalanceValue)
         ? Number(billingDetails.pendingBalanceValue)
         : parseCurrencyAmount(billingDetails?.pendingBalance);
-    const isFullyPaid = isApproved && billingDetails?.statusPillClass === "approved" && pendingBalanceValue <= 0;
+    const isFullyPaid = (isApproved || isCompleted) && billingDetails?.statusPillClass === "approved" && pendingBalanceValue <= 0;
     const billingMeta = bookingRequest ? buildBillingPageMeta(bookingRequest, billingDetails) : null;
     const selectedPackageLabel = bookingRequest?.packageLabel && bookingRequest.packageLabel !== "Package pending"
         ? bookingRequest.packageLabel
         : "";
     const bookingStatusLabel = !bookingRequest
         ? "No active booking yet"
-        : isFullyPaid
-            ? "Confirmed and paid"
-            : isApproved
-                ? "Approved booking"
-                : isClosedBooking
-                    ? "Request closed"
-                    : bookingMeta.label;
+        : isCompleted
+            ? "Event completed"
+            : isFullyPaid
+                ? "Confirmed and paid"
+                : isApproved
+                    ? "Approved booking"
+                    : isClosedBooking
+                        ? "Request closed"
+                        : bookingMeta.label;
     const bookingStatusNote = !bookingRequest
         ? "Start by creating your event request."
         : bookingRequest.submittedAt
@@ -832,13 +835,17 @@ function applyDashboardState(state) {
             : billingMeta?.statusText || bookingMeta.paymentStatus;
     const paymentStatusNote = !bookingRequest
         ? "Invoices will appear after booking confirmation."
-        : isApproved
+        : isCompleted
             ? isFullyPaid
-                ? "Payment has already been verified."
-                : `Invoice ${billingMeta?.invoiceNumber || "details"} is ready in Billing.`
-            : isClosedBooking
-                ? "No active invoice for this closed request."
-                : "Billing opens after approval.";
+                ? "Payment completed. Official receipt ready in Billing."
+                : "Event concluded. Please settle any remaining balance in Billing."
+            : isApproved
+                ? isFullyPaid
+                    ? "Payment has already been verified."
+                    : `Invoice ${billingMeta?.invoiceNumber || "details"} is ready in Billing.`
+                : isClosedBooking
+                    ? "No active invoice for this closed request."
+                    : "Billing opens after approval.";
     const eventScheduleValue = bookingRequest
         ? billingMeta?.eventSchedule || "Not scheduled"
         : "No schedule set";
@@ -853,81 +860,99 @@ function applyDashboardState(state) {
     );
     const headerSubtitle = !bookingRequest
         ? "Plan, manage, and track your catering events in one place."
-        : isApproved
-            ? isFullyPaid
-                ? "Your booking is confirmed. Review your event details and payment record in one place."
-                : "Your booking is approved. Review the invoice and complete the remaining payment on time."
-            : isClosedBooking
-                ? "Your previous request is closed, but you can begin a new booking anytime."
-                : "Track your request progress, schedule, and billing updates from this dashboard.";
+        : isCompleted
+            ? "Thank you for celebrating with Emarioh Catering Services! We hope you enjoyed the celebration."
+            : isApproved
+                ? isFullyPaid
+                    ? "Your booking is confirmed. Review your event details and payment record in one place."
+                    : "Your booking is approved. Review the invoice and complete the remaining payment on time."
+                : isClosedBooking
+                    ? "Your previous request is closed, but you can begin a new booking anytime."
+                    : "Track your request progress, schedule, and billing updates from this dashboard.";
     const heroStatusLabel = !bookingRequest
         ? "Ready to start"
-        : isFullyPaid
-            ? "Confirmed"
-            : isApproved
-                ? "Approved"
-                : isClosedBooking
-                    ? "Closed"
-                    : bookingMeta.label;
+        : isCompleted
+            ? "Completed"
+            : isFullyPaid
+                ? "Confirmed"
+                : isApproved
+                    ? "Approved"
+                    : isClosedBooking
+                        ? "Closed"
+                        : bookingMeta.label;
     const overviewTitle = !bookingRequest
         ? "Ready to plan your event?"
-        : isApproved
-            ? isFullyPaid
-                ? selectedPackageLabel || bookingRequest.eventType || "Your event is confirmed"
-                : "Your event is approved"
-            : isClosedBooking
-                ? "Ready to start a new booking?"
-                : selectedPackageLabel || bookingRequest.eventType || "Your booking request is being reviewed";
+        : isCompleted
+            ? "Thank you for celebrating with us!"
+            : isApproved
+                ? isFullyPaid
+                    ? selectedPackageLabel || bookingRequest.eventType || "Your event is confirmed"
+                    : "Your event is approved"
+                : isClosedBooking
+                    ? "Ready to start a new booking?"
+                    : selectedPackageLabel || bookingRequest.eventType || "Your booking request is being reviewed";
     const overviewIntro = !bookingRequest
         ? "Start a booking request and choose your preferred event date."
-        : isApproved
-            ? isFullyPaid
-                ? "Confirmed and fully paid."
-                : "Approved. Please settle your invoice to keep the schedule confirmed."
-            : isClosedBooking
-                ? "Your previous request is closed."
-                : "Under review by the admin team.";
+        : isCompleted
+            ? "Your event was successfully completed. Thank you for making us a part of your special day!"
+            : isApproved
+                ? isFullyPaid
+                    ? "Confirmed and fully paid."
+                    : "Approved. Please settle your invoice to keep the schedule confirmed."
+                : isClosedBooking
+                    ? "Your previous request is closed."
+                    : "Under review by the admin team.";
     const primaryActionLabel = !bookingRequest
         ? "Book Event"
-        : isApproved
-            ? isFullyPaid
-                ? "View My Booking"
-                : "Open Billing"
-            : isClosedBooking
-                ? "Book Again"
-                : "View My Booking";
+        : isCompleted
+            ? "Book Another Event"
+            : isApproved
+                ? isFullyPaid
+                    ? "View My Booking"
+                    : "Open Billing"
+                : isClosedBooking
+                    ? "Book Again"
+                    : "View My Booking";
     const primaryActionHref = !bookingRequest
         ? "client-bookings.php"
-        : isApproved
-            ? isFullyPaid
-                ? "client-my-bookings.php"
-                : "client-billing.php"
-            : isClosedBooking
-                ? "client-bookings.php"
-                : "client-my-bookings.php";
+        : isCompleted
+            ? "client-bookings.php"
+            : isApproved
+                ? isFullyPaid
+                    ? "client-my-bookings.php"
+                    : "client-billing.php"
+                : isClosedBooking
+                    ? "client-bookings.php"
+                    : "client-my-bookings.php";
     const overviewFootnote = !bookingRequest
         ? "Next step: Book Event."
-        : isApproved
-            ? isFullyPaid
-                ? "Next step: Final coordination."
-                : "Next step: Open Billing."
-            : isClosedBooking
-                ? "Next step: Book Event."
-            : "Next step: Wait for booking update.";
+        : isCompleted
+            ? "Next step: Book your next event."
+            : isApproved
+                ? isFullyPaid
+                    ? "Next step: Final coordination."
+                    : "Next step: Open Billing."
+                : isClosedBooking
+                    ? "Next step: Book Event."
+                    : "Next step: Wait for booking update.";
     const overviewNextStep = !bookingRequest
         ? "Next step: Choose your date and package"
-        : isApproved
-            ? isFullyPaid
-                ? "Next step: Wait for final coordination"
-                : "Next step: Review invoice and payment instructions"
-            : isClosedBooking
-                ? "Next step: Start a new booking request"
-            : "Next step: Wait for admin update";
+        : isCompleted
+            ? "Next step: Plan your next celebration with Emarioh"
+            : isApproved
+                ? isFullyPaid
+                    ? "Next step: Wait for final coordination"
+                    : "Next step: Review invoice and payment instructions"
+                : isClosedBooking
+                    ? "Next step: Start a new booking request"
+                    : "Next step: Wait for admin update";
     const overviewEyebrow = !bookingRequest
         ? "Event Planning"
-        : isClosedBooking
-            ? "Previous Booking"
-            : "Current Booking";
+        : isCompleted
+            ? "Completed Celebration"
+            : isClosedBooking
+                ? "Previous Booking"
+                : "Current Booking";
 
     setText("dashboardHeaderTitle", `Welcome back, ${clientFirstName}`);
     setText("dashboardHeaderSubtitle", headerSubtitle);
@@ -1064,7 +1089,7 @@ function renderDashboardBookingNotification(notification) {
 function applyBillingPageState(state) {
     const bookingRequest = state?.bookingRequest;
     const billingDetails = state?.billingDetails;
-    const isApproved = bookingRequest?.status === "approved";
+    const isApproved = bookingRequest?.status === "approved" || bookingRequest?.status === "completed";
     const hasRequest = Boolean(bookingRequest);
     const isClosedBooking = bookingRequest?.status === "cancelled" || bookingRequest?.status === "rejected";
     const bookingMeta = getBookingStatusMeta(bookingRequest?.status);
@@ -1073,17 +1098,18 @@ function applyBillingPageState(state) {
     setHidden("billingApprovedContent", !isApproved);
 
     if (!isApproved) {
-        const shouldShowPendingBookingLink = hasRequest;
-        const shouldShowPendingPrimaryAction = hasRequest;
+        const shouldShowPendingPrimaryAction = true;
 
         setText("billingTopbarLabel", "Billing Status");
         setText("billingTopbarValue", hasRequest ? bookingMeta.label : "No Booking Yet");
         setHidden("billingPaymentSection", true);
+        setHidden("billingPaidViewLayout", true);
+        setHidden("billingPaidBreakdownCard", true);
         setHidden("billingReceiptSection", true);
         setText(
             "billingPendingTitle",
             !hasRequest
-                ? "Submit a booking first"
+                ? "No Active Invoices Yet"
                 : bookingRequest.status === "cancelled"
                     ? "This booking was cancelled"
                     : bookingRequest.status === "rejected"
@@ -1093,22 +1119,42 @@ function applyBillingPageState(state) {
         setText(
             "billingPendingText",
             !hasRequest
-                ? "You need to submit a booking request first. Once approved, this page will show your invoice, payment method, and payment instructions."
+                ? "You don't have an active booking or pending balance right now. Once you submit a booking request and our team approves your date and catering package, your official invoice, down payment options, and QRPh payment portal will appear here."
                 : bookingRequest.status === "cancelled"
                     ? "This booking was cancelled, so there is no active invoice linked to it. You can submit a new request anytime."
                     : bookingRequest.status === "rejected"
                         ? "This booking request was rejected, so billing was not opened. You can revise your details and submit a new request anytime."
                         : "Your booking request is still being reviewed. Once approved, this page will show your invoice, payment method, and payment instructions."
         );
-        setHidden("billingPendingLink", !shouldShowPendingBookingLink);
+        setHidden("billingPendingLink", true);
         setHidden("billingPendingActions", !shouldShowPendingPrimaryAction);
 
-        if (shouldShowPendingBookingLink) {
-            setAction("billingPendingLink", "View booking", "client-my-bookings.php");
+        const eyebrowEl = document.getElementById("billingPendingEyebrow");
+        if (eyebrowEl) {
+            if (!hasRequest) {
+                eyebrowEl.innerHTML = '<i class="bi bi-info-circle text-warning me-1"></i> Ready to Book';
+            } else if (bookingRequest.status === "cancelled") {
+                eyebrowEl.innerHTML = '<i class="bi bi-x-circle text-muted me-1"></i> Booking Cancelled';
+            } else if (bookingRequest.status === "rejected") {
+                eyebrowEl.innerHTML = '<i class="bi bi-slash-circle text-danger me-1"></i> Booking Declined';
+            } else {
+                eyebrowEl.innerHTML = '<i class="bi bi-clock-history text-warning me-1"></i> Under Review';
+            }
         }
 
-        if (shouldShowPendingPrimaryAction) {
-            setAction("billingPendingPrimaryAction", "Go To My Bookings", "client-my-bookings.php");
+        const heroIconEl = document.getElementById("billingPendingHeroIcon");
+        if (heroIconEl) {
+            heroIconEl.className = !hasRequest
+                ? "bi bi-receipt-cutoff"
+                : bookingRequest.status === "cancelled" || bookingRequest.status === "rejected"
+                    ? "bi bi-calendar-x"
+                    : "bi bi-hourglass-split";
+        }
+
+        if (hasRequest) {
+            setAction("billingPendingPrimaryAction", "Go To My Bookings", "client-my-bookings.php", "bi bi-calendar2-check me-1");
+        } else {
+            setAction("billingPendingPrimaryAction", "Book An Event Now", "client-bookings.php", "bi bi-calendar2-plus me-1");
         }
 
         return;
@@ -1118,13 +1164,22 @@ function applyBillingPageState(state) {
     const pendingBalanceValue = Number.isFinite(billingDetails?.pendingBalanceValue)
         ? Number(billingDetails.pendingBalanceValue)
         : parseCurrencyAmount(billingDetails?.pendingBalance || billingMeta.pendingBalance);
-    const isFullyPaid = billingDetails?.statusPillClass === "approved" && pendingBalanceValue <= 0;
+    const isFullyPaid = (billingDetails?.statusPillClass === "approved" || bookingRequest?.status === "completed") && pendingBalanceValue <= 0;
     renderBillingPaymentChoiceState(billingMeta);
     renderBillingContextState(state, billingMeta);
     renderBillingPaymentState(state, billingMeta, true);
     renderBillingReceiptState(state, billingMeta, true);
 }
 function getBookingStatusMeta(status) {
+    if (status === "completed") {
+        return {
+            label: "Completed",
+            pillClass: "confirmed",
+            paymentStatus: "Settled",
+            stageValue: "Event Completed"
+        };
+    }
+
     if (status === "approved") {
         return {
             label: "Approved",
@@ -1247,14 +1302,18 @@ function setText(id, value) {
     }
 }
 
-function setAction(id, label, href) {
+function setAction(id, label, href, iconClass) {
     const element = document.getElementById(id);
 
     if (!element) {
         return;
     }
 
-    element.textContent = label;
+    if (iconClass) {
+        element.innerHTML = `<i class="${iconClass}"></i> <span>${label}</span>`;
+    } else {
+        element.textContent = label;
+    }
     element.setAttribute("href", href);
 }
 
@@ -1402,6 +1461,9 @@ function renderBillingContextState(state, billingMeta) {
 
     setText("billingPaymentFocusAmountValue", selectedOption?.amount || billingMeta.amountDue);
     setText("billingPaymentFocusOptionValue", optionLabel);
+    setText("billingPaymentTotalContractValue", billingMeta.totalAmount || billingMeta.amountDue || "PHP 0.00");
+    setText("billingPaymentPaidSoFarValue", billingMeta.totalPaid || "PHP 0.00");
+    setText("billingPaymentDueTodayValue", selectedOption?.amount || billingMeta.amountDue || "PHP 0.00");
     setText("billingPaymentAfterValue", afterPaymentText);
     setText("billingPaymentDueInlineValue", billingMeta.dueValue);
 
@@ -1412,6 +1474,7 @@ function renderBillingContextState(state, billingMeta) {
     setText("billingInvoiceScheduleValue", billingMeta.eventSchedule);
     setText("billingInvoiceVenueValue", billingMeta.venue);
     setText("billingInvoiceOptionValue", optionLabel);
+    setText("billingInvoiceTotalContractValue", billingMeta.totalAmount || "PHP 0.00");
     setText("billingInvoicePaidValue", billingMeta.totalPaid);
     setText("billingInvoiceBalanceValue", billingMeta.pendingBalance);
 }
@@ -1426,7 +1489,8 @@ function renderBillingPaymentState(state, billingMeta, isApproved) {
     const pendingBalanceValue = Number.isFinite(billingDetails.pendingBalanceValue)
         ? Number(billingDetails.pendingBalanceValue)
         : parseCurrencyAmount(billingDetails.pendingBalance || billingMeta.pendingBalance);
-    const isFullyPaid = billingDetails.statusPillClass === "approved" && pendingBalanceValue <= 0;
+    const bookingRequest = state?.bookingRequest;
+    const isFullyPaid = (billingDetails.statusPillClass === "approved" || bookingRequest?.status === "completed") && pendingBalanceValue <= 0;
     const isPaymongoEnabled = Boolean(billingDetails.isPaymongoEnabled);
     const selectedOption = getBillingPaymentOptionByValue(billingMeta, getSelectedBillingPaymentOptionValue(billingMeta));
     const selectedOptionValue = String(selectedOption?.value || "").trim();
@@ -1475,9 +1539,7 @@ function renderBillingPaymentState(state, billingMeta, isApproved) {
 function renderBillingReceiptState(state, billingMeta, isApproved) {
     const receiptSection = document.getElementById("billingReceiptSection");
     const receiptIntroText = document.getElementById("billingReceiptIntroText");
-    const receiptFeedback = document.getElementById("billingReceiptFeedback");
     const receiptViewLink = document.getElementById("billingReceiptViewLink");
-    const receiptDownloadLink = document.getElementById("billingReceiptDownloadLink");
     const receiptStatusValue = document.getElementById("billingReceiptStatusValue");
     const receiptStatusPill = document.getElementById("billingReceiptStatusPill");
     const receiptReferenceValue = document.getElementById("billingReceiptReferenceValue");
@@ -1489,7 +1551,8 @@ function renderBillingReceiptState(state, billingMeta, isApproved) {
     const pendingBalanceValue = Number.isFinite(billingDetails.pendingBalanceValue)
         ? Number(billingDetails.pendingBalanceValue)
         : parseCurrencyAmount(billingDetails.pendingBalance || billingMeta.pendingBalance);
-    const isFullyPaid = billingDetails.statusPillClass === "approved" && pendingBalanceValue <= 0;
+    const bookingRequest = state?.bookingRequest;
+    const isFullyPaid = (billingDetails.statusPillClass === "approved" || bookingRequest?.status === "completed") && pendingBalanceValue <= 0;
     const hasReceipt = Boolean(billingMeta.receiptHref);
     const paymentProviderText = String(billingMeta.paymentProvider || billingDetails.paymentProvider || billingDetails.paymentMethod || "").toLowerCase();
     const isManualPayment = paymentProviderText.includes("manual")
@@ -1501,38 +1564,35 @@ function renderBillingReceiptState(state, billingMeta, isApproved) {
         return;
     }
 
-    setHidden("billingReceiptSection", !isApproved || !isFullyPaid || !hasReceipt);
+    const showReceipt = Boolean(isApproved && isFullyPaid && hasReceipt);
+    const showBreakdown = Boolean(isApproved && isFullyPaid);
+    setHidden("billingPaidViewLayout", !showReceipt && !showBreakdown);
+    setHidden("billingReceiptSection", !showReceipt);
+    setHidden("billingPaidBreakdownCard", !showBreakdown);
+    document.body.classList.toggle("has-billing-receipt-active", showReceipt || showBreakdown);
 
-    if (!isApproved || !isFullyPaid || !hasReceipt) {
+    if (!showReceipt && !showBreakdown) {
         return;
     }
 
+    setText("billingPaidEventTitle", billingMeta.eventName || bookingRequest?.eventType || "Celebration Event");
+    setText("billingPaidPackageTitle", billingMeta.packageLabel || bookingRequest?.packageLabel || "Catering Package");
+    setText("billingPaidSchedule", billingMeta.eventSchedule || "Schedule confirmed");
+    setText("billingPaidVenue", billingMeta.venue || bookingRequest?.venue || "Venue confirmed");
+    const guestPax = bookingRequest?.guestCount ? `${bookingRequest.guestCount} pax` : "Standard";
+    setText("billingPaidGuests", guestPax);
+    setText("billingPaidBookingRef", bookingRequest?.reference || billingMeta.invoiceNumber || "REQ-TBA");
+    setText("billingPaidTotalContract", billingMeta.totalPaid || billingMeta.amountDue || "PHP 0.00");
+    setText("billingPaidTotalSettled", billingMeta.totalPaid || billingMeta.amountDue || "PHP 0.00");
+
     if (receiptIntroText) {
         receiptIntroText.textContent = isManualPayment
-            ? "Admin recorded your manual payment. Your system receipt is ready to open, download, print, or screenshot."
-            : "PayMongo already confirmed your payment. Your system receipt is ready to open, download, print, or screenshot.";
-    }
-
-    if (receiptFeedback) {
-        receiptFeedback.textContent = isManualPayment
-            ? "Payment posted successfully. Your manual payment was recorded and your receipt is now available."
-            : "Payment posted successfully. The PayMongo checkout step is complete and your receipt is now available.";
+            ? "Admin recorded your manual payment. Open your system receipt to download, print, or screenshot it."
+            : "PayMongo already confirmed your payment. Open your system receipt to download, print, or screenshot it.";
     }
 
     if (receiptViewLink) {
         receiptViewLink.setAttribute("href", billingMeta.receiptHref);
-    }
-
-    if (receiptDownloadLink) {
-        let downloadHref = (billingMeta.receiptDownloadHref || billingMeta.receiptHref || "")
-            .replace(/([?&])print=1\b/, "$1download=1");
-
-        if (downloadHref && !/[?&]download=1\b/.test(downloadHref)) {
-            downloadHref += `${downloadHref.includes("?") ? "&" : "?"}download=1`;
-        }
-
-        receiptDownloadLink.setAttribute("href", downloadHref);
-        receiptDownloadLink.setAttribute("download", "");
     }
 
     if (receiptStatusValue) {

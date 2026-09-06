@@ -13,7 +13,7 @@ $currentUser = emarioh_require_page_role('admin');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Website Inquiries</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/messages.css?v=20260410e">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903b">
     <link rel="stylesheet" href="assets/css/pages/admin-messages.css?v=20260709c">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>

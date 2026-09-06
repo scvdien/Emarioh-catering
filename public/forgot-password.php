@@ -8,7 +8,7 @@
     <title>Forgot Password | Emarioh Catering Services</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/auth.css?v=20260331f">
-    <link rel="stylesheet" href="assets/css/pages/registration.css?v=20260418b">
+    <link rel="stylesheet" href="assets/css/pages/registration.css?v=20260904a">
 </head>
 <body class="auth-page auth-page--register" data-auth-guard="guest">
     <main class="register-shell">
@@ -60,9 +60,12 @@
 
                         <div class="register-field">
                             <label for="forgotPhone">Mobile Number</label>
-                            <div class="register-input-wrap">
-                                <input id="forgotPhone" name="mobile" type="tel" inputmode="numeric" placeholder="0917 555 2481" autocomplete="tel" required>
-                                <span class="register-input-icon" aria-hidden="true"><i class="bi bi-phone"></i></span>
+                            <div class="register-input-wrap register-input-wrap--phone">
+                                <span class="register-phone-prefix" aria-hidden="true">
+                                    <span class="register-phone-flag">🇵🇭</span>
+                                    <span class="register-phone-code">+63</span>
+                                </span>
+                                <input id="forgotPhone" name="mobile" type="tel" inputmode="numeric" placeholder="917 555 2481" maxlength="13" autocomplete="tel" required>
                             </div>
                         </div>
 
@@ -129,6 +132,6 @@
 
     <?= emarioh_render_vendor_runtime_assets(false); ?>
     <script src="assets/js/auth-api.js"></script>
-    <script src="assets/js/pages/auth-forgot-password-page.js"></script>
+    <script src="assets/js/pages/auth-forgot-password-page.js?v=20260904a"></script>
 </body>
 </html>

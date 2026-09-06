@@ -302,6 +302,49 @@
             box-shadow: 0 0 0 4px rgba(187, 145, 71, 0.1);
         }
 
+        .register-input-wrap--phone {
+            display: flex;
+            align-items: center;
+        }
+
+        .register-phone-prefix {
+            position: absolute;
+            left: 0.88rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #31463d;
+            pointer-events: none;
+            user-select: none;
+            padding-right: 0.55rem;
+            border-right: 1.5px solid #e9dfd1;
+            line-height: 1.2;
+            z-index: 2;
+        }
+
+        .register-phone-flag {
+            font-size: 1.05rem;
+            line-height: 1;
+        }
+
+        .register-phone-code {
+            font-family: inherit;
+            letter-spacing: 0.02em;
+        }
+
+        .register-input-wrap--phone input {
+            padding-left: 4.85rem !important;
+        }
+
+        .register-input-wrap--phone input:focus ~ .register-phone-prefix,
+        .register-input-wrap--phone:focus-within .register-phone-prefix {
+            border-right-color: rgba(31, 88, 66, 0.4);
+        }
+
         .register-input-wrap--otp input {
             text-align: center;
             letter-spacing: 0.32em;

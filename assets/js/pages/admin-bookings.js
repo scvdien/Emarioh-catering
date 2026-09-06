@@ -26,6 +26,16 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         }
 
+        if (nextStatus === "completed") {
+            return {
+                title: "Complete Event?",
+                message: `Mark ${bookingReference} as completed? This archives the event and updates the client portal.`,
+                confirmLabel: "Mark as Completed",
+                loadingLabel: "Completing...",
+                buttonClass: "action-btn--primary"
+            };
+        }
+
         return {
             title: "Reject Booking?",
             message: `Reject ${bookingReference}? This will close the booking request.`,

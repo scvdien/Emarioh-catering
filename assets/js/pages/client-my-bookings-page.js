@@ -27,10 +27,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (tabInstance) {
                     tabInstance.show();
-                    return;
+                } else {
+                    targetButton.click();
                 }
 
-                targetButton.click();
+                const targetPaneSelector = targetButton.getAttribute("data-bs-target");
+                if (targetPaneSelector) {
+                    document.querySelectorAll(".tab-pane").forEach((pane) => {
+                        pane.classList.remove("show", "active");
+                    });
+                    const targetPane = document.querySelector(targetPaneSelector);
+                    if (targetPane) {
+                        targetPane.classList.add("show", "active");
+                    }
+                }
             }
         });
 
@@ -44,6 +54,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     bookingSection.addEventListener("click", (event) => {
+        const viewButton = event.target.closest("[data-booking-view]");
+        if (viewButton) {
+            const data = viewButton.dataset;
+            const summaryModalElement = document.getElementById("bookingSummaryModal");
+            const summaryModal = summaryModalElement && window.bootstrap?.Modal
+                ? window.bootstrap.Modal.getOrCreateInstance(summaryModalElement)
+                : null;
+
+            const setField = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val || "-";
+            };
+
+            setField("summaryModalLabel", `${data.eventType || "Event"} Celebration`);
+            setField("summaryModalRef", data.reference);
+            setField("summaryModalSchedule", data.eventDate);
+            setField("summaryModalVenue", data.venue);
+            setField("summaryModalGuests", data.guests);
+            setField("summaryModalPackage", data.package);
+            setField("summaryModalTierPrice", data.tierPrice ? `Tier: ${data.tierPrice}` : "Standard Tier");
+            setField("summaryModalInvoice", data.invoiceNumber ? `Invoice: ${data.invoiceNumber}` : "Invoice on file");
+            setField("summaryModalPaid", `PHP ${data.amountPaid || "0.00"}`);
+
+            if (summaryModal) {
+                summaryModal.show();
+            }
+            return;
+        }
+
         const cancelButton = event.target.closest("[data-booking-cancel]");
 
         if (!cancelButton) {
@@ -111,7 +150,7 @@ async function submitBookingCancellation(cancellation, confirmButton) {
         });
 
         syncCancelledPortalBooking(cancellation.bookingReference);
-        window.location.assign("client-my-bookings.php?cancelled=1");
+        window.location.assign("client-my-bookings.php");
     } catch (error) {
         confirmButton.disabled = false;
         confirmButton.textContent = "Try Again";

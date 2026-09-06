@@ -84,6 +84,19 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
         $submittedAt = emarioh_admin_datetime_label((string) ($booking['submitted_at'] ?? ''));
         $guestCount = (int) ($booking['guest_count'] ?? 0);
         $notes = emarioh_admin_booking_notes($booking);
+
+        $amountPaid = (float) ($booking['invoice_amount_paid'] ?? 0);
+        $balanceDue = (float) ($booking['invoice_balance_due'] ?? 0);
+        $paymentMeta = '';
+
+        if ($status === 'completed') {
+            if ($amountPaid > 0 && $balanceDue <= 0.0001) {
+                $paymentMeta = '<span class="booking-payment-meta booking-payment-meta--paid"><span class="booking-payment-meta__dot" aria-hidden="true"></span>Fully Paid</span>';
+            } elseif ($balanceDue > 0.0001) {
+                $paymentMeta = '<span class="booking-payment-meta booking-payment-meta--balance"><span class="booking-payment-meta__dot" aria-hidden="true"></span>Bal: ₱' . number_format($balanceDue, 2) . '</span>';
+            }
+        }
+
         $actions = '
             <button
                 class="action-btn booking-row-actions__view"
@@ -98,17 +111,37 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
                 <button class="action-btn action-btn--primary" type="button" data-booking-admin-action="approved" data-booking-id="' . (int) $booking['id'] . '" data-booking-reference="' . $escape($reference) . '">Approve</button>
                 <button class="action-btn action-btn--soft" type="button" data-booking-admin-action="rejected" data-booking-id="' . (int) $booking['id'] . '" data-booking-reference="' . $escape($reference) . '">Reject</button>
             ';
-        } elseif (emarioh_can_send_final_event_reminder($booking)) {
+        } elseif ($status === 'approved') {
             $actions .= '
-                <button class="action-btn action-btn--soft" type="button" data-booking-message-action="final_event_reminder" data-booking-id="' . (int) $booking['id'] . '" data-booking-reference="' . $escape($reference) . '">Final Reminder</button>
+                <button class="action-btn action-btn--primary" type="button" data-booking-admin-action="completed" data-booking-id="' . (int) $booking['id'] . '" data-booking-reference="' . $escape($reference) . '">Complete Event</button>
             ';
+            if (emarioh_can_send_final_event_reminder($booking)) {
+                $actions .= '
+                    <button class="action-btn action-btn--soft" type="button" data-booking-message-action="final_event_reminder" data-booking-id="' . (int) $booking['id'] . '" data-booking-reference="' . $escape($reference) . '">Final Reminder</button>
+                ';
+            }
         }
+
+        $searchIndex = strtolower(implode(' ', array_filter([
+            $clientName,
+            $mobile,
+            $reference,
+            $eventType,
+            $eventDate,
+            $eventTime,
+            $packageLabel,
+            $venueName,
+            $venueOptionLabel,
+            $statusLabel,
+            $notes,
+        ])));
 
         $rows[] = '
             <tr
                 class="admin-booking-row"
                 data-booking-row
                 data-booking-status="' . $escape($filterKey) . '"
+                data-booking-search="' . $escape($searchIndex) . '"
                 data-reference="' . $escape($reference) . '"
                 data-submitted-at="' . $escape($submittedAt) . '"
                 data-client-name="' . $escape($clientName) . '"
@@ -137,7 +170,12 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
                     <span class="d-block text-secondary small fw-normal">' . $escape($eventDate . ' | ' . $eventTime) . '</span>
                     <span class="d-block text-secondary small fw-normal">' . $escape($packageLabel) . '</span>
                 </td>
-                <td><span class="status-pill status-pill--' . $escape($statusClass) . '">' . $escape($statusLabel) . '</span></td>
+                <td class="booking-status-cell">
+                    <div class="booking-status-group">
+                        <span class="status-pill status-pill--' . $escape($statusClass) . '">' . $escape($statusLabel) . '</span>
+                        ' . $paymentMeta . '
+                    </div>
+                </td>
                 <td>
                     <div class="booking-row-actions">
                         <div class="action-menu" data-action-menu>
@@ -164,8 +202,8 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Booking Management</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260710d">
-    <link rel="stylesheet" href="assets/css/pages/admin-bookings.css?v=20260714k">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903b">
+    <link rel="stylesheet" href="assets/css/pages/admin-bookings.css?v=20260906a">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-bookings-page" data-auth-guard="admin">
@@ -234,16 +272,6 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
                         <div class="topbar-copy">
                             <h1 class="topbar-copy__title">Booking Management</h1>
                         </div>
-                        <div class="booking-status-select-wrap">
-                            <label class="visually-hidden" for="bookingStatusSelect">Filter bookings</label>
-                            <select class="form-select booking-status-select" id="bookingStatusSelect" aria-label="Filter bookings">
-                                <option value="all">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="approved">Approved</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                        </div>
                     </div>
                     <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
@@ -257,14 +285,21 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
                                 </div>
                             <?php endif; ?>
 
-                            <div class="booking-queue-toolbar">
-                                <div class="booking-filters" aria-label="Quick booking filters">
-                                    <button class="booking-filter-chip is-active" type="button" data-booking-filter="all" aria-pressed="true">All</button>
-                                    <button class="booking-filter-chip" type="button" data-booking-filter="pending" aria-pressed="false">Pending</button>
-                                    <button class="booking-filter-chip" type="button" data-booking-filter="approved" aria-pressed="false">Approved</button>
-                                    <button class="booking-filter-chip" type="button" data-booking-filter="rejected" aria-pressed="false">Rejected</button>
-                                    <button class="booking-filter-chip" type="button" data-booking-filter="cancelled" aria-pressed="false">Cancelled</button>
-                                </div>
+                            <div class="admin-toolbar booking-toolbar">
+                                <label class="admin-search" for="bookingSearchInput">
+                                    <span class="admin-search__icon"><i class="bi bi-search"></i></span>
+                                    <input class="admin-search__input" type="search" id="bookingSearchInput" placeholder="Search client, reference, event">
+                                </label>
+                                <label class="booking-status-select-wrap" for="bookingStatusSelect">
+                                    <select class="booking-status-select" id="bookingStatusSelect" aria-label="Filter bookings by status">
+                                        <option value="all" selected>All</option>
+                                        <option value="pending">Pending</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </label>
                             </div>
 
                             <div class="table-responsive dashboard-table-wrap booking-queue-table">
@@ -381,7 +416,7 @@ function emarioh_render_admin_booking_rows(array $bookings, callable $escape): s
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
     <script src="assets/js/logout-confirmation.js"></script>
-    <script src="assets/js/pages/index.js?v=20260710b"></script>
-    <script src="assets/js/pages/admin-bookings.js?v=20260709a"></script>
+    <script src="assets/js/pages/index.js?v=20260906a"></script>
+    <script src="assets/js/pages/admin-bookings.js?v=20260903a"></script>
 </body>
 </html>

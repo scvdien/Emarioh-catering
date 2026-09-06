@@ -66,11 +66,8 @@ $settingsSectionUrl = static function (string $sectionId, array $query = []) use
     return $basePath;
 };
 $settingsSectionHiddenAttr = static function (string $sectionId) use ($settingsPageIsDetail, $settingsPageSection): string {
-    if (!$settingsPageIsDetail) {
-        return '';
-    }
-
-    return $settingsPageSection === $sectionId ? '' : ' hidden';
+    $activeSection = $settingsPageSection !== '' ? $settingsPageSection : 'admin-account';
+    return $activeSection === $sectionId ? '' : ' hidden';
 };
 $publicSiteSettings = emarioh_fetch_public_site_settings($db);
 $heroImagePath = emarioh_normalize_public_asset_path(
@@ -841,12 +838,11 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services <?= $escape($settingsPageTitle) ?></title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903c">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260714o">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260903b">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
-</head>
-<body class="admin-dashboard-page admin-settings-page<?= $settingsPageIsDetail ? ' admin-settings-detail-page' : '' ?>" data-auth-guard="admin" data-mobile-settings-view="<?= $settingsPageIsDetail ? 'detail' : 'hub' ?>"<?= $settingsPageIsDetail ? ' data-active-settings-section="' . $escape($settingsPageSection) . '"' : '' ?>>
+<body class="admin-dashboard-page admin-settings-page<?= $settingsPageIsDetail ? ' admin-settings-detail-page' : '' ?>" data-auth-guard="admin" data-mobile-settings-view="detail"<?= $settingsPageIsDetail ? ' data-active-settings-section="' . $escape($settingsPageSection) . '"' : '' ?>>
     <div class="dashboard-shell container-fluid">
         <div class="dashboard-frame">
             <aside class="dashboard-sidebar offcanvas-xl offcanvas-start border-0" tabindex="-1" id="dashboardSidebar" aria-labelledby="dashboardSidebarLabel">
@@ -1004,14 +1000,12 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     </div>
     <?php endif; ?>
 
-    <?php if (!$settingsPageIsDetail): ?>
     <nav class="settings-tabs settings-filter-bar" aria-label="Settings quick filters">
-        <button class="settings-tab is-active" type="button" data-settings-filter="admin-account">Admin Account</button>
-        <button class="settings-tab" type="button" data-settings-filter="manage-public-page">Manage Public Page</button>
-        <button class="settings-tab" type="button" data-settings-filter="payment-settings">Payment</button>
-        <button class="settings-tab" type="button" data-settings-filter="sms-templates">SMS Templates</button>
+        <button class="settings-tab<?= ($settingsPageSection === '' || $settingsPageSection === 'admin-account') ? ' is-active' : '' ?>" type="button" data-settings-filter="admin-account"><i class="bi bi-person-gear"></i><span>Admin Account</span></button>
+        <button class="settings-tab<?= $settingsPageSection === 'manage-public-page' ? ' is-active' : '' ?>" type="button" data-settings-filter="manage-public-page"><i class="bi bi-window-stack"></i><span>Manage Public Page</span></button>
+        <button class="settings-tab<?= $settingsPageSection === 'payment-settings' ? ' is-active' : '' ?>" type="button" data-settings-filter="payment-settings"><i class="bi bi-credit-card-2-front"></i><span>Payment</span></button>
+        <button class="settings-tab<?= $settingsPageSection === 'sms-templates' ? ' is-active' : '' ?>" type="button" data-settings-filter="sms-templates"><i class="bi bi-chat-left-dots"></i><span>SMS Templates</span></button>
     </nav>
-    <?php endif; ?>
         <section class="settings-section" id="admin-account" data-settings-section="admin-account"<?= $settingsSectionHiddenAttr('admin-account') ?>>
             <div class="settings-section__intro">
                 <div>
@@ -2187,6 +2181,6 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/pages/index.js?v=20260417c"></script>
     <script src="assets/js/pages/admin-packages.js"></script>
-    <script src="assets/js/pages/admin-settings.js?v=20260714i"></script>
+    <script src="assets/js/pages/admin-settings.js?v=20260903a"></script>
 </body>
 </html>

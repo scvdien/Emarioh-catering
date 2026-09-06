@@ -29,18 +29,53 @@
             return String(value || "").replace(/\D/g, "");
         }
 
-        function maskMobile(value) {
-            var normalizedDigits = digits(value);
+        function formatPhilippineLocalMobile(raw) {
+            var d = String(raw || "").replace(/\D/g, "");
+            if (d.indexOf("63") === 0 && d.length > 2) {
+                d = d.slice(2);
+            }
+            while (d.charAt(0) === "0") {
+                d = d.slice(1);
+            }
+            d = d.slice(0, 10);
+            if (d.length <= 3) {
+                return d;
+            }
+            if (d.length <= 6) {
+                return d.slice(0, 3) + " " + d.slice(3);
+            }
+            return d.slice(0, 3) + " " + d.slice(3, 6) + " " + d.slice(6, 10);
+        }
 
-            if (!normalizedDigits) {
+        function getNormalizedMobileSubmission(value) {
+            var d = digits(value);
+            if (d.indexOf("63") === 0 && d.length > 2) {
+                d = d.slice(2);
+            }
+            while (d.charAt(0) === "0") {
+                d = d.slice(1);
+            }
+            return "63" + d;
+        }
+
+        function maskMobile(value) {
+            var d = digits(value);
+            if (d.indexOf("63") === 0 && d.length > 2) {
+                d = d.slice(2);
+            }
+            while (d.charAt(0) === "0") {
+                d = d.slice(1);
+            }
+
+            if (!d) {
                 return "your mobile number";
             }
 
-            if (normalizedDigits.length <= 4) {
-                return normalizedDigits;
+            if (d.length <= 4) {
+                return "+63 " + d;
             }
 
-            return normalizedDigits.slice(0, 4) + " *** " + normalizedDigits.slice(-4);
+            return "+63 " + d.slice(0, 3) + " *** " + d.slice(-4);
         }
 
         function setStep(step) {
@@ -121,14 +156,22 @@
         function validateMobileStep() {
             mobileInput.setCustomValidity("");
 
-            if (!mobileInput.value.trim()) {
+            var cleanDigits = digits(mobileInput.value);
+            if (cleanDigits.indexOf("63") === 0 && cleanDigits.length > 2) {
+                cleanDigits = cleanDigits.slice(2);
+            }
+            while (cleanDigits.charAt(0) === "0") {
+                cleanDigits = cleanDigits.slice(1);
+            }
+
+            if (!cleanDigits) {
                 mobileInput.setCustomValidity("Enter the mobile number linked to your account.");
                 mobileInput.reportValidity();
                 return false;
             }
 
-            if (digits(mobileInput.value).length < 10) {
-                mobileInput.setCustomValidity("Enter a valid mobile number.");
+            if (cleanDigits.length !== 10 || cleanDigits.charAt(0) !== "9") {
+                mobileInput.setCustomValidity("Please enter a valid 10-digit mobile number starting with 9.");
                 mobileInput.reportValidity();
                 return false;
             }
@@ -176,8 +219,9 @@
             setButtonsBusy([sendOtpButton, resendOtpButton], true, "Sending...");
 
             try {
+                var submissionMobile = getNormalizedMobileSubmission(mobileInput.value);
                 var response = await window.EmariohAuth.post("request-password-reset.php", {
-                    mobile: mobileInput.value.trim()
+                    mobile: submissionMobile
                 });
 
                 otpTarget.textContent = response.masked_mobile || maskMobile(mobileInput.value);
@@ -214,7 +258,7 @@
 
             try {
                 await window.EmariohAuth.post("verify-password-reset-otp.php", {
-                    mobile: mobileInput.value.trim(),
+                    mobile: getNormalizedMobileSubmission(mobileInput.value),
                     otp: enteredOtp
                 });
 
@@ -258,6 +302,13 @@
 
         otpInput.addEventListener("input", function () {
             otpInput.value = digits(otpInput.value).slice(0, 6);
+        });
+
+        mobileInput.addEventListener("input", function () {
+            var formatted = formatPhilippineLocalMobile(mobileInput.value);
+            if (mobileInput.value !== formatted) {
+                mobileInput.value = formatted;
+            }
         });
 
         [mobileInput, passwordInput, confirmPasswordInput].forEach(function (field) {
@@ -311,7 +362,7 @@
 
             try {
                 var response = await window.EmariohAuth.post("reset-password.php", {
-                    mobile: mobileInput.value.trim(),
+                    mobile: getNormalizedMobileSubmission(mobileInput.value),
                     password: passwordInput.value
                 });
 

@@ -5,11 +5,17 @@ require dirname(__DIR__, 2) . '/app/bootstrap.php';
 
 $db = emarioh_db();
 $currentUser = emarioh_require_page_role('client');
+$currentUserId = (int) ($currentUser['id'] ?? 0);
 $clientPortalState = emarioh_fetch_client_portal_state(
     $db,
-    (int) $currentUser['id'],
+    $currentUserId,
     (string) ($currentUser['full_name'] ?? '')
 );
+$paymentHistory = emarioh_fetch_client_payment_history($db, $currentUserId);
+$totalReceiptsCount = 0;
+foreach ($paymentHistory as $historyItemCheck) {
+    $totalReceiptsCount += (int) ($historyItemCheck['receipt_count'] ?? 1);
+}
 $clientPortalStateJson = json_encode(
     $clientPortalState,
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
@@ -26,10 +32,10 @@ $packageCatalogJson = json_encode(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Client Billing</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/pages/client-billing.css?v=20260418i">
     <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/pages/client-billing.css?v=20260904z">
 </head>
-<body class="dashboard-page client-dashboard-page client-page--sticky-topbar" data-auth-guard="client">
+<body class="dashboard-page client-dashboard-page client-page--sticky-topbar client-billing-page" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
         <div class="dashboard-frame">
             <aside class="dashboard-sidebar offcanvas-xl offcanvas-start border-0" tabindex="-1" id="dashboardSidebar" aria-labelledby="dashboardSidebarLabel">
@@ -75,37 +81,93 @@ $packageCatalogJson = json_encode(
                         <button class="btn mobile-menu-button d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashboardSidebar" aria-controls="dashboardSidebar" aria-label="Open navigation"><i class="bi bi-list"></i></button>
                         <div class="topbar-copy"><h1 class="topbar-copy__title">Billing</h1></div>
                     </div>
+                    <?php if (!empty($paymentHistory)): ?>
+                        <div class="topbar-trailing">
+                            <button type="button" class="billing-history-topbar-btn" data-bs-toggle="modal" data-bs-target="#billingHistoryModal" aria-label="View Payment History">
+                                <i class="bi bi-clock-history" aria-hidden="true"></i>
+                                <span class="billing-history-topbar-btn__label-full">Payment History</span>
+                                <span class="billing-history-topbar-btn__label-short">History</span>
+                                <span class="billing-history-topbar-btn__badge" aria-label="<?= $totalReceiptsCount ?> past receipts"><?= $totalReceiptsCount ?></span>
+                            </button>
+                        </div>
+                    <?php endif; ?>
                 </header>
 
                 <main class="dashboard-content client-dashboard-content billing-page">
-                    <section class="surface-card billing-empty-state" id="billingPendingState">
-                        <div class="panel-heading">
-                            <div class="panel-heading__copy">
-                                <p class="billing-empty-state__status" id="billingPendingTitle">Payment opens after approval</p>
+                    <section class="billing-empty-state-wrapper" id="billingPendingState">
+                        <article class="billing-unified-empty-card surface-card">
+                            <!-- Top Hero: Status, Text, and Primary Action -->
+                            <div class="billing-unified-empty-card__hero">
+                                <div class="billing-unified-empty-card__icon-badge" aria-hidden="true">
+                                    <i class="bi bi-receipt-cutoff" id="billingPendingHeroIcon"></i>
+                                </div>
+                                <div class="billing-unified-empty-card__content">
+                                    <div class="billing-empty-state-hero__meta">
+                                        <span class="panel-heading__eyebrow" id="billingPendingEyebrow"><i class="bi bi-shield-check text-warning me-1"></i> Billing Status</span>
+                                        <h2 class="billing-unified-empty-card__title" id="billingPendingTitle">No Active Invoices Yet</h2>
+                                    </div>
+                                    <p class="billing-unified-empty-card__text" id="billingPendingText">
+                                        You don't have an active booking or pending balance right now. Once you submit a booking request and our team approves your date and catering package, your official invoice, down payment options, and QRPh payment portal will appear here.
+                                    </p>
+                                    <div class="billing-unified-empty-card__actions" id="billingPendingActions">
+                                        <a class="client-action-button client-action-button--primary" href="client-bookings.php" id="billingPendingPrimaryAction">
+                                            <i class="bi bi-calendar2-plus me-1"></i> Book An Event Now
+                                        </a>
+                                        <?php if (!empty($paymentHistory)): ?>
+                                            <button type="button" class="client-action-button client-action-button--secondary" data-bs-toggle="modal" data-bs-target="#billingHistoryModal" id="billingPendingHistoryBtn">
+                                                <i class="bi bi-clock-history me-1"></i> View Past Receipts (<?= $totalReceiptsCount ?>)
+                                            </button>
+                                        <?php endif; ?>
+                                        <a class="client-action-button client-action-button--secondary" href="client-my-bookings.php" id="billingPendingLink" hidden>
+                                            <i class="bi bi-calendar2-check me-1"></i> View My Bookings
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                            <a href="client-my-bookings.php" id="billingPendingLink">View booking</a>
-                        </div>
-                        <p class="billing-empty-state__text" id="billingPendingText">Your booking request is still being reviewed. Once approved, this page will show your invoice, payment method, and payment instructions.</p>
-                        <div class="billing-empty-state__actions" id="billingPendingActions">
-                            <a class="client-action-button client-action-button--primary" href="client-my-bookings.php" id="billingPendingPrimaryAction">Go To My Bookings</a>
-                        </div>
-                        <div class="billing-empty-state__preview" aria-hidden="true">
-                            <article class="billing-preview-card">
-                                <span class="billing-preview-card__icon"><i class="bi bi-hourglass-split"></i></span>
-                                <h3>Booking review first</h3>
-                                <p>Billing stays locked while the team checks your date, venue, and package availability.</p>
-                            </article>
-                            <article class="billing-preview-card">
-                                <span class="billing-preview-card__icon"><i class="bi bi-receipt-cutoff"></i></span>
-                                <h3>Invoice opens after approval</h3>
-                                <p>Once approved, you will see the exact amount to settle, your due date, and the invoice number here.</p>
-                            </article>
-                            <article class="billing-preview-card">
-                                <span class="billing-preview-card__icon"><i class="bi bi-wallet2"></i></span>
-                                <h3>Pay what is allowed</h3>
-                                <p>If your package allows down payment, this page will show that option first so you can pay only the reservation amount.</p>
-                            </article>
-                        </div>
+
+                            <!-- Divider with Guide Badge -->
+                            <div class="billing-unified-empty-card__divider" aria-hidden="true">
+                                <span class="billing-unified-empty-card__divider-line"></span>
+                                <span class="billing-unified-empty-card__divider-pill"><i class="bi bi-journal-bookmark me-1 text-primary"></i> 3-Step Payment Guide</span>
+                                <span class="billing-unified-empty-card__divider-line"></span>
+                            </div>
+
+                            <!-- Integrated Stepper: 3 Connected Steps -->
+                            <div class="billing-unified-stepper" aria-label="How Billing Works">
+                                <div class="billing-unified-step">
+                                    <div class="billing-unified-step__indicator">
+                                        <span class="billing-unified-step__num">01</span>
+                                        <span class="billing-unified-step__icon"><i class="bi bi-calendar2-heart"></i></span>
+                                    </div>
+                                    <div class="billing-unified-step__info">
+                                        <h4 class="billing-unified-step__title">Book Your Event</h4>
+                                        <p class="billing-unified-step__desc">Select your date, venue, guest count, and catering menu package.</p>
+                                    </div>
+                                </div>
+                                <div class="billing-unified-step__connector" aria-hidden="true"><i class="bi bi-chevron-right"></i></div>
+                                <div class="billing-unified-step">
+                                    <div class="billing-unified-step__indicator">
+                                        <span class="billing-unified-step__num">02</span>
+                                        <span class="billing-unified-step__icon"><i class="bi bi-patch-check"></i></span>
+                                    </div>
+                                    <div class="billing-unified-step__info">
+                                        <h4 class="billing-unified-step__title">Admin Review & Bill</h4>
+                                        <p class="billing-unified-step__desc">Our coordinators verify your event date and open your itemized invoice.</p>
+                                    </div>
+                                </div>
+                                <div class="billing-unified-step__connector" aria-hidden="true"><i class="bi bi-chevron-right"></i></div>
+                                <div class="billing-unified-step">
+                                    <div class="billing-unified-step__indicator">
+                                        <span class="billing-unified-step__num">03</span>
+                                        <span class="billing-unified-step__icon"><i class="bi bi-receipt"></i></span>
+                                    </div>
+                                    <div class="billing-unified-step__info">
+                                        <h4 class="billing-unified-step__title">Pay & Get Receipt</h4>
+                                        <p class="billing-unified-step__desc">Settle balance via QRPh and download your official system receipt.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
                     </section>
 
                     <section id="billingApprovedContent" hidden>
@@ -121,16 +183,24 @@ $packageCatalogJson = json_encode(
                                             </div>
                                             <span class="billing-payment-focus__badge billing-payment-focus__badge--plain" id="billingPaymentFocusOptionValue">Remaining balance</span>
                                         </div>
-                                        <div class="billing-payment-focus__meta">
-                                            <article class="billing-mini-stat">
-                                                <span>After payment</span>
-                                                <strong id="billingPaymentAfterValue">PHP 0.00 left</strong>
-                                            </article>
-                                            <article class="billing-mini-stat">
-                                                <span>Due date</span>
-                                                <strong id="billingPaymentDueInlineValue">See invoice</strong>
-                                            </article>
+
+                                        <div class="billing-financial-bar" aria-label="Financial summary">
+                                            <div class="billing-financial-stat">
+                                                <span class="billing-financial-stat__label">Total Contract</span>
+                                                <strong class="billing-financial-stat__val" id="billingPaymentTotalContractValue">PHP 0.00</strong>
+                                            </div>
+                                            <div class="billing-financial-bar__sep" aria-hidden="true"></div>
+                                            <div class="billing-financial-stat">
+                                                <span class="billing-financial-stat__label">Paid So Far</span>
+                                                <strong class="billing-financial-stat__val billing-financial-stat__val--paid" id="billingPaymentPaidSoFarValue">PHP 0.00</strong>
+                                            </div>
+                                            <div class="billing-financial-bar__sep" aria-hidden="true"></div>
+                                            <div class="billing-financial-stat">
+                                                <span class="billing-financial-stat__label">Remaining Due</span>
+                                                <strong class="billing-financial-stat__val billing-financial-stat__val--due" id="billingPaymentDueTodayValue">PHP 0.00</strong>
+                                            </div>
                                         </div>
+
                                         <div class="billing-payment-choice" id="billingPaymentChoiceGroup" hidden>
                                             <div class="billing-payment-choice__header">
                                                 <span>Payment Option</span>
@@ -138,39 +208,17 @@ $packageCatalogJson = json_encode(
                                             </div>
                                             <div class="billing-payment-choice__options" id="billingPaymentChoiceOptions"></div>
                                         </div>
-                                        <div class="billing-payment-guide" aria-label="Payment checklist">
-                                            <div class="billing-payment-guide__header">
-                                                <span>Payment Checklist</span>
-                                                <p>Use these quick reminders before opening the QRPh checkout.</p>
-                                            </div>
-                                            <div class="billing-payment-guide__steps">
-                                                <article class="billing-payment-guide__step">
-                                                    <span class="billing-payment-guide__step-icon" aria-hidden="true"><i class="bi bi-receipt"></i></span>
-                                                    <div class="billing-payment-guide__step-copy">
-                                                        <strong>Match your invoice</strong>
-                                                        <p>Review the amount shown here and confirm it matches your booking invoice.</p>
-                                                    </div>
-                                                </article>
-                                                <article class="billing-payment-guide__step">
-                                                    <span class="billing-payment-guide__step-icon" aria-hidden="true"><i class="bi bi-qr-code"></i></span>
-                                                    <div class="billing-payment-guide__step-copy">
-                                                        <strong>Finish the QRPh payment</strong>
-                                                        <p>Use your bank app or e-wallet to complete the secure checkout.</p>
-                                                    </div>
-                                                </article>
-                                                <article class="billing-payment-guide__step">
-                                                    <span class="billing-payment-guide__step-icon" aria-hidden="true"><i class="bi bi-arrow-clockwise"></i></span>
-                                                    <div class="billing-payment-guide__step-copy">
-                                                        <strong>Refresh for the latest status</strong>
-                                                        <p>Return to this page after payment so the system can show the updated result.</p>
-                                                    </div>
-                                                </article>
-                                            </div>
-                                        </div>
+
                                         <div class="billing-payment-action-panel billing-payment-action-panel--embedded">
                                             <div class="billing-payment-actions__buttons">
                                                 <button class="client-action-button client-action-button--primary" id="billingPayNowButton" type="button">Pay Now</button>
-                                                <button class="client-action-button client-action-button--secondary" id="billingRefreshPaymentButton" type="button">Refresh Status</button>
+                                                <button class="client-action-button client-action-button--secondary" id="billingRefreshPaymentButton" type="button">
+                                                    <i class="bi bi-arrow-clockwise me-1"></i> Refresh Status
+                                                </button>
+                                            </div>
+                                            <div class="billing-payment-trust-badge">
+                                                <span class="billing-payment-trust-badge__icon"><i class="bi bi-shield-fill-check"></i></span>
+                                                <span class="billing-payment-trust-badge__text">100% Secure Checkout via <strong>PayMongo</strong> &bull; QRPh</span>
                                             </div>
                                             <p class="billing-payment-feedback" id="billingPaymentFeedback">Your payment status will update here after PayMongo confirms the transaction.</p>
                                         </div>
@@ -214,11 +262,15 @@ $packageCatalogJson = json_encode(
                                         <div class="billing-invoice-summary-block">
                                             <div class="billing-invoice-summary">
                                                 <article class="billing-mini-stat billing-mini-stat--compact">
-                                                    <span>Paid So Far</span>
-                                                    <strong id="billingInvoicePaidValue">PHP 0.00</strong>
+                                                    <span>Total Contract</span>
+                                                    <strong id="billingInvoiceTotalContractValue">PHP 0.00</strong>
                                                 </article>
                                                 <article class="billing-mini-stat billing-mini-stat--compact">
-                                                    <span>Remaining Balance</span>
+                                                    <span>Paid So Far</span>
+                                                    <strong class="text-success" id="billingInvoicePaidValue">PHP 0.00</strong>
+                                                </article>
+                                                <article class="billing-mini-stat billing-mini-stat--compact">
+                                                    <span>Remaining</span>
                                                     <strong id="billingInvoiceBalanceValue">PHP 0.00</strong>
                                                 </article>
                                             </div>
@@ -228,62 +280,333 @@ $packageCatalogJson = json_encode(
                             </div>
                         </section>
 
-                        <section class="surface-card billing-payment-card" id="billingReceiptSection" hidden>
-                            <div class="panel-heading">
-                                <div>
-                                    <p class="panel-heading__eyebrow">Payment Successful</p>
-                                    <h2>Your receipt is ready</h2>
+                        <div class="billing-paid-view-layout" id="billingPaidViewLayout" hidden>
+                            <article class="billing-paid-breakdown-card" id="billingPaidBreakdownCard" hidden>
+                                <div class="billing-paid-breakdown__header">
+                                    <div>
+                                        <span class="panel-heading__eyebrow"><i class="bi bi-shield-check text-success me-1"></i> Payment Verified</span>
+                                        <h2 class="billing-paid-breakdown__title">Event & Invoice Summary</h2>
+                                    </div>
+                                    <span class="status-pill status-pill--confirmed">Settled in Full</span>
                                 </div>
-                            </div>
-                            <div class="billing-receipt-grid">
-                                <div class="billing-receipt-form">
-                                    <p class="billing-receipt-form__text" id="billingReceiptIntroText">Your payment has been confirmed. You can now view, download, or screenshot your system receipt for your records.</p>
-                                    <div class="billing-payment-actions__buttons">
-                                        <a class="client-action-button client-action-button--primary" href="#" id="billingReceiptViewLink" target="_blank" rel="noopener">View Receipt</a>
-                                        <a class="client-action-button client-action-button--secondary" href="#" id="billingReceiptDownloadLink" target="_blank" rel="noopener">Download Receipt</a>
+
+                                <div class="billing-paid-breakdown__body">
+                                    <div class="billing-paid-banner">
+                                        <div class="billing-paid-banner__icon">
+                                            <i class="bi bi-calendar2-check-fill"></i>
+                                        </div>
+                                        <div class="billing-paid-banner__content">
+                                            <strong class="billing-paid-banner__title" id="billingPaidEventTitle">Catering Event</strong>
+                                            <span class="billing-paid-banner__subtitle" id="billingPaidPackageTitle">Package to follow</span>
+                                        </div>
                                     </div>
-                                    <p class="billing-receipt-feedback is-success" id="billingReceiptFeedback">Payment posted successfully. Your downloadable receipt is now available in the system.</p>
+
+                                    <div class="billing-paid-grid">
+                                        <div class="billing-paid-item">
+                                            <span class="billing-paid-item__label"><i class="bi bi-calendar-event"></i> Event Schedule</span>
+                                            <strong class="billing-paid-item__value" id="billingPaidSchedule">Schedule pending</strong>
+                                        </div>
+                                        <div class="billing-paid-item">
+                                            <span class="billing-paid-item__label"><i class="bi bi-geo-alt"></i> Venue</span>
+                                            <strong class="billing-paid-item__value" id="billingPaidVenue">Venue pending</strong>
+                                        </div>
+                                        <div class="billing-paid-item">
+                                            <span class="billing-paid-item__label"><i class="bi bi-people"></i> Guests</span>
+                                            <strong class="billing-paid-item__value" id="billingPaidGuests">0 pax</strong>
+                                        </div>
+                                        <div class="billing-paid-item">
+                                            <span class="billing-paid-item__label"><i class="bi bi-hash"></i> Booking Reference</span>
+                                            <strong class="billing-paid-item__value" id="billingPaidBookingRef">REQ-TBA</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="billing-paid-ledger">
+                                        <div class="billing-paid-ledger__row">
+                                            <span>Total Contract Amount</span>
+                                            <strong id="billingPaidTotalContract">PHP 0.00</strong>
+                                        </div>
+                                        <div class="billing-paid-ledger__row text-success">
+                                            <span><i class="bi bi-check2-circle me-1"></i> Total Settled</span>
+                                            <strong id="billingPaidTotalSettled">PHP 0.00</strong>
+                                        </div>
+                                        <div class="billing-paid-ledger__row billing-paid-ledger__row--highlight">
+                                            <span>Remaining Balance</span>
+                                            <span class="badge bg-success-subtle text-success fw-bold px-2 py-1">PHP 0.00 (Fully Settled)</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="billing-receipt-preview-card">
-                                    <div class="billing-receipt-preview-card__status">
-                                        <div>
-                                            <span>Receipt Status</span>
-                                            <strong id="billingReceiptStatusValue">Paid Successful</strong>
-                                        </div>
-                                        <span class="status-pill status-pill--confirmed" id="billingReceiptStatusPill">Paid</span>
-                                    </div>
-                                    <div class="billing-receipt-preview-card__frame">
-                                        <p id="billingReceiptFrameText">Your receipt screen is ready. Open it in a new tab, screenshot it, or save it as PDF.</p>
-                                    </div>
-                                    <div class="billing-receipt-preview-card__meta">
-                                        <div class="billing-receipt-preview-card__item">
-                                            <span>Receipt Number</span>
-                                            <strong id="billingReceiptReferenceValue">RCT-TBA</strong>
-                                        </div>
-                                        <div class="billing-receipt-preview-card__item">
-                                            <span>Invoice Number</span>
-                                            <strong id="billingReceiptInvoiceValue">INV-TBA</strong>
-                                        </div>
-                                        <div class="billing-receipt-preview-card__item">
-                                            <span>Amount Paid</span>
-                                            <strong id="billingReceiptAmountValue">PHP 0.00</strong>
-                                        </div>
-                                        <div class="billing-receipt-preview-card__item">
-                                            <span>Payment Date</span>
-                                            <strong id="billingReceiptPaidAtValue">Not available</strong>
+                            </article>
+
+                            <section class="billing-receipt-voucher-card" id="billingReceiptSection" hidden>
+                                <div class="billing-receipt-voucher__header">
+                                    <div class="billing-receipt-voucher__badge-row">
+                                        <span class="billing-receipt-voucher__seal">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                        </span>
+                                        <div class="billing-receipt-voucher__status-wrap">
+                                            <span class="status-pill status-pill--confirmed" id="billingReceiptStatusPill">Paid</span>
+                                            <span class="billing-receipt-voucher__status-label" id="billingReceiptStatusValue">Paid Successful</span>
                                         </div>
                                     </div>
-                                    <p class="billing-receipt-preview-card__note" id="billingReceiptNote">Keep this receipt for your records. You can always return to Billing to open it again.</p>
+                                    <div class="billing-receipt-voucher__hero">
+                                        <span class="billing-receipt-voucher__amount-label">Total Amount Paid</span>
+                                        <h2 class="billing-receipt-voucher__amount" id="billingReceiptAmountValue">PHP 0.00</h2>
+                                        <p class="billing-receipt-voucher__intro" id="billingReceiptIntroText">Admin recorded your manual payment. Open your system receipt to download, print, or screenshot it.</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </section>
+
+                                <div class="billing-receipt-voucher__divider" aria-hidden="true">
+                                    <span class="billing-receipt-voucher__notch billing-receipt-voucher__notch--left"></span>
+                                    <span class="billing-receipt-voucher__line"></span>
+                                    <span class="billing-receipt-voucher__notch billing-receipt-voucher__notch--right"></span>
+                                </div>
+
+                                <div class="billing-receipt-voucher__body">
+                                    <div class="billing-receipt-voucher__list">
+                                        <div class="billing-receipt-voucher__row">
+                                            <span class="billing-receipt-voucher__key"><i class="bi bi-receipt"></i> Receipt No.</span>
+                                            <strong class="billing-receipt-voucher__val" id="billingReceiptReferenceValue">RCT-TBA</strong>
+                                        </div>
+                                        <div class="billing-receipt-voucher__row">
+                                            <span class="billing-receipt-voucher__key"><i class="bi bi-file-earmark-text"></i> Invoice No.</span>
+                                            <strong class="billing-receipt-voucher__val" id="billingReceiptInvoiceValue">INV-TBA</strong>
+                                        </div>
+                                        <div class="billing-receipt-voucher__row">
+                                            <span class="billing-receipt-voucher__key"><i class="bi bi-calendar-check"></i> Payment Date</span>
+                                            <strong class="billing-receipt-voucher__val" id="billingReceiptPaidAtValue">Not available</strong>
+                                        </div>
+                                    </div>
+
+                                    <p class="billing-receipt-voucher__note" id="billingReceiptNote">Keep this receipt for your records. You can always return to Billing to open it again.</p>
+
+                                    <div class="billing-receipt-voucher__actions">
+                                        <a class="client-action-button client-action-button--primary billing-receipt-voucher__btn" href="#" id="billingReceiptViewLink" target="_blank" rel="noopener">
+                                            <i class="bi bi-file-earmark-arrow-down"></i>
+                                            <span>View / Download Official Receipt</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
                     </section>
+
                 </main>
 
                 <?= emarioh_render_client_mobile_nav(basename((string) ($_SERVER['SCRIPT_NAME'] ?? 'client-dashboard.php'))) ?>
             </div>
         </div>
     </div>
+
+    <?php if (!empty($paymentHistory)): ?>
+        <div class="modal fade booking-modal" id="billingHistoryModal" tabindex="-1" aria-labelledby="billingHistoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+                <div class="modal-content booking-modal__content">
+                    <div class="modal-header booking-modal__header">
+                        <div class="pe-2">
+                            <p class="panel-heading__eyebrow d-none d-sm-block mb-1"><i class="bi bi-clock-history text-primary me-1"></i> Transaction Archive</p>
+                            <h2 class="booking-modal__title" id="billingHistoryModalLabel">Payment & Receipts History</h2>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 ms-auto flex-shrink-0">
+                            <span class="badge bg-secondary-subtle text-secondary fw-semibold px-2 px-sm-3 py-1 py-sm-2 rounded-pill">
+                                <?= count($paymentHistory) ?> Booking<?= count($paymentHistory) > 1 ? 's' : '' ?><?= $totalReceiptsCount > count($paymentHistory) ? ' • ' . $totalReceiptsCount . ' Receipts' : (count($paymentHistory) > 1 ? ' Records' : ' Record') ?>
+                            </span>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body booking-modal__body p-0">
+                        <!-- Desktop Table View (>= 768px) -->
+                        <div class="billing-history-desktop">
+                            <div class="table-responsive dashboard-table-wrap billing-history-table-wrap m-0 border-0 rounded-0">
+                                <table class="admin-table admin-table--billing-history">
+                                    <thead>
+                                        <tr>
+                                            <th>Payment Date</th>
+                                            <th>Invoice / Receipt</th>
+                                            <th>Event & Package</th>
+                                            <th>Amount Settled</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($paymentHistory as $historyItem):
+                                            $invoiceNum = (string) ($historyItem['invoice_number'] ?? '');
+                                            $receiptRef = (string) ($historyItem['receipt_reference'] ?? $invoiceNum);
+                                            $receiptId = (int) ($historyItem['receipt_id'] ?? 0);
+                                            $eventDateStr = emarioh_format_booking_date_label((string) ($historyItem['event_date'] ?? ''));
+                                            $paidDateStr = !empty($historyItem['paid_at']) ? date('M j, Y - g:i A', strtotime((string) $historyItem['paid_at'])) : 'Recently';
+                                            $amountPaid = (float) ($historyItem['amount_paid'] ?? 0);
+                                            $receiptUrl = 'client-payment-receipt.php?invoice=' . rawurlencode($invoiceNum) . ($receiptId > 0 ? '&receipt=' . $receiptId : '');
+                                            $receiptCount = (int) ($historyItem['receipt_count'] ?? 1);
+                                            $receipts = (array) ($historyItem['receipts'] ?? []);
+                                        ?>
+                                            <tr>
+                                                <td>
+                                                    <span class="d-block fw-semibold text-dark"><?= htmlspecialchars($paidDateStr, ENT_QUOTES, 'UTF-8') ?></span>
+                                                    <span class="d-block text-secondary small"><?= htmlspecialchars((string) ($historyItem['payment_method'] ?? 'Manual Payment'), ENT_QUOTES, 'UTF-8') ?></span>
+                                                </td>
+                                                <td>
+                                                    <span class="d-block fw-semibold text-dark"><?= htmlspecialchars($invoiceNum, ENT_QUOTES, 'UTF-8') ?></span>
+                                                    <?php if ($receiptCount > 1): ?>
+                                                        <span class="billing-receipt-multi-pill" title="<?= $receiptCount ?> payments completed">
+                                                            <i class="bi bi-collection-fill"></i> <?= $receiptCount ?> Receipts Issued
+                                                        </span>
+                                                        <span class="d-block text-secondary small" style="font-size: 0.72rem; margin-top: 0.15rem;">Down Payment &amp; Balance</span>
+                                                    <?php else: ?>
+                                                        <span class="d-block text-secondary small font-monospace"><?= htmlspecialchars($receiptRef, ENT_QUOTES, 'UTF-8') ?></span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <span class="d-block fw-semibold text-dark"><?= htmlspecialchars((string) ($historyItem['event_type'] ?? 'Catering'), ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars((string) ($historyItem['booking_reference'] ?? ''), ENT_QUOTES, 'UTF-8') ?>)</span>
+                                                    <span class="d-block text-secondary small"><?= htmlspecialchars((string) ($historyItem['package_label'] ?? 'Standard Package'), ENT_QUOTES, 'UTF-8') ?> • Event Date: <?= htmlspecialchars($eventDateStr, ENT_QUOTES, 'UTF-8') ?></span>
+                                                </td>
+                                                <td>
+                                                    <strong class="text-success fs-6">PHP <?= number_format($amountPaid, 2) ?></strong>
+                                                    <?php if ($receiptCount > 1 && count($receipts) >= 2): 
+                                                        $dpAmt = (float) ($receipts[0]['amount_reported'] ?? 0);
+                                                        $balAmt = (float) ($receipts[1]['amount_reported'] ?? 0);
+                                                    ?>
+                                                        <div class="billing-history-settled-breakdown" title="Payment installment breakdown">
+                                                            <span>₱<?= number_format($dpAmt, 0) ?> DP</span> + <span>₱<?= number_format($balAmt, 0) ?> Balance</span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td>
+                                                    <span class="status-pill status-pill--confirmed">Paid</span>
+                                                </td>
+                                                <td>
+                                                    <div class="billing-history-actions">
+                                                        <a href="<?= htmlspecialchars($receiptUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="booking-request-action booking-request-action--view" title="View Official Digital Receipts">
+                                                            <i class="bi bi-eye"></i> <?= $receiptCount > 1 ? 'View Receipts (' . $receiptCount . ')' : 'View Receipt' ?>
+                                                        </a>
+                                                        <?php if ($receiptCount > 1 && !empty($receipts)): ?>
+                                                            <div class="billing-history-direct-receipts">
+                                                                <?php foreach ($receipts as $idx => $r):
+                                                                    $rId = (int) ($r['id'] ?? 0);
+                                                                    $rLabel = ($idx === 0) ? 'DP Receipt' : 'Balance Receipt';
+                                                                    if ($receiptCount > 2) { $rLabel = 'Receipt #' . ($idx + 1); }
+                                                                    $rSingleUrl = 'client-payment-receipt.php?invoice=' . rawurlencode($invoiceNum) . '&receipt=' . $rId;
+                                                                ?>
+                                                                    <a href="<?= htmlspecialchars($rSingleUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="billing-receipt-chip" title="Directly open <?= $rLabel ?>">
+                                                                        <i class="bi bi-file-earmark-check"></i> <?= $rLabel ?>
+                                                                    </a>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Mobile Modern Receipt Slips (< 768px) -->
+                        <div class="billing-history-mobile">
+                            <div class="billing-receipt-cards">
+                                <?php foreach ($paymentHistory as $historyItem):
+                                    $invoiceNum = (string) ($historyItem['invoice_number'] ?? '');
+                                    $receiptRef = (string) ($historyItem['receipt_reference'] ?? $invoiceNum);
+                                    $receiptId = (int) ($historyItem['receipt_id'] ?? 0);
+                                    $eventDateStr = emarioh_format_booking_date_label((string) ($historyItem['event_date'] ?? ''));
+                                    $paidDateStr = !empty($historyItem['paid_at']) ? date('M j, Y • g:i A', strtotime((string) $historyItem['paid_at'])) : 'Recently';
+                                    $amountPaid = (float) ($historyItem['amount_paid'] ?? 0);
+                                    $eventType = (string) ($historyItem['event_type'] ?? 'Catering');
+                                    $bookingRef = (string) ($historyItem['booking_reference'] ?? '');
+                                    $packageLabel = (string) ($historyItem['package_label'] ?? 'Standard Package');
+                                    $paymentMethod = (string) ($historyItem['payment_method'] ?? 'Manual Payment');
+                                    $receiptUrl = 'client-payment-receipt.php?invoice=' . rawurlencode($invoiceNum) . ($receiptId > 0 ? '&receipt=' . $receiptId : '');
+                                    $receiptCount = (int) ($historyItem['receipt_count'] ?? 1);
+                                    $receipts = (array) ($historyItem['receipts'] ?? []);
+                                ?>
+                                    <article class="billing-receipt-slip">
+                                        <div class="billing-receipt-slip__top">
+                                            <div class="billing-receipt-slip__event">
+                                                <span class="billing-receipt-slip__icon" aria-hidden="true">
+                                                    <i class="bi bi-receipt-cutoff"></i>
+                                                </span>
+                                                <div class="billing-receipt-slip__info">
+                                                    <h4 class="billing-receipt-slip__title"><?= htmlspecialchars($eventType, ENT_QUOTES, 'UTF-8') ?></h4>
+                                                    <p class="billing-receipt-slip__subtitle"><?= htmlspecialchars($packageLabel, ENT_QUOTES, 'UTF-8') ?></p>
+                                                </div>
+                                            </div>
+                                            <span class="status-pill status-pill--confirmed">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Paid
+                                            </span>
+                                        </div>
+
+                                        <div class="billing-receipt-slip__amount-card">
+                                            <div class="billing-receipt-slip__amount-label">Amount Settled</div>
+                                            <div class="billing-receipt-slip__amount-value">
+                                                <span>PHP</span> <?= number_format($amountPaid, 2) ?>
+                                            </div>
+                                            <?php if ($receiptCount > 1 && count($receipts) >= 2): 
+                                                $dpAmt = (float) ($receipts[0]['amount_reported'] ?? 0);
+                                                $balAmt = (float) ($receipts[1]['amount_reported'] ?? 0);
+                                            ?>
+                                                <div class="billing-receipt-slip__breakdown-tag">
+                                                    <i class="bi bi-layers-half me-1"></i> 2 Installments: ₱<?= number_format($dpAmt, 0) ?> DP + ₱<?= number_format($balAmt, 0) ?> Balance
+                                                </div>
+                                            <?php endif; ?>
+                                            <div class="billing-receipt-slip__amount-meta">
+                                                <span><i class="bi bi-clock-history"></i> <?= htmlspecialchars($paidDateStr, ENT_QUOTES, 'UTF-8') ?></span>
+                                                <span class="bullet-dot">•</span>
+                                                <span><i class="bi bi-credit-card-2-front"></i> <?= htmlspecialchars($paymentMethod, ENT_QUOTES, 'UTF-8') ?></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="billing-receipt-slip__meta-list">
+                                            <div class="billing-receipt-slip__meta-row">
+                                                <span class="meta-label">Invoice Number</span>
+                                                <span class="meta-value font-monospace text-dark fw-semibold"><?= htmlspecialchars($invoiceNum, ENT_QUOTES, 'UTF-8') ?></span>
+                                            </div>
+                                            <?php if ($receiptCount > 1): ?>
+                                                <div class="billing-receipt-slip__meta-row">
+                                                    <span class="meta-label">Receipts</span>
+                                                    <span class="meta-value text-success fw-semibold"><i class="bi bi-collection me-1"></i> <?= $receiptCount ?> Receipts (DP &amp; Balance)</span>
+                                                </div>
+                                            <?php elseif ($receiptRef !== $invoiceNum): ?>
+                                                <div class="billing-receipt-slip__meta-row">
+                                                    <span class="meta-label">Receipt Ref</span>
+                                                    <span class="meta-value font-monospace"><?= htmlspecialchars($receiptRef, ENT_QUOTES, 'UTF-8') ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                            <div class="billing-receipt-slip__meta-row">
+                                                <span class="meta-label">Event Booking</span>
+                                                <span class="meta-value"><?= htmlspecialchars($bookingRef ?: 'N/A', ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($eventDateStr, ENT_QUOTES, 'UTF-8') ?>)</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="billing-receipt-slip__actions">
+                                            <a href="<?= htmlspecialchars($receiptUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="billing-receipt-slip__action-btn billing-receipt-slip__action-btn--view">
+                                                <i class="bi bi-eye"></i> <?= $receiptCount > 1 ? 'View All Receipts (' . $receiptCount . ')' : 'View Digital Receipt' ?>
+                                            </a>
+                                            <?php if ($receiptCount > 1 && !empty($receipts)): ?>
+                                                <div class="billing-receipt-slip__sub-actions">
+                                                    <?php foreach ($receipts as $idx => $r):
+                                                        $rId = (int) ($r['id'] ?? 0);
+                                                        $rLabel = ($idx === 0) ? 'Down Payment Receipt' : 'Remaining Balance Receipt';
+                                                        if ($receiptCount > 2) { $rLabel = 'Receipt #' . ($idx + 1); }
+                                                        $rAmt = (float) ($r['amount_reported'] ?? 0);
+                                                        $rUrl = 'client-payment-receipt.php?invoice=' . rawurlencode($invoiceNum) . '&receipt=' . $rId;
+                                                    ?>
+                                                        <a href="<?= htmlspecialchars($rUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener" class="billing-receipt-slip__sub-btn">
+                                                            <i class="bi bi-file-earmark-check me-1"></i> <?= $rLabel ?> (₱<?= number_format($rAmt, 0) ?>)
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </article>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js?v=20260419c"></script>
@@ -296,7 +619,7 @@ $packageCatalogJson = json_encode(
     </script>
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/payment-settings-store.js?v=20260412a"></script>
-    <script src="assets/js/client-portal-state.js?v=20260710b"></script>
+    <script src="assets/js/client-portal-state.js?v=20260904e"></script>
     <script src="assets/js/pages/client-dashboard.js?v=20260709a"></script>
 </body>
 </html>

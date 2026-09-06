@@ -11,20 +11,18 @@ $bookings = emarioh_fetch_booking_requests($db, [
 ]);
 
 $pendingBookings = array_values(array_filter($bookings, static fn (array $booking): bool => (string) $booking['status'] === 'pending_review'));
-$approvedBookings = array_values(array_filter($bookings, static fn (array $booking): bool => in_array((string) $booking['status'], ['approved', 'completed'], true)));
+$approvedBookings = array_values(array_filter($bookings, static fn (array $booking): bool => (string) $booking['status'] === 'approved'));
+$completedBookings = array_values(array_filter($bookings, static fn (array $booking): bool => (string) $booking['status'] === 'completed'));
 $cancelledBookings = array_values(array_filter($bookings, static fn (array $booking): bool => (string) $booking['status'] === 'cancelled'));
 $rejectedBookings = array_values(array_filter($bookings, static fn (array $booking): bool => (string) $booking['status'] === 'rejected'));
 
 $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 
 $noticeMessage = '';
-$noticeClass = 'success';
+$noticeClass = 'danger';
 
-if (isset($_GET['cancelled'])) {
-    $noticeMessage = 'Your booking request was cancelled.';
-} elseif (isset($_GET['error'])) {
+if (isset($_GET['error'])) {
     $noticeMessage = 'The booking update could not be completed right now. Please try again.';
-    $noticeClass = 'danger';
 }
 
 function emarioh_client_booking_datetime_label(array $booking): string
@@ -56,7 +54,12 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
         $guestCount = (int) ($booking['guest_count'] ?? 0);
         $venueName = (string) ($booking['venue_name'] ?? 'Venue to follow');
         $eventDateTime = emarioh_client_booking_datetime_label($booking);
-        $canCancel = in_array($status, ['pending_review', 'approved'], true);
+        $amountPaid = (float) ($booking['invoice_amount_paid'] ?? 0);
+        $invoiceStatus = strtolower(trim((string) ($booking['invoice_status'] ?? '')));
+        $isPaid = $amountPaid > 0.0001 || in_array($invoiceStatus, ['paid', 'approved', 'partially_paid'], true);
+
+        // A client can only cancel if still pending review, or if approved but NO payment has been made yet.
+        $canCancel = ($status === 'pending_review') || ($status === 'approved' && !$isPaid);
 
         if ($canCancel) {
             $cancelLabel = $status === 'approved' ? 'Cancel Booking' : 'Cancel Request';
@@ -65,6 +68,26 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
                 (int) $booking['id'],
                 $escape($reference),
                 $escape($cancelLabel)
+            );
+        } elseif ($status === 'approved' && $isPaid) {
+            $actionMarkup = '<span class="booking-request-action booking-request-action--confirmed text-success fw-semibold" title="Confirmed and paid. Contact admin for cancellation or date changes."><i class="bi bi-shield-check"></i> Confirmed</span>';
+        } elseif ($status === 'completed') {
+            $actionMarkup = sprintf(
+                '<button class="booking-request-action booking-request-action--view" type="button" data-booking-view ' .
+                'data-reference="%s" data-event-type="%s" data-event-date="%s" data-guests="%s" data-venue="%s" data-package="%s" ' .
+                'data-tier-price="%s" data-amount-paid="%s" data-balance-due="%s" data-invoice-number="%s" data-status-label="%s">' .
+                '<i class="bi bi-eye"></i> View Details</button>',
+                $escape($reference),
+                $escape($eventType),
+                $escape($eventDateTime),
+                $escape($guestCount > 0 ? $guestCount . ' pax' : 'TBA'),
+                $escape($venueName),
+                $escape((string) ($booking['package_label'] ?? 'Package to follow')),
+                $escape((string) ($booking['package_tier_price'] ?? '')),
+                number_format((float) ($booking['invoice_amount_paid'] ?? 0), 2),
+                number_format((float) ($booking['invoice_balance_due'] ?? 0), 2),
+                $escape((string) ($booking['invoice_number'] ?? '')),
+                $escape($statusLabel)
             );
         } else {
             $actionMarkup = '<span class="booking-request-action booking-request-action--muted">Closed</span>';
@@ -98,7 +121,7 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Client My Bookings</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/pages/client-bookings.css?v=20260418u">
+    <link rel="stylesheet" href="assets/css/pages/client-bookings.css?v=20260903a">
     <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
 </head>
 <body class="dashboard-page client-dashboard-page client-my-bookings-page client-page--sticky-topbar" data-auth-guard="client">
@@ -152,6 +175,7 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
                             <select class="booking-status-select" id="bookingStatusSelect" aria-label="Filter bookings by status">
                                 <option value="booking-pending-tab" selected>Pending</option>
                                 <option value="booking-approved-tab">Approved</option>
+                                <option value="booking-completed-tab">Completed</option>
                                 <option value="booking-cancelled-tab">Cancelled</option>
                                 <option value="booking-rejected-tab">Rejected</option>
                             </select>
@@ -173,6 +197,9 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="booking-approved-tab" data-bs-toggle="pill" data-bs-target="#booking-approved-pane" type="button" role="tab" aria-controls="booking-approved-pane" aria-selected="false">Approved</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="booking-completed-tab" data-bs-toggle="pill" data-bs-target="#booking-completed-pane" type="button" role="tab" aria-controls="booking-completed-pane" aria-selected="false">Completed</button>
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="booking-cancelled-tab" data-bs-toggle="pill" data-bs-target="#booking-cancelled-pane" type="button" role="tab" aria-controls="booking-cancelled-pane" aria-selected="false">Cancelled</button>
@@ -218,6 +245,26 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
                                         </thead>
                                         <tbody id="bookingApprovedTableBody">
                                             <?= emarioh_render_client_booking_rows($approvedBookings, 'No approved booking yet.', $escape) ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="booking-completed-pane" role="tabpanel" aria-labelledby="booking-completed-tab" tabindex="0">
+                                <div class="table-responsive dashboard-table-wrap booking-requests-table">
+                                    <table class="admin-table admin-table--client-bookings">
+                                        <thead>
+                                            <tr>
+                                                <th>Event Date</th>
+                                                <th>Event Type</th>
+                                                <th>Guests</th>
+                                                <th>Venue</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="bookingCompletedTableBody">
+                                            <?= emarioh_render_client_booking_rows($completedBookings, 'No completed booking yet.', $escape) ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -292,10 +339,86 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
         </div>
     </div>
 
+    <div class="modal fade booking-modal" id="bookingSummaryModal" tabindex="-1" aria-labelledby="bookingSummaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content booking-modal__content">
+                <div class="modal-header booking-modal__header">
+                    <div>
+                        <p class="panel-heading__eyebrow">Event Summary</p>
+                        <h2 class="booking-modal__title" id="summaryModalLabel">Event Details</h2>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body booking-modal__body">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-light border">
+                                <span class="text-secondary small d-block mb-1"><i class="bi bi-hash"></i> Booking Reference</span>
+                                <strong id="summaryModalRef" class="fs-6 text-dark">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-light border">
+                                <span class="text-secondary small d-block mb-1"><i class="bi bi-calendar-event"></i> Event Schedule</span>
+                                <strong id="summaryModalSchedule" class="fs-6 text-dark">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-light border">
+                                <span class="text-secondary small d-block mb-1"><i class="bi bi-geo-alt"></i> Venue</span>
+                                <strong id="summaryModalVenue" class="fs-6 text-dark">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 rounded-3 bg-light border">
+                                <span class="text-secondary small d-block mb-1"><i class="bi bi-people"></i> Guests (Pax)</span>
+                                <strong id="summaryModalGuests" class="fs-6 text-dark">-</strong>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 rounded-3 bg-light border">
+                                <span class="text-secondary small d-block mb-1"><i class="bi bi-box-seam"></i> Package Selected</span>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <strong id="summaryModalPackage" class="fs-6 text-dark">-</strong>
+                                    <span id="summaryModalTierPrice" class="badge bg-secondary-subtle text-secondary small">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="p-3 rounded-3 bg-success-subtle border border-success-subtle">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <span class="text-success-emphasis small d-block fw-semibold"><i class="bi bi-check-circle-fill"></i> Payment Record</span>
+                                        <span id="summaryModalInvoice" class="small text-secondary">Invoice: -</span>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="small text-secondary d-block">Amount Settled</span>
+                                        <strong id="summaryModalPaid" class="fs-5 text-success">PHP 0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer booking-modal__footer d-flex justify-content-between flex-wrap gap-2">
+                    <a href="client-billing.php" class="client-action-button" id="summaryModalReceiptBtn">
+                        <i class="bi bi-receipt-cutoff me-1"></i> View Official Receipt
+                    </a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="client-action-button" data-bs-dismiss="modal">Close</button>
+                        <a href="client-bookings.php" class="client-action-button client-action-button--primary" id="summaryModalRebookBtn">
+                            <i class="bi bi-calendar2-plus me-1"></i> Book Another Event
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
     <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
     <script src="assets/js/pages/client-dashboard.js"></script>
-    <script src="assets/js/pages/client-my-bookings-page.js?v=20260418b"></script>
+    <script src="assets/js/pages/client-my-bookings-page.js?v=20260903d"></script>
 </body>
 </html>

@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const bookingEmptyState = document.querySelector("[data-booking-empty]");
     const bookingTableWrap = document.querySelector(".booking-queue-table");
     const bookingStatusSelect = document.getElementById("bookingStatusSelect");
+    const bookingSearchInput = document.getElementById("bookingSearchInput");
     const paymentFilterButtons = document.querySelectorAll("[data-payment-filter]");
     const paymentTableBody = document.querySelector(".admin-table--payments tbody");
     const paymentTableWrap = document.querySelector(".payment-queue-table");
@@ -725,6 +726,10 @@ document.addEventListener("DOMContentLoaded", () => {
             bookingStatusSelect.value = "all";
         }
 
+        if (bookingSearchInput) {
+            bookingSearchInput.value = "";
+        }
+
         applyBookingFilter("all");
         highlightRecordRow(targetRow);
         openBookingDetails(targetRow);
@@ -1073,18 +1078,26 @@ document.addEventListener("DOMContentLoaded", () => {
         paymentViewButtons = Array.from(document.querySelectorAll("[data-payment-view]"));
     };
 
-    const applyBookingFilter = (filterValue = "all") => {
+    const applyBookingFilter = (filterValue = null) => {
         if (!bookingRows.length) {
             return;
         }
 
+        const activeFilter = filterValue
+            || Array.from(bookingFilterButtons).find((button) => button.classList.contains("is-active"))?.dataset.bookingFilter
+            || bookingStatusSelect?.value
+            || "all";
+        const searchTerm = bookingSearchInput?.value.trim().toLowerCase() || "";
         let visibleCount = 0;
 
         closeAllActionMenus();
 
         bookingRows.forEach((row) => {
             const status = row.dataset.bookingStatus || "pending";
-            const isMatch = filterValue === "all" || status === filterValue;
+            const searchIndex = row.dataset.bookingSearch || row.textContent.toLowerCase();
+            const matchesFilter = activeFilter === "all" || status === activeFilter;
+            const matchesSearch = !searchTerm || searchIndex.includes(searchTerm);
+            const isMatch = matchesFilter && matchesSearch;
 
             row.hidden = !isMatch;
 
@@ -1094,14 +1107,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         bookingFilterButtons.forEach((button) => {
-            const isActive = button.dataset.bookingFilter === filterValue;
+            const isActive = button.dataset.bookingFilter === activeFilter;
 
             button.classList.toggle("is-active", isActive);
             button.setAttribute("aria-pressed", String(isActive));
         });
 
-        if (bookingStatusSelect && bookingStatusSelect.value !== filterValue) {
-            bookingStatusSelect.value = filterValue;
+        if (bookingStatusSelect && bookingStatusSelect.value !== activeFilter) {
+            bookingStatusSelect.value = activeFilter;
         }
 
         if (bookingTableWrap) {
@@ -1109,9 +1122,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (bookingEmptyState) {
-            bookingEmptyState.textContent = filterValue === "all"
-                ? "No bookings found."
-                : `No ${filterValue} bookings found.`;
+            bookingEmptyState.textContent = searchTerm
+                ? "No matching bookings found."
+                : activeFilter === "all"
+                    ? "No bookings found."
+                    : `No ${activeFilter} bookings found.`;
             bookingEmptyState.hidden = visibleCount !== 0;
         }
     };
@@ -1732,6 +1747,10 @@ document.addEventListener("DOMContentLoaded", () => {
         applyBookingFilter(bookingStatusSelect.value || "all");
     });
 
+    bookingSearchInput?.addEventListener("input", () => {
+        applyBookingFilter(bookingStatusSelect?.value || "all");
+    });
+
     bookingViewButtons.forEach((button) => {
         if (button.closest("[data-action-menu]")) {
             return;
@@ -1744,10 +1763,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    if (bookingFilterButtons.length && bookingRows.length) {
+    if (bookingRows.length) {
         const defaultFilter = Array.from(bookingFilterButtons)
             .find((button) => button.classList.contains("is-active"))
-            ?.dataset.bookingFilter || "all";
+            ?.dataset.bookingFilter || bookingStatusSelect?.value || "all";
 
         applyBookingFilter(defaultFilter);
     }

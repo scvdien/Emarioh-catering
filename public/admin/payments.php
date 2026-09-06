@@ -403,7 +403,7 @@ function emarioh_render_admin_payment_rows(PDO $db, array $bookings, callable $e
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Payments</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260710d">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903b">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-payments-page" data-auth-guard="admin" data-payment-source="db-only">

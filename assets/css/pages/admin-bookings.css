@@ -1,21 +1,60 @@
-.admin-bookings-page .booking-queue-toolbar {
-    display: grid;
-    gap: 0;
-    margin-bottom: 0.9rem;
-}
-
-.admin-bookings-page .booking-queue-toolbar .booking-filters {
-    padding-bottom: 0;
+.admin-bookings-page .booking-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    margin-bottom: 1rem;
 }
 
 .admin-bookings-page .booking-status-select-wrap {
-    display: none;
+    display: block;
+    justify-self: end;
+    width: min(100%, 15rem);
+    min-width: 0;
 }
 
-.admin-bookings-page .booking-filter-chip {
-    min-width: 4.7rem;
-    padding: 0.45rem 0.76rem;
-    font-size: 0.68rem;
+.admin-bookings-page .booking-status-select {
+    width: 100%;
+    min-height: 2.7rem;
+    padding: 0.62rem 1.75rem 0.62rem 0.9rem;
+    border: 1px solid rgba(95, 71, 53, 0.1);
+    border-radius: 999px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #fffaf3;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%236f5438' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.55rem center;
+    background-size: 0.82rem;
+    color: #6f5438;
+    font-size: 0.84rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.admin-bookings-page .booking-status-select:focus {
+    outline: none;
+    border-color: rgba(201, 162, 74, 0.34);
+    box-shadow: 0 0 0 4px rgba(201, 162, 74, 0.10);
+}
+
+.admin-bookings-page .admin-search {
+    min-width: 0;
+}
+
+@media (min-width: 768px) {
+    .admin-bookings-page .booking-toolbar {
+        display: grid;
+        grid-template-columns: minmax(18rem, 1fr) minmax(12rem, 15rem);
+        align-items: center;
+        gap: 0.9rem 1rem;
+    }
+
+    .admin-bookings-page .admin-search {
+        max-width: none;
+    }
 }
 
 .admin-bookings-page .topbar-copy__title {
@@ -90,9 +129,68 @@
     white-space: normal;
 }
 
+.admin-bookings-page .admin-table--bookings tbody td.booking-status-cell,
+.admin-bookings-page .booking-status-cell {
+    vertical-align: middle;
+    text-align: center;
+}
+
+.admin-bookings-page .booking-status-group {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.32rem;
+    width: 100%;
+    margin: 0 auto;
+}
+
 .admin-bookings-page .status-pill {
-    min-width: 5.5rem;
-    font-size: 0.7rem;
+    min-width: 6.2rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    padding: 0.38rem 0.82rem;
+    line-height: 1.25;
+    font-weight: 700;
+}
+
+.admin-bookings-page .booking-payment-meta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.36rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+
+.admin-bookings-page .booking-payment-meta__dot {
+    display: inline-block;
+    width: 6.5px;
+    height: 6.5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.admin-bookings-page .booking-payment-meta--paid {
+    color: #1b633e;
+}
+
+.admin-bookings-page .booking-payment-meta--paid .booking-payment-meta__dot {
+    background-color: #2e8b57;
+    box-shadow: 0 0 0 2.5px rgba(46, 139, 87, 0.2);
+}
+
+.admin-bookings-page .booking-payment-meta--balance {
+    color: #9a4704;
+    font-weight: 700;
+}
+
+.admin-bookings-page .booking-payment-meta--balance .booking-payment-meta__dot {
+    background-color: #d97706;
+    box-shadow: 0 0 0 2.5px rgba(217, 119, 6, 0.22);
 }
 
 .admin-bookings-page .booking-action-modal__dialog {
@@ -227,39 +325,40 @@
         margin-bottom: 0.42rem !important;
     }
 
-    .admin-bookings-page .booking-queue-toolbar {
-        display: none;
-    }
-
-    .admin-bookings-page .booking-filters {
-        display: none;
+    .admin-bookings-page .booking-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.6rem;
     }
 
     .admin-bookings-page .booking-status-select-wrap {
         display: inline-grid;
-        flex: 0 0 auto;
-        margin-left: auto;
-        align-self: start;
+        justify-self: end;
+        align-self: center;
+        width: auto;
     }
 
     .admin-bookings-page .booking-status-select {
         min-height: 2.18rem;
-        min-width: 6.2rem;
+        min-width: 5.95rem;
         padding: 0.42rem 1rem 0.42rem 0.58rem;
-        border: 1px solid rgba(95, 71, 53, 0.12);
-        border-radius: 0.88rem;
-        background-color: #fffaf3;
         background-position: right 0.34rem center;
         background-size: 0.68rem;
-        color: #5f4f42;
         font-size: 0.72rem;
-        font-weight: 700;
-        box-shadow: none;
+        margin: 0;
     }
 
-    .admin-bookings-page .booking-status-select:focus {
-        border-color: rgba(201, 162, 74, 0.34);
-        box-shadow: 0 0 0 3px rgba(201, 162, 74, 0.10);
+    .admin-bookings-page .admin-search {
+        flex: initial;
+        max-width: none;
+    }
+
+    .admin-bookings-page .admin-search__icon {
+        left: 0.82rem;
+        color: #7d6b59;
+        font-size: 0.88rem;
     }
 
     .admin-bookings-page .booking-queue-table {
@@ -399,6 +498,16 @@
         white-space: normal;
     }
 
+    .admin-bookings-page .booking-payment-meta {
+        font-size: 0.62rem;
+        gap: 0.28rem;
+    }
+
+    .admin-bookings-page .booking-payment-meta__dot {
+        width: 5px;
+        height: 5px;
+    }
+
     .admin-bookings-page .booking-row-actions {
         gap: 0.42rem;
     }
@@ -439,17 +548,32 @@
         padding: 0.32rem;
     }
 
-    .admin-bookings-page .booking-queue-toolbar {
+    .admin-bookings-page .booking-toolbar {
+        gap: 0.42rem;
         margin-bottom: 0.32rem;
+    }
+
+    .admin-bookings-page .booking-status-select-wrap {
+        min-width: 0;
     }
 
     .admin-bookings-page .booking-status-select {
         min-height: 2.02rem;
-        min-width: 5.7rem;
+        min-width: 5.45rem;
         padding: 0.38rem 0.92rem 0.38rem 0.5rem;
         background-position: right 0.3rem center;
         background-size: 0.62rem;
         font-size: 0.66rem;
+    }
+
+    .admin-bookings-page .admin-search__input {
+        min-height: 2.12rem;
+        padding-left: 2rem;
+        font-size: 0.68rem;
+    }
+
+    .admin-bookings-page .admin-search__input::placeholder {
+        font-size: 0.68rem;
     }
 
     .admin-bookings-page .booking-queue-table {

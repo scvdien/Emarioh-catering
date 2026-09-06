@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const settingsMenuLinks = Array.from(document.querySelectorAll("[data-settings-menu-item]"));
     const settingsBackButtons = Array.from(document.querySelectorAll("[data-settings-back]"));
     const settingsBackLabels = Array.from(document.querySelectorAll("[data-settings-back-label]"));
-    const mobileSettingsMedia = window.matchMedia("(max-width: 1199.98px)");
+    const mobileSettingsMedia = window.matchMedia("(max-width: 767.98px)");
     const galleryCategoryFilter = document.getElementById("galleryCategoryFilter");
     const galleryList = document.getElementById("galleryManagerList");
     const galleryEmptyState = document.getElementById("galleryManagerEmptyState");
@@ -2318,20 +2318,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const hashSectionId = getHashSectionId();
             const activeSectionId = getActiveSettingsSectionId();
 
-            if (isMobileSettingsLayout()) {
-                if (allowedSectionIds.includes(hashSectionId)) {
-                    openSettingsSection(hashSectionId);
-                    return;
-                }
+            if (allowedSectionIds.includes(hashSectionId)) {
+                openSettingsSection(hashSectionId);
+                return;
+            }
 
-                if (allowedSectionIds.includes(activeSectionId)) {
-                    openSettingsSection(activeSectionId);
-                    return;
-                }
-
-                setMobileSettingsView("hub");
-                setSettingsPanelExpanded(false);
-                showSection("");
+            if (allowedSectionIds.includes(activeSectionId)) {
+                openSettingsSection(activeSectionId);
                 return;
             }
 

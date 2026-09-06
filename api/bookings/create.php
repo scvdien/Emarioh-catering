@@ -237,8 +237,7 @@ try {
         'pending_review',
         'Booking request submitted',
         sprintf(
-            '%s submitted %s for %s.',
-            emarioh_first_name((string) $currentUser['full_name']),
+            'Your booking request for %s on %s was submitted and is pending review.',
             $eventType,
             $eventDate->format('F j, Y')
         ),

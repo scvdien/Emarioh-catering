@@ -2571,6 +2571,22 @@ button {
     transform: none;
 }
 
+.booking-request-action--view {
+    border-color: rgba(184, 142, 54, 0.4);
+    background: #FAF6EF;
+    color: #8C6A24;
+    cursor: pointer;
+    gap: 0.35rem;
+}
+
+.booking-request-action--view:hover {
+    border-color: rgba(184, 142, 54, 0.7);
+    background: #F3EBDD;
+    color: #6E5218;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184, 142, 54, 0.15);
+}
+
 .client-selection-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

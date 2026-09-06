@@ -273,7 +273,7 @@ function emarioh_render_admin_client_rows(array $clients, array $bookingsByUserI
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Clients</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903b">
     <link rel="stylesheet" href="assets/css/pages/admin-clients.css?v=20260418c">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>

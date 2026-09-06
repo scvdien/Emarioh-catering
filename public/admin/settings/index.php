@@ -15,7 +15,7 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Settings Menu</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903b">
     <link rel="stylesheet" href="assets/css/package-admin.css">
     <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260709b">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">

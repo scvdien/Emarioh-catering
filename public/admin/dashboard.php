@@ -130,7 +130,7 @@ $topYearCelebrationCount = (int) ($topYearCelebration['booking_count'] ?? 0);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Admin Dashboard</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260709b">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903c">
     <link rel="stylesheet" href="assets/css/pages/admin-events.css?v=20260709n">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>

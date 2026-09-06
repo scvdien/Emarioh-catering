@@ -17,7 +17,7 @@ if ($registrationSetupMode === 'admin' && emarioh_admin_exists($registrationDb))
     <title>Client Registration | Emarioh Catering Services</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/auth.css?v=20260331f">
-    <link rel="stylesheet" href="assets/css/pages/registration.css?v=20260716a">
+    <link rel="stylesheet" href="assets/css/pages/registration.css?v=20260904a">
 </head>
 <body class="auth-page auth-page--register" data-auth-guard="guest">
     <main class="register-shell">
@@ -43,15 +43,15 @@ if ($registrationSetupMode === 'admin' && emarioh_admin_exists($registrationDb))
                 <div class="register-heading">
                     <p class="register-eyebrow" id="registerEyebrow" hidden>Setup Mode</p>
                     <h1 id="registerPageTitle">Create an Account</h1>
-                    <p id="registerPageSubtitle">Sign up in 3 easy steps.</p>
+                    <p class="register-subtitle" id="registerPageSubtitle">Register your client portal access in 3 easy steps.</p>
                 </div>
-                <div class="register-mode-banner" id="registerModeBanner" hidden></div>
+                <div class="register-mode-banner is-warning" id="registerModeBanner" hidden></div>
 
-                <div class="register-steps" aria-label="Registration steps">
+                <div class="register-steps" aria-label="Registration progress">
                     <div class="register-step-chip is-active" data-step-indicator="1">
                         <span class="register-step-chip__count">1</span>
-                        <strong>Details</strong>
-                        <span>Start</span>
+                        <strong>Account</strong>
+                        <span>Details</span>
                     </div>
                     <div class="register-step-chip" data-step-indicator="2">
                         <span class="register-step-chip__count">2</span>
@@ -61,7 +61,7 @@ if ($registrationSetupMode === 'admin' && emarioh_admin_exists($registrationDb))
                     <div class="register-step-chip" data-step-indicator="3">
                         <span class="register-step-chip__count">3</span>
                         <strong>Password</strong>
-                        <span>Finish</span>
+                        <span>Secure</span>
                     </div>
                 </div>
 
@@ -76,8 +76,12 @@ if ($registrationSetupMode === 'admin' && emarioh_admin_exists($registrationDb))
                             </div>
                             <div class="register-field">
                                 <label for="registerPhone" id="registerPhoneLabel">Mobile Number</label>
-                                <div class="register-input-wrap">
-                                    <input id="registerPhone" name="mobile" type="tel" inputmode="numeric" placeholder="0917 555 2481" autocomplete="tel" required>
+                                <div class="register-input-wrap register-input-wrap--phone">
+                                    <span class="register-phone-prefix" aria-hidden="true">
+                                        <span class="register-phone-flag">🇵🇭</span>
+                                        <span class="register-phone-code">+63</span>
+                                    </span>
+                                    <input id="registerPhone" name="mobile" type="tel" inputmode="numeric" placeholder="917 555 2481" maxlength="13" autocomplete="tel" required>
                                 </div>
                             </div>
                         </div>
@@ -154,7 +158,7 @@ if ($registrationSetupMode === 'admin' && emarioh_admin_exists($registrationDb))
 
     <?= emarioh_render_vendor_runtime_assets(false); ?>
     <script src="assets/js/auth-api.js"></script>
-    <script src="assets/js/pages/auth-registration-page.js"></script>
+    <script src="assets/js/pages/auth-registration-page.js?v=20260904a"></script>
 </body>
 </html>
 

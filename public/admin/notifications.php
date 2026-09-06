@@ -16,6 +16,7 @@ function emarioh_render_admin_notification_items(array $notifications, callable 
                 <span class="admin-notification-empty__icon" aria-hidden="true"><i class="bi bi-bell"></i></span>
                 <div>
                     <h2>No notifications yet</h2>
+                    <p>New booking requests, customer cancellations, and payment alerts will appear here.</p>
                 </div>
             </article>
         ';
@@ -35,6 +36,7 @@ function emarioh_render_admin_notification_items(array $notifications, callable 
         $type = (string) ($notification['type'] ?? 'system');
         $typeLabel = match ($type) {
             'new_booking' => 'Pending Review',
+            'booking_cancelled' => 'Cancelled',
             'payment_received' => 'Payment Received',
             'manual_payment' => 'Manual Payment',
             'overdue_payment' => 'Payment Overdue',
@@ -87,7 +89,7 @@ function emarioh_render_admin_notification_items(array $notifications, callable 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Admin Notifications</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/index.css?v=20260714f">
+    <link rel="stylesheet" href="assets/css/index.css?v=20260903b">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260714d">
 </head>
 <body class="admin-dashboard-page admin-notifications-page" data-auth-guard="admin">

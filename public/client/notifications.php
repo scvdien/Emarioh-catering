@@ -70,7 +70,7 @@ function emarioh_render_client_notification_items(array $notifications, callable
     <link rel="stylesheet" href="assets/css/index.css?v=20260714f">
     <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20260418d">
     <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
-    <link rel="stylesheet" href="assets/css/pages/client-notifications.css?v=20260714e">
+    <link rel="stylesheet" href="assets/css/pages/client-notifications.css?v=20260903a">
 </head>
 <body class="dashboard-page client-dashboard-page client-notifications-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">

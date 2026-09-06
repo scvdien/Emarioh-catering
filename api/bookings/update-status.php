@@ -48,13 +48,28 @@ if ($role === 'client') {
     if (!in_array($currentStatus, ['pending_review', 'approved'], true)) {
         emarioh_fail('This booking request can no longer be cancelled.', 422);
     }
+
+    $existingInvoice = emarioh_find_payment_invoice_by_booking($db, $bookingId);
+    $amountPaid = (float) ($existingInvoice['amount_paid'] ?? 0);
+    $invoiceStatus = strtolower(trim((string) ($existingInvoice['status'] ?? '')));
+    $isPaid = $amountPaid > 0.0001 || in_array($invoiceStatus, ['paid', 'approved', 'partially_paid'], true);
+
+    if ($currentStatus === 'approved' && $isPaid) {
+        emarioh_fail('This booking is confirmed and has recorded payment. It cannot be cancelled online. Please contact Emarioh Catering Services for cancellation or refund inquiries.', 422);
+    }
 } else {
-    if (!in_array($nextStatus, ['approved', 'rejected'], true)) {
-        emarioh_fail('Admins can only approve or reject pending bookings.', 422);
+    if (!in_array($nextStatus, ['approved', 'rejected', 'completed'], true)) {
+        emarioh_fail('Admins can only approve, reject, or complete bookings.', 422);
     }
 
-    if ($currentStatus !== 'pending_review') {
-        emarioh_fail('Only pending booking requests can be updated from the admin dashboard.', 422);
+    if ($nextStatus === 'completed') {
+        if ($currentStatus !== 'approved') {
+            emarioh_fail('Only approved bookings can be marked as completed.', 422);
+        }
+    } else {
+        if ($currentStatus !== 'pending_review') {
+            emarioh_fail('Only pending booking requests can be reviewed.', 422);
+        }
     }
 
     if ($nextStatus === 'approved' && emarioh_booking_date_has_conflict($db, $bookingEventDate, $bookingId, emarioh_booking_confirmed_statuses())) {
@@ -82,8 +97,8 @@ try {
             (int) $currentUser['id'],
             $currentStatus,
             'cancelled',
-            'Booking cancelled by client',
-            'Client cancelled this booking request from the portal.',
+            'Booking cancelled',
+            'You cancelled this booking request from the portal.',
             $notes === '' ? null : $notes
         );
 
@@ -92,10 +107,11 @@ try {
         $db->prepare('
             UPDATE booking_requests
             SET status = :status,
-                reviewed_at = NOW(),
-                reviewed_by_user_id = :reviewed_by_user_id,
-                approved_at = CASE WHEN :status = "approved" THEN NOW() ELSE NULL END,
-                rejected_at = CASE WHEN :status = "rejected" THEN NOW() ELSE NULL END
+                reviewed_at = CASE WHEN reviewed_at IS NULL THEN NOW() ELSE reviewed_at END,
+                reviewed_by_user_id = COALESCE(reviewed_by_user_id, :reviewed_by_user_id),
+                approved_at = CASE WHEN :status = "approved" THEN NOW() ELSE approved_at END,
+                rejected_at = CASE WHEN :status = "rejected" THEN NOW() ELSE rejected_at END,
+                completed_at = CASE WHEN :status = "completed" THEN NOW() ELSE completed_at END
             WHERE id = :id
         ')->execute([
             ':status' => $nextStatus,
@@ -103,16 +119,25 @@ try {
             ':id' => $bookingId,
         ]);
 
+        $statusTitles = [
+            'approved' => 'Booking approved',
+            'rejected' => 'Booking rejected',
+            'completed' => 'Event completed',
+        ];
+        $statusDescriptions = [
+            'approved' => 'Admin approved this booking request and moved it forward for coordination.',
+            'rejected' => 'Admin rejected this booking request during review.',
+            'completed' => 'Event was successfully conducted and marked completed by admin.',
+        ];
+
         emarioh_log_booking_status(
             $db,
             $bookingId,
             (int) $currentUser['id'],
             $currentStatus,
             $nextStatus,
-            $nextStatus === 'approved' ? 'Booking approved' : 'Booking rejected',
-            $nextStatus === 'approved'
-                ? 'Admin approved this booking request and moved it forward for coordination.'
-                : 'Admin rejected this booking request during review.',
+            $statusTitles[$nextStatus] ?? 'Booking updated',
+            $statusDescriptions[$nextStatus] ?? 'Booking status was updated by admin.',
             $notes === '' ? null : $notes
         );
 
@@ -144,6 +169,17 @@ try {
     emarioh_fail('Booking status could not be updated right now. Please try again in a moment.', 500);
 }
 
+if ($role === 'client') {
+    try {
+        $cancelledBooking = emarioh_find_booking_by_id($db, $bookingId);
+        if ($cancelledBooking !== null) {
+            emarioh_create_admin_client_cancelled_notification($db, $cancelledBooking, (string) ($currentUser['full_name'] ?? 'Client'));
+        }
+    } catch (Throwable $throwable) {
+        // Silently log
+    }
+}
+
 if ($role === 'admin') {
     try {
         $booking['id'] = $bookingId;
@@ -156,7 +192,6 @@ if ($role === 'admin') {
             'message' => 'Booking status updated, but the SMS notification failed.',
         ];
     }
-
 }
 
 emarioh_success([

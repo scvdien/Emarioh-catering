@@ -2974,12 +2974,102 @@ button {
     }
 
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub__grid {
-        gap: clamp(0.85rem, 2.5vh, 1.15rem);
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        border: 1px solid rgba(226, 218, 206, 0.95);
+        border-radius: 1.35rem;
+        background: #FFFFFF;
+        box-shadow: 0 4px 18px rgba(46, 36, 30, 0.04), 0 1px 3px rgba(46, 36, 30, 0.03);
+        overflow: hidden;
     }
 
-    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-shortcut,
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-shortcut {
+        min-height: 4.4rem;
+        padding: 0.95rem 1.15rem;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
+        transition: background-color 0.18s ease;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-shortcut + .settings-profile-shortcut {
+        border-top: 1px solid rgba(235, 229, 220, 0.85);
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-shortcut:hover,
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-shortcut:active {
+        background: rgba(201, 162, 74, 0.05);
+    }
+
     .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-logout {
-        min-height: clamp(5.7rem, 13vh, 7rem);
+        min-height: 4.1rem;
+        padding: 0.9rem 1.15rem;
+        margin-top: 0.45rem;
+        border: 1px solid rgba(220, 53, 69, 0.22);
+        border-radius: 1.25rem;
+        background: #FFFFFF;
+        box-shadow: 0 4px 14px rgba(220, 53, 69, 0.03);
+        transition: all 0.2s ease;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-logout:hover,
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-logout:active {
+        border-color: rgba(220, 53, 69, 0.38);
+        background: rgba(255, 247, 247, 0.95);
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-shortcut__icon {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: 0.85rem;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] [data-target-section="profile-details"] .settings-profile-shortcut__icon {
+        background: rgba(201, 162, 74, 0.15);
+        color: #B88E36;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] [data-target-section="password-security"] .settings-profile-shortcut__icon {
+        background: rgba(31, 59, 47, 0.10);
+        color: #1F3B2F;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-logout .settings-profile-shortcut__icon {
+        background: rgba(220, 53, 69, 0.09);
+        color: #c0392b;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-logout strong {
+        color: #b52b27;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub__icon {
+        width: 3.35rem;
+        height: 3.35rem;
+        border-radius: 1rem;
+        background: linear-gradient(135deg, #1F3B2F, #2A4F3E);
+        color: #D5AE4B;
+        font-size: 1.55rem;
+        box-shadow: 0 6px 16px rgba(31, 59, 47, 0.16);
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub__eyebrow {
+        color: #B88E36;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+    }
+
+    .client-dashboard-page.client-settings-page .settings-dashboard-content[data-mobile-state="collapsed"] .settings-profile-hub__copy h2 {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 1.55rem;
+        font-weight: 700;
+        color: #1e1611;
+        line-height: 1.15;
     }
 
     .client-dashboard-page.client-settings-page .client-mobile-bottom-nav__item {

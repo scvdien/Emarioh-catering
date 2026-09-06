@@ -130,7 +130,7 @@ $description = trim((string) ($invoice['title'] ?? $booking['package_label'] ?? 
 $receiptNotes = trim((string) ($receipt['notes'] ?? ''));
 $isManualReceipt = str_contains(strtolower($receiptNotes), 'manual');
 $receiptSubtext = $isManualReceipt
-    ? 'This receipt was generated automatically after admin recorded your manual payment.'
+    ? ''
     : 'This receipt was generated automatically after your payment was confirmed.';
 
 function emarioh_pdf_sanitize_text(string $value): string
@@ -804,7 +804,9 @@ if ($downloadPdf) {
                 <div>
                     <p class="receipt-card__eyebrow">Emarioh Catering Services</p>
                     <h1 class="receipt-card__title">Payment Receipt</h1>
-                    <p class="receipt-card__subtext"><?= $escape($receiptSubtext) ?></p>
+                    <?php if ($receiptSubtext !== ''): ?>
+                        <p class="receipt-card__subtext"><?= $escape($receiptSubtext) ?></p>
+                    <?php endif; ?>
                 </div>
                 <span class="receipt-badge"><?= $escape($statusLabel) ?></span>
             </header>

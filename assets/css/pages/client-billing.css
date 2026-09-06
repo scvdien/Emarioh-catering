@@ -20,6 +20,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -2922,31 +2926,342 @@ button {
     background: #ece4da;
 }
 
+.billing-empty-state-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+    width: 100%;
+}
+
 .billing-empty-state {
     display: grid;
     gap: 1.35rem;
 }
 
-.billing-empty-state .panel-heading {
-    align-items: flex-end;
-    margin-bottom: 0;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(224, 214, 199, 0.9);
+/* ==========================================================================
+   Option 2: Single Unified Luxury Card with Integrated Stepper
+   ========================================================================== */
+
+#billingApprovedContent[hidden],
+#billingPendingState[hidden],
+#billingPaidViewLayout[hidden],
+.billing-paid-view-layout[hidden],
+#billingPaidBreakdownCard[hidden],
+#billingReceiptSection[hidden],
+#billingPaymentSection[hidden],
+.billing-empty-state-wrapper[hidden] {
+    display: none !important;
 }
 
-.billing-empty-state .panel-heading__copy {
-    display: grid;
+.billing-unified-empty-card {
+    position: relative;
+    width: 100%;
+    max-width: 66rem;
+    margin: 0 auto;
+    padding: 2rem 2.4rem 1.85rem;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(210, 195, 175, 0.7);
+    background: #FFFFFF;
+    box-shadow: 0 16px 42px rgba(46, 36, 30, 0.06), 0 2px 6px rgba(46, 36, 30, 0.02);
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    overflow: hidden;
+}
+
+/* Top Hero Section */
+.billing-unified-empty-card__hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.65rem;
+}
+
+.billing-unified-empty-card__icon-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.2rem;
+    height: 4.2rem;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(198, 154, 51, 0.35);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 230, 207, 0.9));
+    color: #9f7331;
+    font-size: 2rem;
+    box-shadow: 0 8px 20px rgba(198, 154, 51, 0.18);
+}
+
+.billing-unified-empty-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.billing-unified-empty-card__title {
+    margin: 0.15rem 0 0;
+    color: #1F3B2F;
+    font-family: "Cinzel", "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+}
+
+.billing-unified-empty-card__text {
+    margin: 0;
+    max-width: 54rem;
+    color: #67584c;
+    font-size: 0.92rem;
+    line-height: 1.65;
+}
+
+.billing-unified-empty-card__actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 0.4rem;
+}
+
+.billing-unified-empty-card__actions .client-action-button {
+    padding: 0.75rem 1.45rem;
+    font-size: 0.9rem;
+}
+
+/* Divider Line with Badge */
+.billing-unified-empty-card__divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.2rem 0;
+}
+
+.billing-unified-empty-card__divider-line {
+    flex: 1;
+    border-top: 1px dashed rgba(210, 195, 175, 0.75);
+}
+
+.billing-unified-empty-card__divider-pill {
+    display: inline-flex;
+    align-items: center;
     gap: 0.45rem;
+    padding: 0.32rem 0.95rem;
+    border-radius: 999px;
+    background: #FAF7F2;
+    border: 1px solid rgba(198, 154, 51, 0.3);
+    color: #7A5B20;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
-.billing-empty-state .panel-heading h2 {
+/* Integrated Stepper */
+.billing-unified-stepper {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 0.95rem;
+}
+
+.billing-unified-step {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 1.05rem 1.2rem;
+    border-radius: 1.1rem;
+    background: #FCFBF8;
+    border: 1px solid rgba(226, 218, 206, 0.75);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.billing-unified-step:hover {
+    transform: translateY(-2px);
+    border-color: rgba(198, 154, 51, 0.45);
+    box-shadow: 0 6px 18px rgba(58, 41, 35, 0.05);
+}
+
+.billing-unified-step__indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.billing-unified-step__num {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.22rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(198, 154, 51, 0.15);
+    color: #8c642b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.billing-unified-step__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    border-radius: 0.7rem;
+    background: #FFFFFF;
+    border: 1px solid rgba(198, 154, 51, 0.25);
+    color: #1F3B2F;
+    font-size: 1.15rem;
+    box-shadow: 0 2px 6px rgba(46, 36, 30, 0.04);
+}
+
+.billing-unified-step__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.billing-unified-step__title {
+    margin: 0;
+    color: #2D211B;
+    font-size: 0.98rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.billing-unified-step__desc {
+    margin: 0;
+    color: #7A6B5F;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.billing-unified-step__connector {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #B88E36;
+    font-size: 1.2rem;
+    opacity: 0.7;
+}
+
+@media (max-width: 991.98px) {
+    .billing-unified-empty-card {
+        padding: 1.4rem 1.3rem;
+        gap: 1.15rem;
+    }
+
+    .billing-unified-stepper {
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+    }
+
+    .billing-unified-step__connector {
+        display: none;
+    }
+
+    .billing-unified-step {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.75rem 0.9rem;
+    }
+
+    .billing-unified-step__indicator {
+        flex-direction: column;
+        gap: 0.3rem;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .billing-unified-empty-card__hero {
+        flex-direction: column;
+        gap: 0.85rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .billing-unified-empty-card__actions {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .billing-unified-empty-card__actions .client-action-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .billing-unified-step {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .billing-unified-step__indicator {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Empty State Hero Card (Legacy Fallback) */
+.billing-empty-state-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 2.2rem 2.4rem;
+    border: 1px solid rgba(198, 154, 51, 0.25);
+    border-radius: 1.4rem;
+    background:
+        radial-gradient(circle at 90% 15%, rgba(198, 154, 51, 0.14), transparent 48%),
+        linear-gradient(145deg, #fffefa 0%, #fbf5eb 100%);
+    box-shadow: 0 16px 36px rgba(58, 41, 35, 0.06);
+}
+
+.billing-empty-state-hero__inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.85rem;
+}
+
+.billing-empty-state-hero__icon-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 1.35rem;
+    border: 1px solid rgba(198, 154, 51, 0.35);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 230, 207, 0.95));
+    color: #9f7331;
+    font-size: 2rem;
+    box-shadow: 0 10px 24px rgba(198, 154, 51, 0.2);
+}
+
+.billing-empty-state-hero__content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    flex: 1;
+}
+
+.billing-empty-state-hero__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.billing-empty-state-hero__title {
     margin: 0;
     color: #2d211b;
     font-family: "Cormorant Garamond", serif;
-    font-size: clamp(2rem, 3.4vw, 3rem);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 0.95;
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
 }
 
 .billing-empty-state__status {
@@ -2960,18 +3275,293 @@ button {
 
 .billing-empty-state__text {
     margin: 0;
-    max-width: 52rem;
+    max-width: 54rem;
     color: #67584c;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     line-height: 1.75;
 }
 
 .billing-empty-state__actions {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.85rem;
+    margin-top: 0.4rem;
 }
 
+.billing-empty-state__actions .client-action-button {
+    font-size: 0.88rem;
+    padding: 0.78rem 1.45rem;
+}
+
+.billing-empty-state__actions .client-action-button i {
+    font-size: 1rem;
+}
+
+/* How Billing Works (Process Stepper) */
+.billing-process-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+}
+
+.billing-process-section__head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.billing-process-section__title {
+    margin: 0;
+    color: #2d211b;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+.billing-process-section__desc {
+    margin: 0;
+    color: #7a6b5f;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.billing-process-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.15rem;
+}
+
+.billing-process-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 1.45rem 1.4rem;
+    border: 1px solid rgba(95, 71, 53, 0.1);
+    border-radius: 1.25rem;
+    background: linear-gradient(180deg, #ffffff 0%, #fbf6ef 100%);
+    box-shadow: 0 8px 24px rgba(58, 41, 35, 0.04);
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.billing-process-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(198, 154, 51, 0.38);
+    box-shadow: 0 14px 28px rgba(58, 41, 35, 0.09);
+}
+
+.billing-process-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.billing-process-card__step-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.72rem;
+    border-radius: 999px;
+    background: rgba(198, 154, 51, 0.16);
+    color: #8c642b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.billing-process-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 0.9rem;
+    background: #ffffff;
+    border: 1px solid rgba(198, 154, 51, 0.22);
+    color: #a77937;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 10px rgba(58, 41, 35, 0.05);
+}
+
+.billing-process-card__heading {
+    margin: 0 0 0.45rem;
+    color: #2d211b;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.billing-process-card__text {
+    margin: 0;
+    color: #6d5e52;
+    font-size: 0.85rem;
+    line-height: 1.65;
+}
+
+/* Official Receipts Archive Section */
+.billing-receipt-archive-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding: 1.55rem 1.75rem;
+    border: 1px solid rgba(95, 71, 53, 0.1);
+    border-radius: 1.3rem;
+    background: #fdfbf7;
+}
+
+.billing-receipt-archive-card__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.95rem;
+    border-bottom: 1px solid rgba(122, 107, 95, 0.14);
+}
+
+.billing-receipt-archive-card__title {
+    margin: 0.25rem 0 0;
+    color: #2d211b;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+}
+
+.billing-receipt-archive-empty {
+    display: flex;
+    align-items: center;
+    gap: 1.35rem;
+    padding: 1.25rem 1.45rem;
+    border: 1px dashed rgba(198, 154, 51, 0.38);
+    border-radius: 1.1rem;
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.billing-receipt-archive-empty__icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    border-radius: 1.1rem;
+    background: rgba(122, 107, 95, 0.09);
+    color: #8c7a6e;
+    font-size: 1.55rem;
+}
+
+.billing-receipt-archive-empty__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.billing-receipt-archive-empty__title {
+    color: #3b2c24;
+    font-size: 0.96rem;
+    font-weight: 700;
+}
+
+.billing-receipt-archive-empty__text {
+    margin: 0;
+    color: #726256;
+    font-size: 0.86rem;
+    line-height: 1.6;
+}
+
+.billing-receipt-archive-available {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    background: rgba(227, 234, 223, 0.45);
+    border: 1px solid rgba(93, 112, 81, 0.2);
+}
+
+/* Digital Payment Channels & Trust Assurances */
+.billing-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem;
+}
+
+.billing-trust-card {
+    padding: 1.45rem 1.55rem;
+    border: 1px solid rgba(95, 71, 53, 0.1);
+    border-radius: 1.25rem;
+    background: #fffdfa;
+}
+
+.billing-trust-card__header {
+    display: flex;
+    align-items: center;
+    gap: 0.95rem;
+    margin-bottom: 0.95rem;
+}
+
+.billing-trust-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.65rem;
+    height: 2.65rem;
+    border-radius: 0.85rem;
+    background: rgba(198, 154, 51, 0.15);
+    color: #9f7331;
+    font-size: 1.2rem;
+}
+
+.billing-trust-card__title {
+    margin: 0;
+    color: #2d211b;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.billing-trust-card__subtitle {
+    margin: 0.15rem 0 0;
+    color: #7a6b5f;
+    font-size: 0.82rem;
+}
+
+.billing-trust-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.billing-channel-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.42rem 0.8rem;
+    border: 1px solid rgba(95, 71, 53, 0.12);
+    border-radius: 0.7rem;
+    background: #ffffff;
+    color: #4a3d34;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(58, 41, 35, 0.03);
+}
+
+.billing-trust-card__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.billing-trust-card__list li {
+    color: #64554a;
+    font-size: 0.84rem;
+    line-height: 1.5;
+}
+
+/* Fallback for legacy preview cards */
 .billing-empty-state__preview {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3272,25 +3862,25 @@ button {
 
 .billing-payment-guide {
     display: grid;
-    gap: 0.65rem;
-    flex: 1 1 auto;
-    align-content: center;
-    padding: 0.9rem 0.95rem;
+    gap: 0.45rem;
+    padding: 0.65rem 0.85rem;
     border: 1px solid rgba(95, 71, 53, 0.08);
-    border-radius: 1.05rem;
+    border-radius: 0.85rem;
     background:
         radial-gradient(circle at top right, rgba(198, 154, 51, 0.12), transparent 34%),
         rgba(255, 252, 246, 0.86);
 }
 
 .billing-payment-guide__header {
-    display: grid;
-    gap: 0.22rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
 }
 
 .billing-payment-guide__header span {
     color: #8b7866;
-    font-size: 0.58rem;
+    font-size: 0.56rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -3299,55 +3889,64 @@ button {
 .billing-payment-guide__header p {
     margin: 0;
     color: #67584c;
-    font-size: 0.72rem;
-    line-height: 1.45;
+    font-size: 0.68rem;
+    line-height: 1.3;
 }
 
 .billing-payment-guide__steps {
     display: grid;
-    gap: 0.55rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
 }
 
 .billing-payment-guide__step {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 0.6rem;
-    align-items: start;
-    padding: 0.72rem 0.76rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.42rem 0.55rem;
     border: 1px solid rgba(95, 71, 53, 0.08);
-    border-radius: 0.95rem;
-    background: rgba(255, 255, 255, 0.82);
+    border-radius: 0.65rem;
+    background: rgba(255, 255, 255, 0.92);
 }
 
 .billing-payment-guide__step-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.85rem;
-    height: 1.85rem;
-    border-radius: 0.68rem;
-    background: rgba(21, 54, 36, 0.1);
+    width: 1.5rem;
+    height: 1.5rem;
+    min-width: 1.5rem;
+    border-radius: 0.45rem;
+    background: rgba(21, 54, 36, 0.09);
     color: #1a4630;
-    font-size: 0.84rem;
+    font-size: 0.75rem;
+    flex-shrink: 0;
 }
 
 .billing-payment-guide__step-copy {
     display: grid;
-    gap: 0.12rem;
+    gap: 0.06rem;
+    min-width: 0;
 }
 
 .billing-payment-guide__step-copy strong {
     color: #2d211b;
-    font-size: 0.74rem;
-    font-weight: 800;
-    line-height: 1.3;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .billing-payment-guide__step-copy p {
     margin: 0;
-    color: #6f6154;
-    font-size: 0.66rem;
-    line-height: 1.4;
+    color: #7b6d61;
+    font-size: 0.62rem;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .billing-payment-choice {
@@ -3479,7 +4078,6 @@ button {
 .billing-payment-feedback,
 .billing-payment-status-card__note,
 .billing-receipt-form__text,
-.billing-receipt-feedback,
 .billing-receipt-preview-card__note {
     margin: 0;
     color: #67584c;
@@ -3491,8 +4089,7 @@ button {
     display: none;
 }
 
-.billing-payment-feedback.is-success,
-.billing-receipt-feedback.is-success {
+.billing-payment-feedback.is-success {
     display: block;
     color: #23533c;
     padding: 0.95rem 1rem;
@@ -3502,8 +4099,7 @@ button {
     background: rgba(228, 245, 234, 0.9);
 }
 
-.billing-payment-feedback.is-error,
-.billing-receipt-feedback.is-error {
+.billing-payment-feedback.is-error {
     display: block;
     color: #8a3d36;
     padding: 0.95rem 1rem;
@@ -3630,13 +4226,6 @@ button {
     box-shadow: 0 16px 32px rgba(58, 41, 35, 0.08);
 }
 
-.billing-receipt-feedback {
-    padding: 0.95rem 1rem;
-    border: 1px solid rgba(95, 71, 53, 0.08);
-    border-radius: 1rem;
-    background: rgba(255, 248, 236, 0.88);
-}
-
 .billing-receipt-preview-card__status {
     display: flex;
     align-items: center;
@@ -3702,16 +4291,21 @@ button {
     }
 
     #billingPaymentSection {
-        flex: 1 1 auto;
-        min-height: calc(100vh - 8.35rem);
-        min-height: calc(100dvh - 8.35rem);
+        flex: 0 1 auto;
+        min-height: auto;
     }
 
-    .billing-payment-grid,
+    .billing-payment-grid {
+        min-height: auto;
+        align-items: start;
+    }
+
     .billing-payment-main,
     .billing-payment-sidebar,
+    .billing-payment-focus,
     .billing-invoice-card {
-        min-height: 100%;
+        min-height: auto;
+        height: auto;
     }
 }
 
@@ -3724,7 +4318,9 @@ button {
 
 @media (max-width: 991.98px) {
     .billing-payment-grid,
-    .billing-receipt-grid {
+    .billing-receipt-grid,
+    .billing-process-grid,
+    .billing-trust-grid {
         grid-template-columns: 1fr;
     }
 
@@ -3735,6 +4331,38 @@ button {
 }
 
 @media (max-width: 767.98px) {
+    .billing-empty-state-hero {
+        padding: 1.4rem 1.25rem;
+    }
+
+    .billing-empty-state-hero__inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.15rem;
+    }
+
+    .billing-empty-state__actions {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .billing-empty-state__actions .client-action-button {
+        width: 100%;
+    }
+
+    .billing-receipt-archive-card__head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .billing-receipt-archive-empty {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.95rem;
+    }
+
     .billing-empty-state__preview,
     .billing-summary-grid,
     .billing-summary-grid--billing,
@@ -3809,3 +4437,1758 @@ button {
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================================================
+   Modern Digital Receipt Voucher UI
+   ========================================================================== */
+.client-dashboard-content.billing-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 8rem);
+    min-height: calc(100dvh - 8rem);
+    padding: 1.5rem 0.85rem 1.5rem;
+}
+
+#billingApprovedContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex: 1 1 auto;
+    margin: auto 0;
+}
+
+.billing-receipt-voucher-card {
+    position: relative;
+    max-width: 31.5rem;
+    width: 100%;
+    margin: clamp(1.5rem, 5vh, 3.5rem) auto auto;
+    border: 1px solid rgba(226, 218, 206, 0.95);
+    border-radius: 1.5rem;
+    background: #FFFFFF;
+    box-shadow: 0 12px 36px rgba(46, 36, 30, 0.08), 0 2px 6px rgba(46, 36, 30, 0.03);
+    overflow: hidden;
+}
+
+.billing-receipt-voucher__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.6rem 1.4rem 1.25rem;
+    background: linear-gradient(180deg, #FAF7F2 0%, #FFFFFF 100%);
+}
+
+.billing-receipt-voucher__badge-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.85rem;
+}
+
+.billing-receipt-voucher__seal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 999px;
+    background: rgba(31, 59, 47, 0.1);
+    color: #1F3B2F;
+    font-size: 1.25rem;
+}
+
+.billing-receipt-voucher__status-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.billing-receipt-voucher__status-label {
+    color: #1F3B2F;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
+.billing-receipt-voucher__hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.billing-receipt-voucher__amount-label {
+    color: #8C7E72;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.billing-receipt-voucher__amount {
+    margin: 0;
+    color: #1E1611;
+    font-family: "Manrope", sans-serif;
+    font-size: clamp(1.85rem, 5vw, 2.35rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.billing-receipt-voucher__intro {
+    margin: 0.45rem 0 0;
+    color: #6E6257;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    max-width: 24rem;
+}
+
+/* Ticket perforated line with left/right notches */
+.billing-receipt-voucher__divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 1.4rem;
+    margin: 0 -1px;
+}
+
+.billing-receipt-voucher__notch {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.9rem;
+    height: 1.4rem;
+    background: var(--page-bg, #f3eee7);
+    border: 1px solid rgba(226, 218, 206, 0.95);
+    z-index: 2;
+}
+
+.billing-receipt-voucher__notch--left {
+    left: -1px;
+    border-left: 0;
+    border-radius: 0 999px 999px 0;
+}
+
+.billing-receipt-voucher__notch--right {
+    right: -1px;
+    border-right: 0;
+    border-radius: 999px 0 0 999px;
+}
+
+.billing-receipt-voucher__line {
+    flex: 1;
+    margin: 0 1.25rem;
+    border-top: 2px dashed rgba(210, 200, 186, 0.85);
+}
+
+.billing-receipt-voucher__body {
+    padding: 1.1rem 1.4rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.95rem;
+}
+
+.billing-receipt-voucher__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    padding: 0.95rem 1.05rem;
+    border: 1px solid rgba(235, 229, 220, 0.85);
+    border-radius: 1.15rem;
+    background: #FAF7F2;
+}
+
+.billing-receipt-voucher__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.billing-receipt-voucher__key {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #7E7063;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.billing-receipt-voucher__key i {
+    color: #B88E36;
+    font-size: 0.9rem;
+}
+
+.billing-receipt-voucher__val {
+    color: #211A15;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.billing-receipt-voucher__note {
+    margin: 0;
+    color: #8A7D71;
+    font-size: 0.76rem;
+    line-height: 1.45;
+    text-align: center;
+}
+
+.billing-receipt-voucher__actions {
+    margin-top: 0.25rem;
+}
+
+.billing-receipt-voucher__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    width: 100%;
+    min-height: 3.1rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 800;
+    box-shadow: 0 6px 18px rgba(184, 142, 54, 0.28);
+    transition: all 0.2s ease;
+}
+
+.billing-receipt-voucher__btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 22px rgba(184, 142, 54, 0.35);
+}
+
+@media (max-width: 1199.98px) {
+    body.has-billing-receipt-active,
+    body:has(#billingReceiptSection:not([hidden])) {
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+    }
+
+    body.has-billing-receipt-active .dashboard-frame,
+    body:has(#billingReceiptSection:not([hidden])) .dashboard-frame {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    body.has-billing-receipt-active .dashboard-main,
+    body:has(#billingReceiptSection:not([hidden])) .dashboard-main {
+        height: 100vh !important;
+        height: 100dvh !important;
+        min-height: 100dvh !important;
+        padding-bottom: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden;
+    }
+
+    body.has-billing-receipt-active .client-dashboard-content.billing-page,
+    body:has(#billingReceiptSection:not([hidden])) .client-dashboard-content.billing-page {
+        flex: 1 1 auto;
+        min-height: 0 !important;
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 0.5rem 0.85rem calc(4.6rem + env(safe-area-inset-bottom)) !important;
+        margin: 0 !important;
+        overflow-y: auto;
+    }
+
+    body.has-billing-receipt-active #billingApprovedContent,
+    body:has(#billingReceiptSection:not([hidden])) #billingApprovedContent {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100%;
+        margin: auto 0 !important;
+    }
+
+    body.has-billing-receipt-active .billing-receipt-voucher-card,
+    body:has(#billingReceiptSection:not([hidden])) .billing-receipt-voucher-card {
+        margin: auto auto !important;
+        width: 100%;
+        max-width: 31.5rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .billing-receipt-voucher-card {
+        border-radius: 1.25rem;
+    }
+
+    .billing-receipt-voucher__header {
+        padding: 1.3rem 1.1rem 1rem;
+    }
+
+    .billing-receipt-voucher__body {
+        padding: 0.95rem 1.1rem 1.3rem;
+        gap: 0.8rem;
+    }
+
+    .billing-receipt-voucher__amount {
+        font-size: 1.95rem;
+    }
+
+    .billing-receipt-voucher__intro {
+        font-size: 0.78rem;
+    }
+
+    .billing-receipt-voucher__list {
+        padding: 0.85rem 0.95rem;
+        gap: 0.55rem;
+    }
+
+    .billing-receipt-voucher__key,
+    .billing-receipt-voucher__val {
+        font-size: 0.8rem;
+    }
+
+    .billing-receipt-voucher__btn {
+        min-height: 2.9rem;
+        font-size: 0.88rem;
+    }
+}
+
+/* ==========================================================================
+   Financial Ledger Bar & Secure Checkout Badge
+   ========================================================================== */
+
+.billing-financial-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #FAF7F2;
+    border: 1px solid rgba(200, 164, 107, 0.35);
+    border-radius: 0.95rem;
+    padding: 0.85rem 1.15rem;
+    gap: 0.75rem;
+}
+
+.billing-financial-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1 1 0;
+    text-align: center;
+}
+
+.billing-financial-stat__label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #8A7A6D;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.billing-financial-stat__val {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #2D211B;
+    line-height: 1.2;
+}
+
+.billing-financial-stat__val--paid {
+    color: #198754;
+}
+
+.billing-financial-stat__val--due {
+    color: #1F3B2F;
+}
+
+.billing-financial-bar__sep {
+    width: 1px;
+    height: 2.2rem;
+    background: rgba(200, 164, 107, 0.3);
+    flex-shrink: 0;
+}
+
+.billing-payment-trust-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 0.65rem;
+    background: #F6FAF7;
+    border: 1px solid rgba(76, 106, 82, 0.2);
+    color: #2c4a38;
+    margin-top: 0.25rem;
+}
+
+.billing-payment-trust-badge__icon {
+    color: #198754;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.billing-payment-trust-badge__text {
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: #3b5042;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.billing-payment-trust-badge__text strong {
+    font-weight: 700;
+    color: #163624;
+}
+
+@media (max-width: 575.98px) {
+    .billing-financial-bar {
+        flex-direction: column;
+        gap: 0.6rem;
+        padding: 0.75rem 0.9rem;
+    }
+
+    .billing-financial-bar__sep {
+        width: 100%;
+        height: 1px;
+    }
+
+    .billing-payment-trust-badge__text {
+        font-size: 0.68rem;
+        white-space: normal;
+    }
+}
+
+/* ==========================================================================
+   Desktop 2-Column Split View for Paid Billing State
+   ========================================================================== */
+
+.billing-paid-view-layout {
+    width: 100%;
+}
+
+@media (min-width: 1200px) {
+    /* Compact desktop layout to fit 100% viewport cleanly without vertical scrollbar */
+    html:has(.client-billing-page),
+    body.client-billing-page.dashboard-page,
+    body.client-billing-page {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+    }
+
+    .client-dashboard-page.client-billing-page .dashboard-frame {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+    }
+
+    .client-dashboard-page.client-billing-page .dashboard-main {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+        overflow-y: hidden !important;
+    }
+
+    .client-billing-page .dashboard-topbar,
+    .client-dashboard-page.client-billing-page .dashboard-topbar {
+        flex: 0 0 auto !important;
+        padding: 0.85rem 1.85rem !important;
+        min-height: auto !important;
+    }
+
+    .client-billing-page .topbar-copy__title,
+    .client-dashboard-page.client-billing-page .topbar-copy__title {
+        font-size: 1.85rem !important;
+    }
+
+    .client-dashboard-page.client-billing-page .dashboard-content.billing-page,
+    .client-dashboard-content.billing-page {
+        flex: 1 1 0 !important;
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 0.85rem 1.85rem 1rem !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        margin: 0 !important;
+    }
+
+    #billingApprovedContent[hidden],
+    #billingPendingState[hidden],
+    #billingPaidViewLayout[hidden],
+    .billing-paid-view-layout[hidden],
+    #billingPaidBreakdownCard[hidden],
+    #billingReceiptSection[hidden],
+    #billingPaymentSection[hidden],
+    .billing-empty-state-wrapper[hidden] {
+        display: none !important;
+    }
+
+    .client-dashboard-page.client-billing-page .billing-empty-state-wrapper:not([hidden]),
+    .billing-empty-state-wrapper:not([hidden]) {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: auto auto !important;
+    }
+
+    #billingApprovedContent:not([hidden]) {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        margin: auto auto !important;
+    }
+
+    .billing-payment-section {
+        width: 100% !important;
+        max-width: 74rem !important;
+        margin: auto auto !important;
+    }
+
+    .billing-payment-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1.25fr) minmax(360px, 430px) !important;
+        gap: 1.5rem !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+
+    .billing-payment-main,
+    .billing-payment-sidebar {
+        height: 100% !important;
+        min-height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .billing-payment-focus {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        gap: 0.95rem !important;
+        padding: 1.6rem 1.55rem !important;
+        border-radius: 1.4rem !important;
+        height: 100% !important;
+        min-height: 520px !important;
+        box-sizing: border-box !important;
+        background: #FFFFFF !important;
+        border: 1px solid rgba(226, 218, 206, 0.95) !important;
+        box-shadow: 0 10px 32px rgba(46, 36, 30, 0.06), 0 2px 6px rgba(46, 36, 30, 0.02) !important;
+    }
+
+    .billing-payment-focus__head {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 0.75rem !important;
+    }
+
+    .billing-payment-focus__copy {
+        display: grid !important;
+        gap: 0.15rem !important;
+    }
+
+    .billing-payment-focus__eyebrow {
+        font-size: 0.6rem !important;
+        letter-spacing: 0.08em !important;
+        font-weight: 700 !important;
+        color: #8C7E72 !important;
+        text-transform: uppercase !important;
+    }
+
+    .billing-payment-focus__amount {
+        font-size: 2.2rem !important;
+        color: #173827 !important;
+        line-height: 1 !important;
+        margin: 0.1rem 0 !important;
+        font-weight: 800 !important;
+    }
+
+    .billing-payment-focus__text {
+        font-size: 0.78rem !important;
+        color: #67584c !important;
+        line-height: 1.35 !important;
+        margin: 0 !important;
+        max-width: 32rem !important;
+        min-height: 2.75rem !important;
+    }
+
+    .billing-payment-focus .billing-financial-bar {
+        padding: 0.85rem 1.1rem !important;
+        border-radius: 0.95rem !important;
+        margin: 0.25rem 0 !important;
+    }
+
+    .billing-payment-focus .billing-financial-stat {
+        gap: 0.2rem !important;
+    }
+
+    .billing-payment-focus .billing-financial-stat__label {
+        font-size: 0.64rem !important;
+    }
+
+    .billing-payment-focus .billing-financial-stat__val {
+        font-size: 1rem !important;
+    }
+
+    .billing-payment-focus .billing-financial-bar__sep {
+        height: 2.15rem !important;
+    }
+
+    .billing-payment-choice {
+        display: grid !important;
+        gap: 0.4rem !important;
+        padding-top: 0 !important;
+    }
+
+    .billing-payment-choice__header {
+        display: flex !important;
+        align-items: baseline !important;
+        gap: 0.45rem !important;
+    }
+
+    .billing-payment-choice__header span {
+        font-size: 0.58rem !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        color: #8b7866 !important;
+        letter-spacing: 0.08em !important;
+    }
+
+    .billing-payment-choice__header p {
+        font-size: 0.72rem !important;
+        color: #67584c !important;
+        margin: 0 !important;
+    }
+
+    .billing-payment-choice__options {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.65rem !important;
+    }
+
+    .billing-payment-option {
+        display: grid !important;
+        grid-template-columns: auto minmax(0, 1fr) !important;
+        align-items: flex-start !important;
+        gap: 0.65rem !important;
+        padding: 0.65rem 0.85rem !important;
+        border-radius: 0.85rem !important;
+        border: 1px solid rgba(226, 218, 206, 0.85) !important;
+        background: #FAF8F5 !important;
+        transition: border-color 0.2s ease, background-color 0.2s ease !important;
+    }
+
+    .billing-payment-option:hover {
+        background: #FFFFFF !important;
+        border-color: rgba(200, 164, 107, 0.6) !important;
+    }
+
+    .billing-payment-option__input {
+        width: 1rem !important;
+        height: 1rem !important;
+        margin: 0.15rem 0 0 0 !important;
+    }
+
+    .billing-payment-option__copy {
+        display: grid !important;
+        gap: 0.15rem !important;
+        min-width: 0 !important;
+    }
+
+    .billing-payment-option__head {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: baseline !important;
+        gap: 0.4rem !important;
+    }
+
+    .billing-payment-option__label {
+        font-size: 0.84rem !important;
+        font-weight: 700 !important;
+        color: #2d211b !important;
+    }
+
+    .billing-payment-option__amount {
+        font-size: 0.86rem !important;
+        font-weight: 800 !important;
+        color: #183c2a !important;
+    }
+
+    .billing-payment-option__description {
+        font-size: 0.7rem !important;
+        line-height: 1.35 !important;
+        color: #6f6154 !important;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        display: block !important;
+        min-height: 2.15rem !important;
+    }
+
+    .billing-payment-action-panel {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.45rem !important;
+        margin-top: auto !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .billing-payment-actions__buttons {
+        display: flex !important;
+        gap: 0.75rem !important;
+        width: 100% !important;
+        justify-content: stretch !important;
+    }
+
+    .billing-payment-actions__buttons .client-action-button {
+        flex: 1 1 0 !important;
+        padding: 0.65rem 1.15rem !important;
+        font-size: 0.88rem !important;
+        font-weight: 700 !important;
+        min-height: 2.85rem !important;
+        border-radius: 0.85rem !important;
+        justify-content: center !important;
+    }
+
+    .billing-payment-trust-badge {
+        padding: 0.45rem 0.85rem !important;
+        margin-top: 0.25rem !important;
+        border-radius: 0.65rem !important;
+    }
+
+    .billing-payment-trust-badge__text {
+        font-size: 0.72rem !important;
+    }
+
+    .billing-payment-feedback {
+        margin: 0 !important;
+        font-size: 0.72rem !important;
+        line-height: 1.35 !important;
+        text-align: center !important;
+    }
+
+    .billing-invoice-card {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        gap: 0.95rem !important;
+        height: 100% !important;
+        min-height: 520px !important;
+        padding: 1.6rem 1.55rem !important;
+        border-radius: 1.4rem !important;
+        box-sizing: border-box !important;
+        background: #FFFFFF !important;
+        border: 1px solid rgba(226, 218, 206, 0.95) !important;
+        box-shadow: 0 10px 32px rgba(46, 36, 30, 0.06), 0 2px 6px rgba(46, 36, 30, 0.02) !important;
+    }
+
+    .billing-invoice-card__head {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: flex-start !important;
+        gap: 0.75rem !important;
+        padding-bottom: 0.82rem !important;
+        border-bottom: 1px solid rgba(226, 218, 206, 0.8) !important;
+    }
+
+    .billing-invoice-card__head h3 {
+        margin: 0.15rem 0 0 !important;
+        font-size: 1.18rem !important;
+        font-weight: 700 !important;
+        color: #1E1611 !important;
+    }
+
+    .billing-invoice-list {
+        display: grid !important;
+        gap: 0.62rem !important;
+        padding: 0.42rem 0 !important;
+        flex: 1 1 auto !important;
+    }
+
+    .billing-invoice-list__row {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        font-size: 0.84rem !important;
+        border-bottom: 1px dashed rgba(226, 218, 206, 0.6) !important;
+        padding-bottom: 0.45rem !important;
+    }
+
+    .billing-invoice-list__row:last-child {
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+    }
+
+    .billing-invoice-list__row span {
+        color: #7A6A5C !important;
+        font-weight: 600 !important;
+    }
+
+    .billing-invoice-list__row strong {
+        color: #2D211B !important;
+        font-weight: 700 !important;
+        text-align: right !important;
+    }
+
+    .billing-invoice-summary-block {
+        margin-top: auto !important;
+        padding-top: 0.75rem !important;
+        border-top: 1px solid rgba(226, 218, 206, 0.8) !important;
+    }
+
+    .billing-invoice-summary {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 0.5rem !important;
+    }
+
+    .billing-invoice-summary .billing-mini-stat {
+        padding: 0.5rem 0.55rem !important;
+        gap: 0.18rem !important;
+        border-radius: 0.75rem !important;
+        background: #FAF7F2 !important;
+        border: 1px solid rgba(200, 164, 107, 0.25) !important;
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    .billing-invoice-summary .billing-mini-stat span {
+        font-size: 0.58rem !important;
+        font-weight: 700 !important;
+        color: #8A7A6D !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        white-space: nowrap !important;
+    }
+
+    .billing-invoice-summary .billing-mini-stat strong {
+        font-size: 0.86rem !important;
+        font-weight: 800 !important;
+        color: #2D211B !important;
+        white-space: nowrap !important;
+    }
+
+    .billing-paid-view-layout:not([hidden]) {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1.25fr) minmax(350px, 420px) !important;
+        gap: 1.4rem !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        max-width: 74rem !important;
+        margin: auto auto !important;
+    }
+
+    .billing-paid-breakdown-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        gap: 1rem;
+        background: #FFFFFF;
+        border: 1px solid rgba(226, 218, 206, 0.95);
+        border-radius: 1.35rem;
+        padding: 1.5rem 1.65rem;
+        box-shadow: 0 10px 32px rgba(46, 36, 30, 0.06), 0 2px 6px rgba(46, 36, 30, 0.02);
+    }
+
+    .billing-paid-breakdown__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(226, 218, 206, 0.8);
+    }
+
+    .billing-paid-breakdown__title {
+        margin: 0.2rem 0 0;
+        font-family: "Cinzel", Georgia, serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1F3B2F;
+        line-height: 1.25;
+    }
+
+    .billing-paid-breakdown__body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1 1 auto;
+        gap: 0.9rem;
+    }
+
+    .billing-paid-banner {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.8rem 1.1rem;
+        border-radius: 0.95rem;
+        background: #FAF7F2;
+        border: 1px solid rgba(200, 164, 107, 0.25);
+    }
+
+    .billing-paid-banner__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.55rem;
+        height: 2.55rem;
+        border-radius: 999px;
+        background: rgba(31, 59, 47, 0.12);
+        color: #1F3B2F;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    .billing-paid-banner__title {
+        display: block;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #1E1611;
+        line-height: 1.25;
+    }
+
+    .billing-paid-banner__subtitle {
+        display: block;
+        font-size: 0.84rem;
+        color: #7A6A5C;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .billing-paid-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+    }
+
+    .billing-paid-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+        padding: 0.68rem 0.85rem;
+        border-radius: 0.8rem;
+        background: #FCFBF8;
+        border: 1px solid rgba(226, 218, 206, 0.7);
+    }
+
+    .billing-paid-item__label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #8C7E72;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .billing-paid-item__value {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #2D211B;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .billing-paid-ledger {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.8rem 1.1rem;
+        border-radius: 0.95rem;
+        background: #F6FAF7;
+        border: 1px solid rgba(76, 106, 82, 0.2);
+    }
+
+    .billing-paid-ledger__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #4C3C30;
+    }
+
+    .billing-paid-ledger__row--highlight {
+        padding-top: 0.5rem;
+        margin-top: 0.2rem;
+        border-top: 1px dashed rgba(76, 106, 82, 0.25);
+        font-weight: 700;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100%;
+        border-radius: 1.35rem;
+        box-shadow: 0 10px 32px rgba(46, 36, 30, 0.06), 0 2px 6px rgba(46, 36, 30, 0.02);
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__header {
+        padding: 1.3rem 1.35rem 0.9rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__badge-row {
+        gap: 0.5rem;
+        margin-bottom: 0.55rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__seal {
+        width: 2rem;
+        height: 2rem;
+        font-size: 1.15rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__status-label {
+        font-size: 0.84rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__hero {
+        gap: 0.2rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__amount-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.09em;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__amount {
+        font-size: clamp(1.85rem, 2.3vw, 2.15rem);
+        line-height: 1.15;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__intro {
+        font-size: 0.8rem;
+        line-height: 1.4;
+        margin: 0.35rem 0 0;
+        max-width: 23rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__divider {
+        height: 1.2rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__notch {
+        width: 0.8rem;
+        height: 1.2rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        flex: 1 1 auto;
+        padding: 0.95rem 1.35rem 1.2rem;
+        gap: 0.75rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__list {
+        padding: 0.8rem 0.95rem;
+        gap: 0.5rem;
+        border-radius: 0.95rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__key {
+        font-size: 0.82rem;
+        gap: 0.4rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__val {
+        font-size: 0.84rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__note {
+        font-size: 0.74rem;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__actions {
+        margin-top: 0.15rem;
+    }
+
+    .billing-paid-view-layout .billing-receipt-voucher__btn {
+        min-height: 2.85rem;
+        padding: 0.65rem 1.15rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .billing-paid-breakdown-card {
+        display: none !important;
+    }
+
+    .billing-paid-view-layout:not([hidden]) {
+        display: contents;
+    }
+}
+
+/* ==========================================================================
+   Payment & Receipts History Modal & Topbar Button
+   ========================================================================== */
+
+.billing-history-topbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.46rem 0.95rem;
+    border: 1px solid rgba(184, 142, 54, 0.4);
+    border-radius: 999px;
+    background: #FAF7F2;
+    color: #7A5B20;
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(184, 142, 54, 0.08);
+}
+
+.billing-history-topbar-btn:hover {
+    background: #F3EBDD;
+    border-color: rgba(184, 142, 54, 0.75);
+    color: #5A4212;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184, 142, 54, 0.15);
+}
+
+.billing-history-topbar-btn__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.3rem;
+    height: 1.3rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    background: #1F3B2F;
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+#billingHistoryModal .modal-dialog {
+    max-width: 72rem;
+}
+
+#billingHistoryModal .admin-table--billing-history th {
+    padding: 0.95rem 1.1rem;
+    background: #FAF7F2;
+    color: #4C3C30;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid rgba(226, 218, 206, 0.9);
+}
+
+#billingHistoryModal .admin-table--billing-history td {
+    padding: 1.1rem 1.1rem;
+    border-bottom: 1px solid rgba(226, 218, 206, 0.6);
+    vertical-align: middle;
+}
+
+#billingHistoryModal .admin-table--billing-history tr:last-child td {
+    border-bottom: none;
+}
+
+.billing-history-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.billing-history-actions .booking-request-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.46rem 0.92rem;
+    border-radius: 999px;
+    border: 1px solid rgba(184, 142, 54, 0.42);
+    background: #FAF6EF;
+    color: #8C6A24;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(184, 142, 54, 0.08);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.billing-history-actions .booking-request-action i {
+    font-size: 0.88rem;
+    line-height: 1;
+    transition: transform 0.2s ease;
+}
+
+.billing-history-actions .booking-request-action:hover {
+    background: #F3EBDD;
+    border-color: rgba(184, 142, 54, 0.75);
+    color: #6E5218;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(184, 142, 54, 0.18);
+}
+
+.billing-history-actions .booking-request-action:hover i {
+    transform: scale(1.12);
+}
+
+.billing-history-actions .booking-request-action:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(184, 142, 54, 0.1);
+}
+
+.billing-receipt-multi-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+    padding: 0.22rem 0.58rem;
+    border-radius: 999px;
+    background: #FAF6EF;
+    border: 1px solid rgba(184, 142, 54, 0.4);
+    color: #8C6A24;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.billing-receipt-multi-pill i {
+    font-size: 0.76rem;
+    color: #B88E36;
+}
+
+.billing-history-settled-breakdown {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6C5D53;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+}
+
+.billing-history-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+.billing-history-direct-receipts {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    margin-top: 0.15rem;
+}
+
+.billing-receipt-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.22rem 0.52rem;
+    border-radius: 999px;
+    background: #FFFFFF;
+    border: 1px solid rgba(31, 59, 47, 0.2);
+    color: #1F3B2F;
+    font-size: 0.69rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.billing-receipt-chip:hover {
+    background: #1F3B2F;
+    color: #FFFFFF;
+    border-color: #1F3B2F;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(31, 59, 47, 0.15);
+}
+
+.billing-receipt-slip__breakdown-tag {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    background: rgba(31, 59, 47, 0.06);
+    color: #1F3B2F;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.billing-receipt-slip__sub-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.38rem;
+    width: 100%;
+    margin-top: 0.4rem;
+}
+
+.billing-receipt-slip__sub-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.46rem 0.8rem;
+    border-radius: 999px;
+    background: #FAF7F2;
+    border: 1px solid rgba(184, 142, 54, 0.35);
+    color: #7A5B20;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.billing-receipt-slip__sub-btn:hover {
+    background: #F3EBDD;
+    border-color: rgba(184, 142, 54, 0.7);
+    color: #5A4212;
+}
+
+@media (max-width: 1199.98px) {
+    .billing-history-topbar-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.78rem;
+    }
+}
+
+/* ==========================================================================
+   Billing History Topbar Button Label Responsive Display
+   ========================================================================== */
+
+.billing-history-topbar-btn__label-full {
+    display: inline;
+}
+
+.billing-history-topbar-btn__label-short {
+    display: none;
+}
+
+@media (max-width: 575.98px) {
+    .billing-history-topbar-btn__label-full {
+        display: none !important;
+    }
+
+    .billing-history-topbar-btn__label-short {
+        display: inline !important;
+    }
+}
+
+/* ==========================================================================
+   Billing History Modal Desktop Table vs Mobile Cards Switcher
+   ========================================================================== */
+
+.billing-history-desktop {
+    display: block;
+}
+
+.billing-history-mobile {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    .billing-history-desktop {
+        display: none !important;
+    }
+
+    .billing-history-mobile {
+        display: block !important;
+    }
+}
+
+/* ==========================================================================
+   Mobile Modern Receipt Slips (Option 1)
+   ========================================================================== */
+
+.billing-receipt-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 0.85rem;
+    background: #F8F5EE;
+}
+
+.billing-receipt-slip {
+    background: #FFFFFF;
+    border: 1px solid rgba(226, 218, 206, 0.9);
+    border-radius: 1rem;
+    padding: 1.1rem;
+    box-shadow: 0 4px 14px rgba(47, 36, 30, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.billing-receipt-slip::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #D4AF37 0%, #B88E36 100%);
+}
+
+.billing-receipt-slip__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.billing-receipt-slip__event {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.billing-receipt-slip__icon {
+    width: 2.35rem;
+    height: 2.35rem;
+    min-width: 2.35rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(184, 142, 54, 0.1));
+    border: 1px solid rgba(184, 142, 54, 0.35);
+    color: #7A5B20;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+}
+
+.billing-receipt-slip__info {
+    min-width: 0;
+}
+
+.billing-receipt-slip__title {
+    margin: 0;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #24180E;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.billing-receipt-slip__subtitle {
+    margin: 0;
+    font-size: 0.76rem;
+    color: #7E7165;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.billing-receipt-slip__amount-card {
+    background: linear-gradient(180deg, #FAF7F2 0%, #F5EDE0 100%);
+    border: 1px solid rgba(184, 142, 54, 0.28);
+    border-radius: 0.75rem;
+    padding: 0.75rem 0.95rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.billing-receipt-slip__amount-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8C7E72;
+}
+
+.billing-receipt-slip__amount-value {
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.65rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #1F3B2F;
+}
+
+.billing-receipt-slip__amount-value span {
+    font-family: "Manrope", sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #526E5F;
+    vertical-align: middle;
+    margin-right: 0.15rem;
+}
+
+.billing-receipt-slip__amount-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    font-size: 0.74rem;
+    color: #6D6054;
+    margin-top: 0.15rem;
+}
+
+.billing-receipt-slip__amount-meta .bullet-dot {
+    color: #C0B4A7;
+}
+
+.billing-receipt-slip__amount-meta i {
+    color: #7A5B20;
+    font-size: 0.75rem;
+}
+
+.billing-receipt-slip__meta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.35rem 0.15rem;
+}
+
+.billing-receipt-slip__meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+}
+
+.billing-receipt-slip__meta-row .meta-label {
+    color: #8C7E72;
+    font-size: 0.74rem;
+    font-weight: 600;
+}
+
+.billing-receipt-slip__meta-row .meta-value {
+    color: #3A2E24;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 65%;
+}
+
+.billing-receipt-slip__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding-top: 0.65rem;
+    border-top: 1px dashed rgba(226, 218, 206, 0.85);
+    margin-top: 0.15rem;
+}
+
+.billing-receipt-slip__action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.52rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.billing-receipt-slip__action-btn--view {
+    flex: 1;
+    background: #1F3B2F;
+    border: 1px solid #1F3B2F;
+    color: #FFFFFF;
+    box-shadow: 0 2px 6px rgba(31, 59, 47, 0.18);
+}
+
+.billing-receipt-slip__action-btn--view:hover {
+    background: #162B22;
+    border-color: #162B22;
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+.billing-receipt-slip__action-btn--download {
+    background: #FAF7F2;
+    border: 1px solid rgba(184, 142, 54, 0.45);
+    color: #7A5B20;
+}
+
+.billing-receipt-slip__action-btn--download:hover {
+    background: #F3EBDD;
+    color: #5A4212;
+    border-color: rgba(184, 142, 54, 0.75);
+    transform: translateY(-1px);
+}
+
+#billingHistoryModal .booking-modal__content {
+    border-radius: 1.5rem;
+    overflow: hidden;
+}
+
+@media (max-width: 767.98px) {
+    #billingHistoryModal .modal-dialog {
+        margin: 0.65rem auto;
+        max-width: calc(100vw - 1.3rem);
+    }
+
+    #billingHistoryModal .booking-modal__content {
+        border-radius: 1.25rem;
+        overflow: hidden;
+    }
+
+    #billingHistoryModal .booking-modal__header {
+        padding: 0.85rem 1rem;
+    }
+
+    #billingHistoryModal .booking-modal__title {
+        font-size: 1.22rem !important;
+        line-height: 1.2;
+    }
+}
+
+/* ==========================================================================
+   Client Billing Topbar Responsive Single-Row Alignment (Mobile)
+   ========================================================================== */
+
+@media (max-width: 991.98px) {
+    .client-billing-page .dashboard-topbar,
+    .client-dashboard-page.client-billing-page .dashboard-topbar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.75rem;
+    }
+
+    .client-billing-page .topbar-leading,
+    .client-dashboard-page.client-billing-page .topbar-leading {
+        width: auto !important;
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: center !important;
+        gap: 0.75rem;
+    }
+
+    .client-billing-page .topbar-trailing,
+    .client-dashboard-page.client-billing-page .topbar-trailing {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .client-billing-page .dashboard-topbar,
+    .client-dashboard-page.client-billing-page .dashboard-topbar {
+        padding: 0.8rem 1rem !important;
+        min-height: 3.75rem;
+    }
+
+    .client-billing-page .topbar-leading,
+    .client-dashboard-page.client-billing-page .topbar-leading {
+        align-items: center !important;
+        gap: 0.6rem;
+    }
+
+    .client-billing-page .mobile-menu-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        font-size: 1.75rem;
+    }
+
+    .client-billing-page .topbar-copy__title,
+    .client-dashboard-page.client-billing-page .topbar-copy__title {
+        font-size: 1.55rem !important;
+        line-height: 1 !important;
+        margin: 0;
+    }
+
+    .billing-history-topbar-btn {
+        padding: 0.38rem 0.65rem;
+        font-size: 0.76rem;
+        gap: 0.38rem;
+        white-space: nowrap;
+        box-shadow: 0 1px 4px rgba(184, 142, 54, 0.12);
+    }
+
+    .billing-history-topbar-btn i {
+        font-size: 0.85rem;
+        line-height: 1;
+    }
+
+    .billing-history-topbar-btn__badge {
+        min-width: 1.2rem;
+        height: 1.2rem;
+        font-size: 0.68rem;
+        padding: 0 0.28rem;
+        line-height: 1;
+    }
+}
+
+@media (max-width: 380px) {
+    .client-billing-page .dashboard-topbar,
+    .client-dashboard-page.client-billing-page .dashboard-topbar {
+        padding: 0.7rem 0.75rem !important;
+        gap: 0.45rem;
+    }
+
+    .client-billing-page .topbar-leading,
+    .client-dashboard-page.client-billing-page .topbar-leading {
+        gap: 0.45rem;
+    }
+
+    .client-billing-page .topbar-copy__title,
+    .client-dashboard-page.client-billing-page .topbar-copy__title {
+        font-size: 1.4rem !important;
+    }
+
+    .billing-history-topbar-btn {
+        padding: 0.32rem 0.5rem;
+        font-size: 0.72rem;
+        gap: 0.28rem;
+    }
+
+    .billing-history-topbar-btn i {
+        font-size: 0.78rem;
+    }
+}
+

@@ -69,39 +69,12 @@
     };
 
     function iconFontIsReady() {
-        if (!document.fonts || typeof document.fonts.check !== "function") {
-            return false;
-        }
-
-        return document.fonts.check('1em "bootstrap-icons"');
+        return true;
     }
 
     function installIconFallbacks() {
-        if (iconFontIsReady()) {
-            return;
-        }
-
-        document.querySelectorAll(".bi").forEach((element) => {
-            if (element.dataset.biFallbackReady === "1") {
-                return;
-            }
-
-            const iconClass = Array.from(element.classList).find((className) => className.indexOf("bi-") === 0);
-
-            if (!iconClass) {
-                return;
-            }
-
-            element.textContent = "";
-            element.dataset.biFallback = "text";
-            element.dataset.biFallbackReady = "1";
-
-            const glyph = document.createElement("span");
-            glyph.className = "bi-fallback-glyph";
-            glyph.setAttribute("aria-hidden", "true");
-            glyph.textContent = iconGlyphs[iconClass] || "\u2022";
-            element.appendChild(glyph);
-        });
+        // Bootstrap Icons are loaded directly via CSS @font-face.
+        // We do not mutate icon elements into emoji/text characters to prevent broken glyphs across browsers.
     }
 
     function resolveTarget(trigger) {

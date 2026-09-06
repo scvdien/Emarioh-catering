@@ -1401,12 +1401,54 @@ button {
     font-size: 0.94rem;
     line-height: 1.7;
 }
+
 @media (min-width: 1200px) {
-    .dashboard-sidebar {
-        position: sticky;
+    body.admin-dashboard-page,
+    body.client-dashboard-page {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .admin-dashboard-page .dashboard-frame,
+    .client-dashboard-page .dashboard-frame {
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .admin-dashboard-page .dashboard-sidebar,
+    .client-dashboard-page .dashboard-sidebar {
+        position: relative;
         top: 0;
-        align-self: start;
+        align-self: stretch;
         height: 100vh !important;
+        overflow: hidden;
+    }
+
+    .admin-dashboard-page .dashboard-sidebar .offcanvas-body,
+    .admin-dashboard-page .sidebar-inner,
+    .client-dashboard-page .dashboard-sidebar .offcanvas-body,
+    .client-dashboard-page .sidebar-inner {
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .admin-dashboard-page .dashboard-nav,
+    .client-dashboard-page .dashboard-nav {
+        overflow-y: hidden;
+    }
+
+    .admin-dashboard-page .dashboard-main,
+    .client-dashboard-page .dashboard-main {
+        height: 100vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .admin-dashboard-page .dashboard-content,
+    .client-dashboard-page .dashboard-content {
+        flex: 1 0 auto;
     }
 }
 
