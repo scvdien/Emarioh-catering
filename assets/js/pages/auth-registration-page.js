@@ -202,7 +202,7 @@
             nameLabel.textContent = "Full Name";
             phoneLabel.textContent = "Mobile Number";
             fullNameInput.placeholder = "Maria Santos";
-            consentCopy.innerHTML = 'I agree to the <a href="public-page.php#contact">Terms of Service</a> and <a href="public-page.php#contact">Privacy Policy</a>.';
+            consentCopy.innerHTML = 'I agree to the <button type="button" class="register-policy-link" data-open-policy="terms">Terms of Service</button> and <button type="button" class="register-policy-link" data-open-policy="privacy">Privacy Policy</button>.';
             sendOtpButton.textContent = "Send OTP";
             verifyOtpButton.textContent = "Verify OTP";
             completeButton.textContent = "Create Account";
@@ -459,6 +459,85 @@
                 setButtonsBusy([completeButton], false);
             }
         });
+
+        function initPolicyModal() {
+            var modal = document.getElementById("policyModal");
+            if (!modal) {
+                return;
+            }
+
+            var tabButtons = Array.prototype.slice.call(modal.querySelectorAll("[data-policy-tab]"));
+            var panes = Array.prototype.slice.call(modal.querySelectorAll("[data-policy-pane]"));
+            var modalTitle = document.getElementById("policyModalTitle");
+
+            function switchTab(type) {
+                var targetType = type === "privacy" ? "privacy" : "terms";
+
+                tabButtons.forEach(function (btn) {
+                    var isMatch = btn.getAttribute("data-policy-tab") === targetType;
+                    btn.classList.toggle("is-active", isMatch);
+                    btn.setAttribute("aria-selected", isMatch ? "true" : "false");
+                });
+
+                panes.forEach(function (pane) {
+                    var isMatch = pane.getAttribute("data-policy-pane") === targetType;
+                    pane.classList.toggle("is-active", isMatch);
+                    pane.hidden = !isMatch;
+                });
+
+                if (modalTitle) {
+                    modalTitle.textContent = targetType === "privacy" ? "Privacy Policy" : "Terms of Service";
+                }
+            }
+
+            function openModal(type) {
+                switchTab(type);
+                modal.classList.add("is-visible");
+                modal.setAttribute("aria-hidden", "false");
+                document.body.classList.add("modal-open");
+            }
+
+            function closeModal() {
+                modal.classList.remove("is-visible");
+                modal.setAttribute("aria-hidden", "true");
+                document.body.classList.remove("modal-open");
+            }
+
+            document.addEventListener("click", function (event) {
+                var trigger = event.target.closest("[data-open-policy]");
+                if (trigger) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openModal(trigger.getAttribute("data-open-policy"));
+                    return;
+                }
+
+                if (event.target.closest("[data-close-policy]")) {
+                    event.preventDefault();
+                    closeModal();
+                    return;
+                }
+
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            tabButtons.forEach(function (btn) {
+                btn.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    switchTab(btn.getAttribute("data-policy-tab"));
+                });
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && modal.classList.contains("is-visible")) {
+                    closeModal();
+                }
+            });
+        }
+
+        initPolicyModal();
 
         window.EmariohAuth.getStatus(false)
             .then(function (status) {

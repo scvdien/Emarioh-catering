@@ -281,16 +281,16 @@ function initializePackageSelector() {
                 label: "PHP 500 / head",
                 meta: "Per-head",
                 badge: "50 pax minimum",
-                description: "Rice, soup, chicken, pork, fish, vegetables, beverage",
-                tags: ["Soup included", "Min. 50 pax"]
+                description: "Rice, soup, chicken, pork, fish, vegetables, dessert, beverage",
+                tags: ["Soup included", "Dessert included", "Min. 50 pax"]
             },
             {
                 value: "PHP 600/head",
                 label: "PHP 600 / head",
                 meta: "Per-head",
                 badge: "Premium per-head",
-                description: "Rice, soup, chicken, pork, fish, pasta, vegetables, dessert",
-                tags: ["Dessert included", "Premium per-head"]
+                description: "Rice, soup, chicken, pork, fish, pasta, vegetables, dessert, 2 kinds of beverage",
+                tags: ["Dessert included", "2 Beverages", "Premium per-head"]
             }
         ],
         celebration: [

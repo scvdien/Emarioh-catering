@@ -58,7 +58,7 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
     <title>Emarioh Catering Services Client Dashboard</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
-    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20260706d">
+    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20261011c">
     <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
 </head>
 <body class="dashboard-page client-dashboard-page client-dashboard-home" data-auth-guard="client">
@@ -140,8 +140,8 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
                                 <p class="client-hero-card__intro" id="dashboardOverviewIntro">Start a booking request and choose your preferred event date.</p>
 
                                 <div class="client-hero-card__actions">
-                                    <span class="status-pill status-pill--pending" id="dashboardOverviewStatusPill">Ready to start</span>
                                     <a class="client-hero-card__action" href="client-bookings.php" id="dashboardPrimaryAction">Book Event</a>
+                                    <span class="status-pill status-pill--pending" id="dashboardOverviewStatusPill">Ready to start</span>
                                 </div>
 
                                 <p class="client-hero-card__next-step">

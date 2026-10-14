@@ -754,3 +754,303 @@
             }
         }
 
+        /* Policy Modal Trigger Links */
+        .register-policy-link {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            color: #174638;
+            font: inherit;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+            display: inline;
+            vertical-align: baseline;
+            transition: color 0.15s ease;
+        }
+
+        .register-policy-link:hover,
+        .register-policy-link:focus-visible {
+            color: #b98d4b;
+            outline: none;
+        }
+
+        /* Modal Open Body Lock */
+        body.modal-open {
+            overflow: hidden !important;
+        }
+
+        /* Modal Backdrop */
+        .policy-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: rgba(18, 38, 32, 0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.22s ease, visibility 0.22s ease;
+        }
+
+        .policy-modal-backdrop.is-visible {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* Modal Card */
+        .policy-modal {
+            position: relative;
+            width: 100%;
+            max-width: 660px;
+            max-height: 86vh;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border: 1px solid rgba(23, 70, 56, 0.12);
+            border-radius: 1.25rem;
+            box-shadow:
+                0 20px 48px rgba(15, 23, 42, 0.16),
+                0 4px 16px rgba(15, 23, 42, 0.06);
+            transform: translateY(14px) scale(0.985);
+            transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        .policy-modal-backdrop.is-visible .policy-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        /* Modal Header: Segmented Switcher & Close */
+        .policy-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.95rem 1.25rem;
+            background: #ffffff;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+        }
+
+        /* Segmented Control */
+        .policy-segmented-tabs {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem;
+            background: #f1ede6;
+            border-radius: 999px;
+            gap: 0.2rem;
+        }
+
+        .policy-segmented-tab {
+            padding: 0.45rem 1.15rem;
+            border: none;
+            border-radius: 999px;
+            background: transparent;
+            color: #64748b;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .policy-segmented-tab:hover {
+            color: #1e293b;
+        }
+
+        .policy-segmented-tab.is-active {
+            background: #ffffff;
+            color: #174638;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Close Button */
+        .policy-modal__close {
+            width: 2rem;
+            height: 2rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1ede6;
+            border: none;
+            border-radius: 50%;
+            color: #64748b;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            flex: 0 0 auto;
+        }
+
+        .policy-modal__close:hover,
+        .policy-modal__close:focus-visible {
+            background: #e2dcd2;
+            color: #0f172a;
+            outline: none;
+        }
+
+        /* Modal Body */
+        .policy-modal__body {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 1.5rem 1.75rem 1.75rem;
+            color: #334155;
+            font-size: 0.875rem;
+            line-height: 1.68;
+            overscroll-behavior: contain;
+            background: #ffffff;
+        }
+
+        .policy-modal__body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .policy-modal__body::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        .policy-modal__body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 999px;
+        }
+
+        /* Leading Header inside Pane */
+        .policy-header-lead {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .policy-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #b98d4b;
+            background: #faf6f0;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            margin-bottom: 0.5rem;
+        }
+
+        .policy-title {
+            margin: 0;
+            font-family: inherit;
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #174638;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+        }
+
+        .policy-meta {
+            margin: 0.35rem 0 0;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        /* Content Headings and Text */
+        .policy-content h4 {
+            margin: 1.35rem 0 0.4rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #174638;
+            letter-spacing: -0.01em;
+        }
+
+        .policy-content h4:first-of-type {
+            margin-top: 0.5rem;
+        }
+
+        .policy-content p {
+            margin: 0 0 0.75rem;
+            color: #334155;
+        }
+
+        .policy-content ul {
+            margin: 0 0 1rem;
+            padding-left: 1.3rem;
+        }
+
+        .policy-content li {
+            margin-bottom: 0.45rem;
+            color: #334155;
+        }
+
+        .policy-content strong {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        /* Modal Footer */
+        .policy-modal__footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0.85rem 1.25rem;
+            background: #ffffff;
+            border-top: 1px solid rgba(226, 232, 240, 0.85);
+        }
+
+        .policy-modal__btn-close {
+            padding: 0.55rem 1.5rem;
+            border: none;
+            border-radius: 999px;
+            background: #174638;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(23, 70, 56, 0.18);
+            transition: all 0.18s ease;
+        }
+
+        .policy-modal__btn-close:hover,
+        .policy-modal__btn-close:focus-visible {
+            background: #12382d;
+            box-shadow: 0 4px 14px rgba(23, 70, 56, 0.28);
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        @media (max-width: 640px) {
+            .policy-modal-backdrop {
+                padding: 0.75rem;
+            }
+            .policy-modal {
+                max-height: 90vh;
+                border-radius: 1rem;
+            }
+            .policy-modal__header {
+                padding: 0.75rem 1rem;
+            }
+            .policy-segmented-tab {
+                padding: 0.4rem 0.85rem;
+                font-size: 0.78rem;
+            }
+            .policy-modal__body {
+                padding: 1.25rem 1.25rem 1.5rem;
+            }
+            .policy-title {
+                font-size: 1.25rem;
+            }
+            .policy-modal__footer {
+                padding: 0.75rem 1rem;
+            }
+            .policy-modal__btn-close {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+

@@ -489,6 +489,7 @@ $hasPublicContactDetails = $publicContactServiceArea !== ''
                                         <li>Fish</li>
                                         <li>Vegetables or Salad (Choose 1)</li>
                                         <li>Beverage</li>
+                                        <li>Dessert</li>
                                     </ul>
                                 </article>
 
@@ -502,7 +503,7 @@ $hasPublicContactDetails = $publicContactServiceArea !== ''
                                         <li>Fish</li>
                                         <li>Noodles or Pasta (Choose 1)</li>
                                         <li>Vegetables or Salad (Choose 1)</li>
-                                        <li>Beverage</li>
+                                        <li>2 Kinds of Beverage</li>
                                         <li>Dessert</li>
                                     </ul>
                                 </article>

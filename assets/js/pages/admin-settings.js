@@ -1671,19 +1671,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (hasMultiplePricingTiers) {
                 const tierValues = tierInputMap.get(packageItem.id) || new Map();
-                const missingTier = pricingTiers.find((tier) => {
+                const invalidTier = pricingTiers.find((tier) => {
                     const tierLabel = String(tier?.label || "").trim();
                     const downPaymentAmount = tierValues.has(tierLabel)
                         ? tierValues.get(tierLabel)
                         : catalogApi.getPackageDownPaymentAmount(packageItem, tierLabel);
 
-                    return !String(downPaymentAmount || "").trim();
+                    const trimmed = String(downPaymentAmount || "").trim();
+                    if (!trimmed) {
+                        return true;
+                    }
+                    const num = parseFloat(trimmed);
+                    return Number.isNaN(num) || num < 1 || num > 100;
                 });
 
-                if (missingTier) {
+                if (invalidTier) {
                     invalidTierDetails = {
                         packageId: packageItem.id,
-                        tierLabel: String(missingTier.label || "").trim()
+                        tierLabel: String(invalidTier.label || "").trim()
                     };
                     return true;
                 }
@@ -1695,7 +1700,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? inputMap.get(packageItem.id)
                 : (packageItem.downPaymentAmount || "");
 
-            return !String(downPaymentAmount || "").trim();
+            const trimmedAmount = String(downPaymentAmount || "").trim();
+            if (!trimmedAmount) {
+                return true;
+            }
+            const numAmount = parseFloat(trimmedAmount);
+            return Number.isNaN(numAmount) || numAmount < 1 || numAmount > 100;
         });
 
         if (invalidPackage) {
@@ -1709,12 +1719,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     .find((input) => input.dataset.packageId === invalidPackage.id);
 
             invalidField?.focus();
-            setPackageDownPaymentFeedback(
-                invalidTierDetails
-                    ? `Enter a down payment amount for "${invalidPackage.name}" (${invalidTierDetails.tierLabel}) or turn off its down payment toggle.`
-                    : `Enter a down payment amount for "${invalidPackage.name}" or turn off its down payment toggle.`,
-                "error"
-            );
+            const valStr = String(invalidField?.value || "").trim();
+            const valNum = parseFloat(valStr);
+            const isOutOfRange = !Number.isNaN(valNum) && (valNum < 1 || valNum > 100);
+
+            if (isOutOfRange) {
+                setPackageDownPaymentFeedback(
+                    invalidTierDetails
+                        ? `Down payment percentage for "${invalidPackage.name}" (${invalidTierDetails.tierLabel}) must be between 1% and 100%.`
+                        : `Down payment percentage for "${invalidPackage.name}" must be between 1% and 100%.`,
+                    "error"
+                );
+            } else {
+                setPackageDownPaymentFeedback(
+                    invalidTierDetails
+                        ? `Enter a down payment percentage for "${invalidPackage.name}" (${invalidTierDetails.tierLabel}) or turn off its down payment toggle.`
+                        : `Enter a down payment percentage for "${invalidPackage.name}" or turn off its down payment toggle.`,
+                    "error"
+                );
+            }
             return null;
         }
 
@@ -2081,14 +2104,14 @@ document.addEventListener("DOMContentLoaded", () => {
                                         class="settings-input"
                                         type="number"
                                         min="1"
-                                        max="99"
+                                        max="100"
                                         step="0.01"
                                         inputmode="decimal"
                                         data-package-down-payment-tier-input
                                         data-package-id="${escapeHtml(packageItem.id)}"
                                         data-tier-label="${escapeHtml(tier.label)}"
                                         value="${escapeHtml(catalogApi.getPackageDownPaymentAmount(packageItem, tier.label))}"
-                                        placeholder="e.g. 20"
+                                        placeholder="1-100%"
                                         ${allowDownPayment ? "" : "disabled"}
                                     >
                                 </span>
@@ -2102,7 +2125,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <span class="settings-field__label">Down payment percentage</span>
                         <span class="package-down-payment-money-field is-percent">
                             <span class="package-down-payment-money-field__prefix">%</span>
-                            <input class="settings-input" type="number" min="1" max="99" step="0.01" inputmode="decimal" data-package-down-payment-input data-package-id="${escapeHtml(packageItem.id)}" value="${escapeHtml(catalogApi.getPackageDownPaymentAmount(packageItem) || "")}" placeholder="e.g. 20"${allowDownPayment ? "" : " disabled"}>
+                            <input class="settings-input" type="number" min="1" max="100" step="0.01" inputmode="decimal" data-package-down-payment-input data-package-id="${escapeHtml(packageItem.id)}" value="${escapeHtml(catalogApi.getPackageDownPaymentAmount(packageItem) || "")}" placeholder="1-100%"${allowDownPayment ? "" : " disabled"}>
                         </span>
                         <span class="package-down-payment-card__tier-note">Calculated automatically from the client’s booking total.</span>
                     </label>
@@ -2826,6 +2849,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (toggle) {
             syncPackagePaymentCard(toggle);
+        }
+
+        const numberInput = event.target.closest("[data-package-down-payment-input], [data-package-down-payment-tier-input]");
+        if (numberInput) {
+            const rawVal = numberInput.value.trim();
+            if (rawVal !== "") {
+                const val = parseFloat(rawVal);
+                if (!Number.isNaN(val)) {
+                    if (val > 100) {
+                        numberInput.value = "100";
+                    } else if (val < 0) {
+                        numberInput.value = "0";
+                    }
+                }
+            }
+        }
+    });
+
+    packageDownPaymentForm?.addEventListener("change", (event) => {
+        const numberInput = event.target.closest("[data-package-down-payment-input], [data-package-down-payment-tier-input]");
+        if (numberInput) {
+            const rawVal = numberInput.value.trim();
+            if (rawVal !== "") {
+                const val = parseFloat(rawVal);
+                if (!Number.isNaN(val)) {
+                    if (val > 100) {
+                        numberInput.value = "100";
+                    } else if (val < 1) {
+                        numberInput.value = "1";
+                    }
+                }
+            }
         }
     });
 

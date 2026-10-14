@@ -77,8 +77,8 @@ if (!$eventTime || $eventTime->format('H:i') !== $eventTimeValue) {
     emarioh_fail('Please choose a valid event start time.');
 }
 
-if ($guestCount < 20) {
-    emarioh_fail('Guest count must be at least 20.');
+if ($guestCount < 50) {
+    emarioh_fail('Per-head and celebration packages require a minimum of 50 guests.');
 }
 
 if (!in_array($venueOption, ['own', 'emarioh'], true)) {

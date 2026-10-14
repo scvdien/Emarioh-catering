@@ -2181,6 +2181,6 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <script src="assets/js/package-catalog.js?v=20260413a"></script>
     <script src="assets/js/pages/index.js?v=20260417c"></script>
     <script src="assets/js/pages/admin-packages.js"></script>
-    <script src="assets/js/pages/admin-settings.js?v=20260903a"></script>
+    <script src="assets/js/pages/admin-settings.js?v=<?= time(); ?>"></script>
 </body>
 </html>

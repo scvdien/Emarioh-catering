@@ -41,8 +41,8 @@ try {
         if ($allowDownPayment && $downPaymentAmount !== '') {
             $percentageValue = (float) $downPaymentAmount;
 
-            if (!is_numeric($downPaymentAmount) || $percentageValue < 1 || $percentageValue >= 100) {
-                throw new RuntimeException($packageName . ' down payment must be from 1% to 99%.');
+            if (!is_numeric($downPaymentAmount) || $percentageValue < 1 || $percentageValue > 100) {
+                throw new RuntimeException($packageName . ' down payment must be from 1% to 100%.');
             }
         }
 
@@ -60,8 +60,8 @@ try {
 
                 $tierPercentageValue = (float) $tierPercentage;
 
-                if (!is_numeric($tierPercentage) || $tierPercentageValue < 1 || $tierPercentageValue >= 100) {
-                    throw new RuntimeException($packageName . ' tier down payment must be from 1% to 99%.');
+                if (!is_numeric($tierPercentage) || $tierPercentageValue < 1 || $tierPercentageValue > 100) {
+                    throw new RuntimeException($packageName . ' tier down payment must be from 1% to 100%.');
                 }
             }
         }

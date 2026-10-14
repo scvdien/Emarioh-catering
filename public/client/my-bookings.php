@@ -61,37 +61,39 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
         // A client can only cancel if still pending review, or if approved but NO payment has been made yet.
         $canCancel = ($status === 'pending_review') || ($status === 'approved' && !$isPaid);
 
+        $viewButtonMarkup = sprintf(
+            '<button class="booking-request-action booking-request-action--view" type="button" data-booking-view ' .
+            'data-reference="%s" data-event-type="%s" data-event-date="%s" data-guests="%s" data-venue="%s" data-package="%s" ' .
+            'data-tier-price="%s" data-amount-paid="%s" data-balance-due="%s" data-invoice-number="%s" data-status-label="%s">' .
+            '<i class="bi bi-eye"></i> View Details</button>',
+            $escape($reference),
+            $escape($eventType),
+            $escape($eventDateTime),
+            $escape($guestCount > 0 ? $guestCount . ' pax' : 'TBA'),
+            $escape($venueName),
+            $escape((string) ($booking['package_label'] ?? 'Package to follow')),
+            $escape((string) ($booking['package_tier_price'] ?? '')),
+            number_format((float) ($booking['invoice_amount_paid'] ?? 0), 2),
+            number_format((float) ($booking['invoice_balance_due'] ?? 0), 2),
+            $escape((string) ($booking['invoice_number'] ?? '')),
+            $escape($statusLabel)
+        );
+
+        $actions = [$viewButtonMarkup];
+
         if ($canCancel) {
             $cancelLabel = $status === 'approved' ? 'Cancel Booking' : 'Cancel Request';
-            $actionMarkup = sprintf(
-                '<button class="booking-request-action" type="button" data-booking-cancel data-booking-id="%d" data-booking-reference="%s">%s</button>',
+            $actions[] = sprintf(
+                '<button class="booking-request-action text-danger" type="button" data-booking-cancel data-booking-id="%d" data-booking-reference="%s">%s</button>',
                 (int) $booking['id'],
                 $escape($reference),
                 $escape($cancelLabel)
             );
         } elseif ($status === 'approved' && $isPaid) {
-            $actionMarkup = '<span class="booking-request-action booking-request-action--confirmed text-success fw-semibold" title="Confirmed and paid. Contact admin for cancellation or date changes."><i class="bi bi-shield-check"></i> Confirmed</span>';
-        } elseif ($status === 'completed') {
-            $actionMarkup = sprintf(
-                '<button class="booking-request-action booking-request-action--view" type="button" data-booking-view ' .
-                'data-reference="%s" data-event-type="%s" data-event-date="%s" data-guests="%s" data-venue="%s" data-package="%s" ' .
-                'data-tier-price="%s" data-amount-paid="%s" data-balance-due="%s" data-invoice-number="%s" data-status-label="%s">' .
-                '<i class="bi bi-eye"></i> View Details</button>',
-                $escape($reference),
-                $escape($eventType),
-                $escape($eventDateTime),
-                $escape($guestCount > 0 ? $guestCount . ' pax' : 'TBA'),
-                $escape($venueName),
-                $escape((string) ($booking['package_label'] ?? 'Package to follow')),
-                $escape((string) ($booking['package_tier_price'] ?? '')),
-                number_format((float) ($booking['invoice_amount_paid'] ?? 0), 2),
-                number_format((float) ($booking['invoice_balance_due'] ?? 0), 2),
-                $escape((string) ($booking['invoice_number'] ?? '')),
-                $escape($statusLabel)
-            );
-        } else {
-            $actionMarkup = '<span class="booking-request-action booking-request-action--muted">Closed</span>';
+            $actions[] = '<span class="booking-request-action booking-request-action--confirmed text-success fw-semibold" title="Confirmed and paid. Contact admin for cancellation or date changes."><i class="bi bi-shield-check"></i> Confirmed</span>';
         }
+
+        $actionMarkup = '<div class="d-flex align-items-center gap-1 flex-wrap">' . implode('', $actions) . '</div>';
 
         $rows[] = '
             <tr>
