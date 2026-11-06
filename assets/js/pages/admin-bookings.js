@@ -122,6 +122,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 status: nextStatus
             });
 
+            const bookingBadges = document.querySelectorAll(".admin-booking-nav-badge");
+            bookingBadges.forEach((badge) => {
+                const currentCount = Math.max(0, (parseInt(badge.textContent, 10) || 1) - 1);
+                if (currentCount <= 0) {
+                    badge.remove();
+                } else {
+                    badge.textContent = String(Math.min(currentCount, 99));
+                    badge.setAttribute("aria-label", `${currentCount} pending bookings`);
+                }
+            });
+
             window.location.assign("admin-bookings.php");
         } catch (error) {
             actionButton.disabled = false;

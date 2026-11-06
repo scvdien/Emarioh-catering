@@ -18,6 +18,7 @@ date_default_timezone_set('Asia/Manila');
 
 emarioh_enforce_https_request();
 emarioh_send_dynamic_no_cache_headers();
+emarioh_send_security_headers();
 
 if (!defined('EMARIOH_SKIP_SESSION_BOOTSTRAP') || EMARIOH_SKIP_SESSION_BOOTSTRAP !== true) {
     emarioh_prepare_storage_paths();
@@ -39,6 +40,50 @@ function emarioh_send_dynamic_no_cache_headers(): void
     header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     header('Pragma: no-cache');
     header('Expires: 0');
+}
+
+function emarioh_send_security_headers(): void
+{
+    if (PHP_SAPI === 'cli' || headers_sent()) {
+        return;
+    }
+
+    // 1. Prevent Clickjacking (framing by external malicious sites)
+    header('X-Frame-Options: SAMEORIGIN');
+
+    // 2. Prevent MIME-type sniffing
+    header('X-Content-Type-Options: nosniff');
+
+    // 3. Referrer Policy
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+
+    // 4. Permissions Policy - restrict access to hardware sensors/APIs
+    header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+
+    // 5. Cross-Site Scripting protection for legacy browsers
+    header('X-XSS-Protection: 1; mode=block');
+
+    $scriptName = strtolower(trim((string) ($_SERVER['SCRIPT_NAME'] ?? '')));
+    if ($scriptName !== '' && str_ends_with($scriptName, '/media.php')) {
+        return;
+    }
+
+    // 6. Content Security Policy (CSP)
+    // Secures against XSS and code injection while allowing local assets and Google Fonts.
+    $cspDirectives = [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com data:",
+        "img-src 'self' data: blob:",
+        "connect-src 'self' https://api.paymongo.com https://api.semaphore.co",
+        "frame-ancestors 'self'",
+        "form-action 'self' https://*.paymongo.com",
+        "base-uri 'self'",
+        "object-src 'none'",
+    ];
+
+    header('Content-Security-Policy: ' . implode('; ', $cspDirectives));
 }
 
 function emarioh_config(): array
@@ -1486,6 +1531,36 @@ function emarioh_success(array $payload = [], int $statusCode = 200): never
     emarioh_json_response(array_merge(['ok' => true], $payload), $statusCode);
 }
 
+function emarioh_fast_success(array $payload = [], int $statusCode = 200): void
+{
+    $payload = emarioh_normalize_json_response_payload(array_merge(['ok' => true], $payload));
+    $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+    ignore_user_abort(true);
+    set_time_limit(120);
+
+    http_response_code($statusCode);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Connection: close');
+    header('Content-Length: ' . (string) strlen($json));
+
+    echo $json;
+
+    while (ob_get_level() > 0) {
+        ob_end_flush();
+    }
+    flush();
+
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+}
+
 function emarioh_fail(string $message, int $statusCode = 422, array $payload = []): never
 {
     emarioh_json_response(array_merge([
@@ -1816,6 +1891,44 @@ function emarioh_render_admin_notification_nav_link(PDO $db, bool $isActive = fa
         : '';
 
     return '<a class="nav-link admin-notification-nav-link' . ($isActive ? ' active' : '') . '" href="admin-notifications.php"' . ($isActive ? ' aria-current="page"' : '') . '><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span>' . $badge . '</a>';
+}
+
+function emarioh_count_unread_website_inquiries(PDO $db): int
+{
+    try {
+        return max(0, (int) $db->query("SELECT COUNT(*) FROM website_inquiries WHERE status = 'unread'")->fetchColumn());
+    } catch (Throwable $throwable) {
+        return 0;
+    }
+}
+
+function emarioh_render_admin_inquiry_nav_link(PDO $db, bool $isActive = false): string
+{
+    $unreadCount = emarioh_count_unread_website_inquiries($db);
+    $badge = $unreadCount > 0
+        ? '<span class="admin-nav-badge admin-inquiry-nav-badge" aria-label="' . htmlspecialchars((string) $unreadCount, ENT_QUOTES, 'UTF-8') . ' unread inquiries">' . htmlspecialchars((string) min($unreadCount, 99), ENT_QUOTES, 'UTF-8') . '</span>'
+        : '';
+
+    return '<a class="nav-link admin-inquiry-nav-link' . ($isActive ? ' active' : '') . '" href="admin-inquiries.php"' . ($isActive ? ' aria-current="page"' : '') . '><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span>' . $badge . '</a>';
+}
+
+function emarioh_count_pending_booking_requests(PDO $db): int
+{
+    try {
+        return max(0, (int) $db->query("SELECT COUNT(*) FROM booking_requests WHERE status = 'pending_review'")->fetchColumn());
+    } catch (Throwable $throwable) {
+        return 0;
+    }
+}
+
+function emarioh_render_admin_booking_nav_link(PDO $db, bool $isActive = false): string
+{
+    $pendingCount = emarioh_count_pending_booking_requests($db);
+    $badge = $pendingCount > 0
+        ? '<span class="admin-nav-badge admin-booking-nav-badge" aria-label="' . htmlspecialchars((string) $pendingCount, ENT_QUOTES, 'UTF-8') . ' pending bookings">' . htmlspecialchars((string) min($pendingCount, 99), ENT_QUOTES, 'UTF-8') . '</span>'
+        : '';
+
+    return '<a class="nav-link admin-booking-nav-link' . ($isActive ? ' active' : '') . '" href="admin-bookings.php"' . ($isActive ? ' aria-current="page"' : '') . '><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span>' . $badge . '</a>';
 }
 
 function emarioh_render_admin_mobile_notification_button(PDO $db, bool $isActive = false): string
@@ -8169,6 +8282,7 @@ function emarioh_fetch_booking_requests(PDO $db, array $options = []): array
 
     $orderBy = (string) ($options['order_by'] ?? 'submitted_desc');
     $sql .= match ($orderBy) {
+        'pending_queue_asc' => " ORDER BY CASE WHEN br.status = 'pending_review' THEN 0 ELSE 1 END, CASE WHEN br.status = 'pending_review' THEN br.submitted_at END ASC, br.submitted_at DESC, br.id DESC",
         'event_date_asc' => ' ORDER BY br.event_date ASC, br.event_time ASC, br.id ASC',
         'event_date_desc' => ' ORDER BY br.event_date DESC, br.event_time DESC, br.id DESC',
         'submitted_asc' => ' ORDER BY br.submitted_at ASC, br.id ASC',

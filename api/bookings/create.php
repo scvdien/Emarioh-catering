@@ -260,12 +260,30 @@ try {
     emarioh_fail('Booking request could not be saved right now. Please try again in a moment.', 500);
 }
 
+$createdBooking = null;
+
 try {
     $createdBooking = emarioh_find_booking_by_id($db, $bookingId);
 
     if ($createdBooking !== null) {
         emarioh_create_admin_booking_notification($db, $createdBooking);
+    }
+} catch (Throwable $throwable) {
+    // Keep booking creation successful even if admin notification fails.
+}
 
+// Immediately respond to the client browser so submission is instant (< 1 second)
+emarioh_fast_success([
+    'message' => 'Booking request submitted successfully.',
+    'booking_id' => $bookingId,
+    'reference' => $reference,
+    'redirect_url' => 'client-my-bookings.php',
+], 201);
+
+// Customer browser is now redirecting to My Bookings.
+// Send the confirmation SMS asynchronously in the background.
+if ($createdBooking !== null) {
+    try {
         emarioh_send_booking_sms_template(
             $db,
             $createdBooking,
@@ -275,14 +293,9 @@ try {
                 'source_label' => 'Booking Management',
             ]
         );
+    } catch (Throwable $throwable) {
+        // Keep SMS failure silent in background
     }
-} catch (Throwable $throwable) {
-    // Keep booking creation successful even when the SMS gateway is unavailable.
 }
 
-emarioh_success([
-    'message' => 'Booking request submitted successfully.',
-    'booking_id' => $bookingId,
-    'reference' => $reference,
-    'redirect_url' => 'client-my-bookings.php',
-], 201);
+exit;

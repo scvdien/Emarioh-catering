@@ -2,6 +2,14 @@
     Options -Indexes
 </IfModule>
 
+<IfModule mod_headers.c>
+    Header setifempty X-Frame-Options "SAMEORIGIN"
+    Header setifempty X-Content-Type-Options "nosniff"
+    Header setifempty Referrer-Policy "strict-origin-when-cross-origin"
+    Header setifempty Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header setifempty X-XSS-Protection "1; mode=block"
+</IfModule>
+
 DirectoryIndex public/index.php
 
 <IfModule mod_rewrite.c>

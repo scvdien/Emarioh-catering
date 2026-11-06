@@ -879,10 +879,10 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
                             <a class="nav-link" href="index.php"><span class="nav-link__icon"><i class="bi bi-grid-1x2-fill"></i></span><span>Dashboard</span></a>
                             <?= emarioh_render_admin_notification_nav_link($db) ?>
                             <a class="nav-link" href="admin-events.php"><span class="nav-link__icon"><i class="bi bi-calendar-event"></i></span><span>Booking Calendar</span></a>
-                            <a class="nav-link" href="admin-bookings.php"><span class="nav-link__icon"><i class="bi bi-journal-check"></i></span><span>Booking Management</span></a>
+                            <?= emarioh_render_admin_booking_nav_link($db, false) ?>
                             <a class="nav-link" href="admin-clients.php"><span class="nav-link__icon"><i class="bi bi-people"></i></span><span>Clients</span></a>
                             <a class="nav-link" href="admin-payments.php"><span class="nav-link__icon"><i class="bi bi-wallet2"></i></span><span>Payment</span></a>
-                            <a class="nav-link" href="admin-inquiries.php"><span class="nav-link__icon"><i class="bi bi-envelope-paper"></i></span><span>Website Inquiries</span></a>
+                            <?= emarioh_render_admin_inquiry_nav_link($db, false) ?>
                             <a class="nav-link active" href="<?= $escape($settingsNavHref) ?>" aria-current="page"><span class="nav-link__icon"><i class="bi bi-gear"></i></span><span>Settings</span></a>
                         </nav>
 

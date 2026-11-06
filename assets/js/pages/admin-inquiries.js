@@ -196,7 +196,39 @@ document.addEventListener("DOMContentLoaded", () => {
         return messages.find((message) => String(message.id) === selectedMessageId) || null;
     }
 
+    function updateSidebarInquiryBadges(unreadTotal) {
+        const count = Math.max(0, Number.parseInt(String(unreadTotal), 10) || 0);
+        const badges = document.querySelectorAll(".admin-inquiry-nav-badge");
+
+        if (count === 0) {
+            badges.forEach((badge) => badge.remove());
+            return;
+        }
+
+        if (badges.length > 0) {
+            badges.forEach((badge) => {
+                badge.textContent = String(Math.min(count, 99));
+                badge.setAttribute("aria-label", `${count} unread inquiries`);
+            });
+        } else {
+            const navLinks = document.querySelectorAll(".admin-inquiry-nav-link");
+            navLinks.forEach((navLink) => {
+                const span = document.createElement("span");
+                span.className = "admin-nav-badge admin-inquiry-nav-badge";
+                span.setAttribute("aria-label", `${count} unread inquiries`);
+                span.textContent = String(Math.min(count, 99));
+                navLink.appendChild(span);
+            });
+        }
+    }
+
     function renderSummary() {
+        const unreadTotal = messages.filter((message) => normalizeStatus(message.status) === "unread").length;
+
+        if (!isLoading) {
+            updateSidebarInquiryBadges(unreadTotal);
+        }
+
         if (topbarStatus) {
             let summary = "";
 
@@ -205,7 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
             } else if (lastErrorMessage && !messages.length) {
                 summary = "Inbox unavailable";
             } else {
-                const unreadTotal = messages.filter((message) => normalizeStatus(message.status) === "unread").length;
                 summary = formatTopbarSummary(unreadTotal, messages.length);
             }
 

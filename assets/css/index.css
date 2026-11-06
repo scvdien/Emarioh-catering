@@ -211,6 +211,8 @@ button {
 }
 
 .admin-notification-nav-link,
+.admin-inquiry-nav-link,
+.admin-booking-nav-link,
 .client-notification-nav-link {
     position: relative;
 }

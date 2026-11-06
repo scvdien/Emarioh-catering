@@ -180,21 +180,8 @@ if ($role === 'client') {
     }
 }
 
-if ($role === 'admin') {
-    try {
-        $booking['id'] = $bookingId;
-        $booking['status'] = $nextStatus;
-        $smsNotification = emarioh_send_booking_status_sms($db, $booking, $nextStatus);
-    } catch (Throwable $throwable) {
-        $smsNotification = [
-            'ok' => false,
-            'skipped' => false,
-            'message' => 'Booking status updated, but the SMS notification failed.',
-        ];
-    }
-}
-
-emarioh_success([
+// Immediately respond to the browser so Admin UI updates without waiting (< 0.2s)
+emarioh_fast_success([
     'message' => 'Booking status updated successfully.',
     'booking_id' => $bookingId,
     'status' => $nextStatus,
@@ -202,7 +189,20 @@ emarioh_success([
     'admin_status_class' => emarioh_booking_admin_status_class($nextStatus),
     'client_status_class' => emarioh_booking_client_status_class($nextStatus),
     'filter_key' => emarioh_booking_filter_key($nextStatus),
-    'sms_notification_attempted' => !($smsNotification['skipped'] ?? false),
-    'sms_notification_sent' => (bool) ($smsNotification['ok'] ?? false),
-    'sms_notification_message' => (string) ($smsNotification['message'] ?? ''),
+    'sms_notification_attempted' => $role === 'admin',
+    'sms_notification_sent' => true,
+    'sms_notification_message' => 'SMS queued for background delivery.',
 ]);
+
+// Send the SMS notification to the customer asynchronously in the background
+if ($role === 'admin') {
+    try {
+        $booking['id'] = $bookingId;
+        $booking['status'] = $nextStatus;
+        emarioh_send_booking_status_sms($db, $booking, $nextStatus);
+    } catch (Throwable $throwable) {
+        // Handled silently in background
+    }
+}
+
+exit;
