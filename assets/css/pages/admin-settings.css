@@ -1154,14 +1154,15 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: flex-start;
-        align-self: start;
+        justify-content: center;
+        align-self: center;
         gap: 0.24rem;
         min-height: 0;
         height: auto;
         max-height: none;
         padding-top: 0.42rem;
         padding-bottom: 0.42rem;
+        text-align: center;
     }
 
     .admin-settings-page[data-mobile-settings-view="hub"] .admin-mobile-bottom-nav__item.is-active {
@@ -1406,13 +1407,15 @@
 
     .admin-settings-page .admin-mobile-bottom-nav__item,
     .admin-settings-page .admin-mobile-bottom-nav__item.is-active {
-        align-self: start !important;
-        justify-content: flex-start !important;
+        align-self: center !important;
+        align-content: center !important;
+        justify-content: center !important;
+        justify-items: center !important;
         min-height: 3.45rem !important;
         height: 3.45rem !important;
         max-height: 3.45rem !important;
-        padding-top: 0.38rem !important;
-        padding-bottom: 0.38rem !important;
+        padding: 0.38rem 0.2rem !important;
+        text-align: center;
     }
 
     .admin-settings-page .admin-mobile-bottom-nav__item.is-active {
@@ -3110,4 +3113,320 @@
 
 .admin-settings-page .settings-profile-hub__header--centered .settings-profile-hub__summary {
     max-width: 100%;
+}
+
+/* ==========================================================================
+   Admin Mobile Profile Hub (Emerald & Gold Luxury App Style)
+   Strictly scoped away from .client-settings-page
+   ========================================================================== */
+.admin-settings-page:not(.client-settings-page) .admin-profile-hub {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.admin-profile-hub__inner {
+    display: grid;
+    gap: 0.9rem;
+    width: min(100%, 30rem);
+    margin-inline: auto;
+}
+
+.admin-profile-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 1rem 1.05rem;
+    border: 1px solid rgba(201, 162, 74, 0.34);
+    border-radius: 1.2rem;
+    background:
+        radial-gradient(circle at top right, rgba(201, 162, 74, 0.24), transparent 52%),
+        linear-gradient(145deg, #254739 0%, #1B352A 100%);
+    color: #FFF8EC;
+    text-decoration: none;
+    box-shadow: 0 14px 28px rgba(31, 59, 47, 0.18);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.admin-profile-card:hover,
+.admin-profile-card:focus-visible {
+    color: #FFF8EC;
+    border-color: rgba(243, 207, 118, 0.55);
+    box-shadow: 0 16px 32px rgba(31, 59, 47, 0.24);
+    transform: translateY(-1px);
+}
+
+.admin-profile-card__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.35rem;
+    height: 3.35rem;
+    padding: 0.2rem;
+    border: 1px solid rgba(243, 207, 118, 0.42);
+    border-radius: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.admin-profile-card__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.8rem;
+}
+
+.admin-profile-card__body {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
+}
+
+.admin-profile-card__badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 0.14rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(243, 207, 118, 0.18);
+    color: #F3CF76;
+    font-size: 0.6rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.admin-profile-card__name {
+    color: #FFF9EE;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.38rem;
+    font-weight: 700;
+    line-height: 1.05;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-profile-card__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.34rem;
+    color: rgba(255, 248, 236, 0.78);
+    font-size: 0.74rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.admin-profile-card__meta i {
+    color: #F3CF76;
+    font-size: 0.74rem;
+}
+
+.admin-profile-card__edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.22rem;
+    padding: 0.34rem 0.62rem;
+    border: 1px solid rgba(255, 248, 236, 0.18);
+    border-radius: 999px;
+    background: rgba(255, 248, 236, 0.1);
+    color: #FFF8EC;
+    font-size: 0.69rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-profile-group {
+    display: grid;
+    gap: 0.42rem;
+}
+
+.admin-profile-group__label {
+    margin: 0;
+    padding-left: 0.35rem;
+    color: #847262;
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.admin-profile-list {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid rgba(215, 193, 154, 0.58);
+    border-radius: 1.1rem;
+    background: #FFFFFF;
+    box-shadow: 0 10px 24px rgba(46, 40, 34, 0.045);
+}
+
+.admin-profile-item,
+.admin-profile-logout {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.78rem;
+    padding: 0.82rem 0.92rem;
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.admin-profile-item + .admin-profile-item {
+    border-top: 1px solid rgba(215, 193, 154, 0.38);
+}
+
+.admin-profile-item:hover,
+.admin-profile-item:active {
+    background: #FCF9F2;
+    color: var(--ink);
+}
+
+.admin-profile-item__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 0.8rem;
+    font-size: 0.96rem;
+    flex-shrink: 0;
+}
+
+.admin-profile-item__icon--emerald {
+    background: rgba(31, 59, 47, 0.09);
+    color: #1F3B2F;
+}
+
+.admin-profile-item__icon--gold {
+    background: rgba(201, 162, 74, 0.14);
+    color: #A47B24;
+}
+
+.admin-profile-item__icon--danger {
+    background: rgba(166, 58, 50, 0.11);
+    color: #9E342D;
+}
+
+.admin-profile-item__copy {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.admin-profile-item__copy strong {
+    color: var(--ink);
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.admin-profile-item__copy span {
+    color: #7A6B5F;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-profile-item__trail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    color: #A49485;
+    font-size: 0.84rem;
+    flex-shrink: 0;
+}
+
+.admin-profile-item__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.45rem;
+    height: 1.45rem;
+    padding: 0 0.42rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #D5AE4B, #C2942A);
+    color: #FFFFFF;
+    font-size: 0.68rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.admin-profile-logout {
+    margin-top: 0.15rem;
+    border: 1px solid rgba(166, 58, 50, 0.22);
+    border-radius: 1.05rem;
+    background: #FFFDFB;
+    box-shadow: 0 8px 20px rgba(166, 58, 50, 0.05);
+}
+
+.admin-profile-logout .admin-profile-item__copy strong {
+    color: #9E342D;
+}
+
+.admin-profile-logout:hover,
+.admin-profile-logout:active {
+    background: #FDF3F2;
+    border-color: rgba(166, 58, 50, 0.34);
+}
+
+@media (max-width: 767.98px) {
+    .admin-settings-page:not(.client-settings-page):not(.admin-settings-detail-page) .settings-dashboard-content,
+    .admin-settings-page:not(.client-settings-page)[data-mobile-settings-view="hub"] .settings-dashboard-content,
+    .admin-settings-menu-page .settings-dashboard-content {
+        display: block;
+        min-height: 100dvh;
+        padding:
+            max(1rem, env(safe-area-inset-top))
+            max(0.88rem, env(safe-area-inset-right))
+            calc(6.2rem + env(safe-area-inset-bottom))
+            max(0.88rem, env(safe-area-inset-left));
+        background:
+            radial-gradient(circle at top right, rgba(201, 162, 74, 0.12), transparent 34%),
+            linear-gradient(180deg, #FBF8F1 0%, #F4EEE2 100%);
+    }
+
+    .admin-settings-page:not(.client-settings-page):not(.admin-settings-detail-page) .admin-profile-hub,
+    .admin-settings-page:not(.client-settings-page)[data-mobile-settings-view="hub"] .admin-profile-hub,
+    .admin-settings-menu-page .admin-profile-hub {
+        min-height: auto;
+        padding: 0;
+        background: transparent;
+    }
+
+    .admin-profile-hub__inner {
+        gap: 0.85rem;
+        width: 100%;
+        max-width: 28rem;
+    }
+
+    .admin-profile-card {
+        padding: 0.92rem 0.96rem;
+        gap: 0.78rem;
+    }
+
+    .admin-profile-card__avatar {
+        width: 3.1rem;
+        height: 3.1rem;
+    }
+
+    .admin-profile-card__name {
+        font-size: 1.28rem;
+    }
+
+    .admin-profile-item,
+    .admin-profile-logout {
+        padding: 0.76rem 0.86rem;
+    }
+
+    .admin-profile-item__icon {
+        width: 2.2rem;
+        height: 2.2rem;
+        font-size: 0.9rem;
+    }
 }

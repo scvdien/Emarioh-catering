@@ -2237,8 +2237,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const backLabel = getMobileSettingsView() === "detail"
-            ? "Back to settings menu"
-            : "Back to profile menu";
+            ? "Back to profile"
+            : "Back to profile";
 
         settingsBackLabels.forEach((label) => {
             label.textContent = backLabel;

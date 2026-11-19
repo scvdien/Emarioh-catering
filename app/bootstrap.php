@@ -622,7 +622,7 @@ function emarioh_create_database_connection(bool $withDatabase = true): PDO
         );
 
     try {
-        return new PDO(
+        $pdo = new PDO(
             $dsn,
             (string) ($databaseConfig['user'] ?? ''),
             (string) ($databaseConfig['password'] ?? ''),
@@ -631,6 +631,9 @@ function emarioh_create_database_connection(bool $withDatabase = true): PDO
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             ]
         );
+        $pdo->exec("SET time_zone = '+08:00'");
+
+        return $pdo;
     } catch (PDOException $exception) {
         $message = $withDatabase
             ? 'Database connection failed. Check the configured database name, username, and password.'
@@ -1750,8 +1753,8 @@ function emarioh_admin_mobile_nav_items(): array
         ],
         [
             'href' => 'admin-settings.php',
-            'icon' => 'bi-gear',
-            'label' => 'Settings',
+            'icon' => 'bi-person-circle',
+            'label' => 'Profile',
             'active_paths' => [
                 'admin-settings.php',
                 'admin-settings-menu.php',
@@ -1759,11 +1762,15 @@ function emarioh_admin_mobile_nav_items(): array
                 'admin-settings-payment.php',
                 'admin-settings-public-page.php',
                 'admin-settings-sms.php',
+                'admin-clients.php',
+                'admin-inquiries.php',
                 '_base.php',
                 'account.php',
                 'payment.php',
                 'public-page.php',
                 'sms.php',
+                'clients.php',
+                'inquiries.php',
             ],
         ],
     ];
@@ -1797,15 +1804,6 @@ function emarioh_client_mobile_nav_items(): array
             'active_paths' => [
                 'client-my-bookings.php',
                 'my-bookings.php',
-            ],
-        ],
-        [
-            'href' => 'client-notifications.php',
-            'icon' => 'bi-bell',
-            'label' => 'Alerts',
-            'active_paths' => [
-                'client-notifications.php',
-                'notifications.php',
             ],
         ],
         [
@@ -1949,6 +1947,20 @@ function emarioh_render_client_notification_nav_link(PDO $db, int $userId, bool 
         : '';
 
     return '<a class="nav-link client-notification-nav-link' . ($isActive ? ' active' : '') . '" href="client-notifications.php"' . ($isActive ? ' aria-current="page"' : '') . '><span class="nav-link__icon"><i class="bi bi-bell"></i></span><span>Notifications</span>' . $badge . '</a>';
+}
+
+function emarioh_render_client_mobile_notification_button(PDO $db, int $userId, bool $isActive = false, string $extraClasses = ''): string
+{
+    $unreadCount = emarioh_count_unread_client_notifications($db, $userId);
+    $badge = $unreadCount > 0
+        ? '<span class="client-mobile-notification-badge" data-client-notification-badge aria-label="' . htmlspecialchars((string) $unreadCount, ENT_QUOTES, 'UTF-8') . ' unread notifications">' . htmlspecialchars((string) min($unreadCount, 99), ENT_QUOTES, 'UTF-8') . '</span>'
+        : '';
+    $normalizedExtra = trim($extraClasses);
+    $className = 'client-mobile-notification-button d-xl-none'
+        . ($isActive ? ' is-active' : '')
+        . ($normalizedExtra !== '' ? ' ' . $normalizedExtra : '');
+
+    return '<a class="' . htmlspecialchars($className, ENT_QUOTES, 'UTF-8') . '" href="client-notifications.php" aria-label="Open notifications"' . ($isActive ? ' aria-current="page"' : '') . '><i class="bi bi-bell-fill" aria-hidden="true"></i>' . $badge . '</a>';
 }
 
 function emarioh_render_client_mobile_nav(string $currentPath): string

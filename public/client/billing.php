@@ -32,7 +32,7 @@ $packageCatalogJson = json_encode(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emarioh Catering Services Client Billing</title>
     <?= emarioh_render_vendor_head_assets(); ?>
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20261119a">
     <link rel="stylesheet" href="assets/css/pages/client-billing.css?v=20260904z">
 </head>
 <body class="dashboard-page client-dashboard-page client-page--sticky-topbar client-billing-page" data-auth-guard="client">
@@ -81,16 +81,17 @@ $packageCatalogJson = json_encode(
                         <button class="btn mobile-menu-button d-xl-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#dashboardSidebar" aria-controls="dashboardSidebar" aria-label="Open navigation"><i class="bi bi-list"></i></button>
                         <div class="topbar-copy"><h1 class="topbar-copy__title">Billing</h1></div>
                     </div>
-                    <?php if (!empty($paymentHistory)): ?>
-                        <div class="topbar-trailing">
+                    <div class="topbar-trailing">
+                        <?php if (!empty($paymentHistory)): ?>
                             <button type="button" class="billing-history-topbar-btn" data-bs-toggle="modal" data-bs-target="#billingHistoryModal" aria-label="View Payment History">
                                 <i class="bi bi-clock-history" aria-hidden="true"></i>
                                 <span class="billing-history-topbar-btn__label-full">Payment History</span>
                                 <span class="billing-history-topbar-btn__label-short">History</span>
                                 <span class="billing-history-topbar-btn__badge" aria-label="<?= $totalReceiptsCount ?> past receipts"><?= $totalReceiptsCount ?></span>
                             </button>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                        <?= emarioh_render_client_mobile_notification_button($db, (int) $currentUser['id']) ?>
+                    </div>
                 </header>
 
                 <main class="dashboard-content client-dashboard-content billing-page">

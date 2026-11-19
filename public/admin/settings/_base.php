@@ -45,7 +45,7 @@ $settingsPageTitle = isset($settingsPageTitle) ? trim((string) $settingsPageTitl
 $settingsPageEyebrow = isset($settingsPageEyebrow) ? trim((string) $settingsPageEyebrow) : $settingsPageMeta['eyebrow'];
 $settingsPageDescription = isset($settingsPageDescription) ? trim((string) $settingsPageDescription) : $settingsPageMeta['description'];
 $settingsBackHref = isset($settingsBackHref) ? trim((string) $settingsBackHref) : ($settingsPageIsDetail ? 'admin-settings-menu.php' : '');
-$settingsBackLabel = isset($settingsBackLabel) ? trim((string) $settingsBackLabel) : ($settingsPageIsDetail ? 'Back to settings menu' : '');
+$settingsBackLabel = isset($settingsBackLabel) ? trim((string) $settingsBackLabel) : ($settingsPageIsDetail ? 'Back to profile' : '');
 $settingsNavHref = $settingsPageIsDetail ? 'admin-settings-menu.php' : 'admin-settings.php';
 $settingsSectionUrl = static function (string $sectionId, array $query = []) use ($settingsPageIsDetail, $settingsSectionRoutes): string {
     $sectionId = trim($sectionId);
@@ -840,9 +840,9 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260903c">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260903b">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20261119b">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
-<body class="admin-dashboard-page admin-settings-page<?= $settingsPageIsDetail ? ' admin-settings-detail-page' : '' ?>" data-auth-guard="admin" data-mobile-settings-view="detail"<?= $settingsPageIsDetail ? ' data-active-settings-section="' . $escape($settingsPageSection) . '"' : '' ?>>
+<body class="admin-dashboard-page admin-settings-page<?= $settingsPageIsDetail ? ' admin-settings-detail-page' : '' ?>" data-auth-guard="admin" data-mobile-settings-view="<?= $settingsPageIsDetail ? 'detail' : 'hub' ?>"<?= $settingsPageIsDetail ? ' data-active-settings-section="' . $escape($settingsPageSection) . '"' : '' ?>>
     <div class="dashboard-shell container-fluid">
         <div class="dashboard-frame">
             <aside class="dashboard-sidebar offcanvas-xl offcanvas-start border-0" tabindex="-1" id="dashboardSidebar" aria-labelledby="dashboardSidebarLabel">
@@ -919,76 +919,12 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'POST'
 
                 <main class="dashboard-content settings-dashboard-content">
 <?php if (!$settingsPageIsDetail): ?>
-<section class="surface-card settings-profile-hub d-xl-none" data-settings-hub aria-labelledby="settingsProfileHubTitle">
-    <div class="settings-profile-hub__header settings-profile-hub__header--centered">
-        <div class="settings-profile-hub__copy">
-            <h2 id="settingsProfileHubTitle">Admin Settings</h2>
-            <p class="settings-profile-hub__summary">Choose which part of the admin settings you want to manage.</p>
-        </div>
-    </div>
-    <div class="settings-profile-hub__grid">
-        <a class="settings-profile-shortcut" href="admin-settings-account.php">
-            <span class="settings-profile-shortcut__content">
-                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-person-badge"></i></span>
-                <span class="settings-profile-shortcut__copy">
-                    <strong>Admin Account</strong>
-                    <span>Update admin name, mobile number, and password.</span>
-                </span>
-            </span>
-            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-        </a>
-        <a class="settings-profile-shortcut" href="admin-settings-public-page.php">
-            <span class="settings-profile-shortcut__content">
-                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-window-stack"></i></span>
-                <span class="settings-profile-shortcut__copy">
-                    <strong>Public Page</strong>
-                    <span>Manage hero, services, gallery, and contacts.</span>
-                </span>
-            </span>
-            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-        </a>
-        <a class="settings-profile-shortcut" href="admin-settings-payment.php">
-            <span class="settings-profile-shortcut__content">
-                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-wallet2"></i></span>
-                <span class="settings-profile-shortcut__copy">
-                    <strong>Payment</strong>
-                    <span>Set down payment rules for each service.</span>
-                </span>
-            </span>
-            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-        </a>
-        <a class="settings-profile-shortcut" href="admin-settings-sms.php">
-            <span class="settings-profile-shortcut__content">
-                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-chat-dots"></i></span>
-                <span class="settings-profile-shortcut__copy">
-                    <strong>SMS Templates</strong>
-                    <span>Review message templates and placeholders.</span>
-                </span>
-            </span>
-            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-        </a>
-        <a class="settings-profile-shortcut" href="admin-inquiries.php">
-            <span class="settings-profile-shortcut__content">
-                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-envelope-paper"></i></span>
-                <span class="settings-profile-shortcut__copy">
-                    <strong>Website Inquiries</strong>
-                    <span>Review customer messages from the public page.</span>
-                </span>
-            </span>
-            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-        </a>
-    </div>
-    <a class="settings-profile-logout" href="logout.php" data-logout-link>
-        <span class="settings-profile-logout__content">
-            <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-box-arrow-right"></i></span>
-            <span class="settings-profile-shortcut__copy">
-                <strong>Log Out</strong>
-                <span>Sign out of the admin dashboard.</span>
-            </span>
-        </span>
-        <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-    </a>
-</section>
+<?php
+$adminProfileHubClasses = 'surface-card settings-profile-hub admin-profile-hub d-xl-none';
+$adminProfileHubTitleId = 'settingsProfileHubTitle';
+$adminProfileHubHasDataAttr = true;
+require __DIR__ . '/_profile-hub.php';
+?>
 <?php endif; ?>
 <section class="surface-card settings-panel" data-settings-panel data-mobile-state="<?= $settingsPageIsDetail ? 'expanded' : 'collapsed' ?>" aria-hidden="<?= $settingsPageIsDetail ? 'false' : 'true' ?>">
     <?php if ($settingsPageIsDetail && $settingsBackHref !== ''): ?>

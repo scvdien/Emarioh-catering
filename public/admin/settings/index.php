@@ -17,7 +17,7 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260903b">
     <link rel="stylesheet" href="assets/css/package-admin.css">
-    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260709b">
+    <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20261119b">
     <link rel="stylesheet" href="assets/css/admin-mobile-notification.css?v=20260710d">
 </head>
 <body class="admin-dashboard-page admin-settings-page admin-settings-menu-page" data-auth-guard="admin">
@@ -84,90 +84,21 @@ $adminDisplayName = trim((string) ($currentUser['full_name'] ?? '')) ?: 'Admin P
                         </button>
 
                         <div class="topbar-copy">
-                            <p class="settings-mobile-topbar__eyebrow">Settings</p>
-                            <h1 class="topbar-copy__title">Settings Menu</h1>
-                            <p class="settings-mobile-topbar__text">Choose which part of the admin settings you want to manage.</p>
+                            <p class="settings-mobile-topbar__eyebrow">Profile</p>
+                            <h1 class="topbar-copy__title">Admin Profile</h1>
+                            <p class="settings-mobile-topbar__text">Manage your admin account, clients, and system settings.</p>
                         </div>
                     </div>
                     <?= emarioh_render_admin_mobile_notification_button($db) ?>
                 </header>
 
                 <main class="dashboard-content settings-dashboard-content">
-                    <section class="surface-card settings-profile-hub settings-menu-page__hub" aria-labelledby="settingsMenuPageTitle">
-                        <div class="settings-profile-hub__header settings-profile-hub__header--centered">
-                            <div class="settings-profile-hub__copy">
-                                <h2 id="settingsMenuPageTitle">Admin Settings</h2>
-                                <p class="settings-profile-hub__summary">Choose which part of the admin settings you want to manage.</p>
-                            </div>
-                        </div>
-
-                        <div class="settings-profile-hub__grid">
-                            <a class="settings-profile-shortcut" href="admin-settings-account.php">
-                                <span class="settings-profile-shortcut__content">
-                                    <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-person-badge"></i></span>
-                                    <span class="settings-profile-shortcut__copy">
-                                        <strong>Admin Account</strong>
-                                        <span>Update admin name, mobile number, and password.</span>
-                                    </span>
-                                </span>
-                                <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-                            </a>
-
-                            <a class="settings-profile-shortcut" href="admin-settings-public-page.php">
-                                <span class="settings-profile-shortcut__content">
-                                    <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-window-stack"></i></span>
-                                    <span class="settings-profile-shortcut__copy">
-                                        <strong>Public Page</strong>
-                                        <span>Manage hero, services, gallery, and contacts.</span>
-                                    </span>
-                                </span>
-                                <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-                            </a>
-
-                            <a class="settings-profile-shortcut" href="admin-settings-payment.php">
-                                <span class="settings-profile-shortcut__content">
-                                    <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-wallet2"></i></span>
-                                    <span class="settings-profile-shortcut__copy">
-                                        <strong>Payment</strong>
-                                        <span>Set down payment rules for each service.</span>
-                                    </span>
-                                </span>
-                                <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-                            </a>
-
-                            <a class="settings-profile-shortcut" href="admin-settings-sms.php">
-                                <span class="settings-profile-shortcut__content">
-                                    <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-chat-dots"></i></span>
-                                    <span class="settings-profile-shortcut__copy">
-                                        <strong>SMS Templates</strong>
-                                        <span>Review message templates and placeholders.</span>
-                                    </span>
-                                </span>
-                                <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-                            </a>
-
-                            <a class="settings-profile-shortcut" href="admin-inquiries.php">
-                                <span class="settings-profile-shortcut__content">
-                                    <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-envelope-paper"></i></span>
-                                    <span class="settings-profile-shortcut__copy">
-                                        <strong>Website Inquiries</strong>
-                                        <span>Review customer messages from the public page.</span>
-                                    </span>
-                                </span>
-                                <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-                            </a>
-                        </div>
-                        <a class="settings-profile-logout" href="logout.php" data-logout-link>
-                            <span class="settings-profile-logout__content">
-                                <span class="settings-profile-shortcut__icon" aria-hidden="true"><i class="bi bi-box-arrow-right"></i></span>
-                                <span class="settings-profile-shortcut__copy">
-                                    <strong>Log Out</strong>
-                                    <span>Sign out of the admin dashboard.</span>
-                                </span>
-                            </span>
-                            <span class="settings-profile-shortcut__chevron" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
-                        </a>
-                    </section>
+                    <?php
+                    $adminProfileHubClasses = 'surface-card settings-profile-hub admin-profile-hub settings-menu-page__hub';
+                    $adminProfileHubTitleId = 'settingsMenuPageTitle';
+                    $adminProfileHubHasDataAttr = false;
+                    require __DIR__ . '/_profile-hub.php';
+                    ?>
                 </main>
                 <?= emarioh_render_admin_mobile_nav('admin-settings-menu.php') ?>
             </div>

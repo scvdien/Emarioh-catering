@@ -7,17 +7,19 @@ $db = emarioh_db();
 $currentUser = emarioh_require_page_role('client');
 $clientProfile = emarioh_find_client_profile($db, (int) $currentUser['id']);
 $bookedEventDates = emarioh_fetch_booked_event_dates($db);
-$unpaidBlockingBooking = emarioh_find_client_unpaid_active_booking($db, (int) $currentUser['id']);
-$activeBlockingBooking = emarioh_find_client_active_upcoming_booking($db, (int) $currentUser['id']);
-$blockingBooking = $unpaidBlockingBooking ?? $activeBlockingBooking;
-$bookingSubmissionLocked = $blockingBooking !== null;
-$bookingSubmissionLockType = $unpaidBlockingBooking !== null ? 'unpaid' : ($activeBlockingBooking !== null ? 'active' : '');
-$bookingSubmissionLockTitle = $bookingSubmissionLockType === 'unpaid' ? 'Unpaid Booking Pending' : 'Booking Pending Review';
-$bookingSubmissionLockButtonLabel = $bookingSubmissionLockType === 'unpaid' ? 'Settle Billing First' : 'Waiting For Review';
-$bookingSubmissionLockMessage = $bookingSubmissionLocked
-    ? ($bookingSubmissionLockType === 'unpaid'
-        ? emarioh_client_unpaid_booking_block_message($blockingBooking)
-        : emarioh_client_active_booking_block_message($blockingBooking))
+$pendingReviewBooking = emarioh_find_client_active_upcoming_booking($db, (int) $currentUser['id']);
+$bookingReviewLocked = $pendingReviewBooking !== null;
+$pendingReviewReference = $bookingReviewLocked
+    ? (trim((string) ($pendingReviewBooking['reference'] ?? '')) ?: 'Pending Reference')
+    : '';
+$pendingReviewEventType = $bookingReviewLocked
+    ? (trim((string) ($pendingReviewBooking['event_type'] ?? '')) ?: 'Event Booking')
+    : '';
+$pendingReviewEventDate = $bookingReviewLocked
+    ? emarioh_format_booking_date_label((string) ($pendingReviewBooking['event_date'] ?? ''))
+    : '';
+$pendingReviewPackage = $bookingReviewLocked
+    ? (trim((string) ($pendingReviewBooking['package_label'] ?? '')) ?: 'Selected Package')
     : '';
 
 $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -38,7 +40,7 @@ $packageCatalogJson = json_encode(
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/pages/client-bookings.css?v=<?= time() ?>">
     <link rel="stylesheet" href="assets/css/client-portal-state.css">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20261119a">
 </head>
 <body class="dashboard-page client-dashboard-page client-book-event-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -87,16 +89,67 @@ $packageCatalogJson = json_encode(
                         <div class="topbar-copy"><h1 class="topbar-copy__title">Book Event</h1></div>
                     </div>
                     <div class="topbar-trailing">
-                        <button class="booking-topbar-clear-btn btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center" id="bookingTopClearButton" type="button" data-bs-toggle="modal" data-bs-target="#bookingClearConfirmModal" title="Clear all fields">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i>
-                            <span class="d-none d-sm-inline">Clear All Fields</span>
-                            <span class="d-sm-none">Clear</span>
-                        </button>
+                        <?php if (!$bookingReviewLocked): ?>
+                            <button class="booking-topbar-clear-btn btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center" id="bookingTopClearButton" type="button" data-bs-toggle="modal" data-bs-target="#bookingClearConfirmModal" title="Clear all fields">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>
+                                <span class="d-none d-sm-inline">Clear All Fields</span>
+                                <span class="d-sm-none">Clear</span>
+                            </button>
+                        <?php endif; ?>
+                        <?= emarioh_render_client_mobile_notification_button($db, (int) $currentUser['id']) ?>
                     </div>
                 </header>
 
                 <main class="dashboard-content client-dashboard-content">
-                    <div class="client-book-event-layout">
+                    <div class="client-book-event-layout<?= $bookingReviewLocked ? ' client-book-event-layout--locked' : '' ?>">
+                        <?php if ($bookingReviewLocked): ?>
+                            <section class="surface-card booking-review-lock-card" aria-labelledby="bookingReviewLockTitle">
+                                <div class="booking-review-lock-card__head">
+                                    <span class="booking-review-lock-card__icon" aria-hidden="true">
+                                        <i class="bi bi-hourglass-split"></i>
+                                    </span>
+                                    <div class="booking-review-lock-card__heading">
+                                        <div class="booking-review-lock-card__eyebrow-row">
+                                            <span class="panel-heading__eyebrow booking-review-lock-card__eyebrow">Booking Status</span>
+                                            <span class="status-pill status-pill--pending">Pending Review</span>
+                                        </div>
+                                        <h2 class="booking-review-lock-card__title" id="bookingReviewLockTitle">Booking Request Under Review</h2>
+                                        <p class="booking-review-lock-card__text">
+                                            Our team is reviewing your request. You can submit a new booking once it is approved or cancelled.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="booking-review-lock-summary">
+                                    <div class="booking-review-lock-summary__item">
+                                        <span>Reference</span>
+                                        <strong><?= $escape($pendingReviewReference) ?></strong>
+                                    </div>
+                                    <div class="booking-review-lock-summary__item">
+                                        <span>Event</span>
+                                        <strong><?= $escape($pendingReviewEventType) ?></strong>
+                                    </div>
+                                    <div class="booking-review-lock-summary__item">
+                                        <span>Event Date</span>
+                                        <strong><?= $escape($pendingReviewEventDate) ?></strong>
+                                    </div>
+                                    <div class="booking-review-lock-summary__item booking-review-lock-summary__item--package">
+                                        <span>Package</span>
+                                        <strong><?= $escape($pendingReviewPackage) ?></strong>
+                                    </div>
+                                </div>
+
+                                <div class="booking-review-lock-card__footer">
+                                    <a class="client-action-button client-action-button--primary" href="client-my-bookings.php">
+                                        <i class="bi bi-calendar2-check me-2" aria-hidden="true"></i>
+                                        <span>View My Bookings</span>
+                                    </a>
+                                    <p class="booking-review-lock-card__hint">
+                                        Need to change details? Cancel this pending booking in My Bookings to book again.
+                                    </p>
+                                </div>
+                            </section>
+                        <?php else: ?>
                         <form class="booking-form booking-form--details" id="bookingFormShell" action="#" novalidate>
                             <section class="surface-card booking-unified-card">
                                 <!-- Section 01: Schedule & Venue -->
@@ -284,22 +337,18 @@ $packageCatalogJson = json_encode(
                                                 <i class="bi bi-arrow-counterclockwise me-2"></i>
                                                 <span>Clear All Fields</span>
                                             </button>
-                                            <button class="client-action-button client-action-button--primary booking-review-submit-btn" id="bookingSubmitButton" type="submit"<?= $bookingSubmissionLocked ? ' disabled aria-disabled="true"' : '' ?>>
+                                            <button class="client-action-button client-action-button--primary booking-review-submit-btn" id="bookingSubmitButton" type="submit">
                                                 <i class="bi bi-clipboard2-check me-2"></i>
-                                                <span><?= $bookingSubmissionLocked ? $escape($bookingSubmissionLockButtonLabel) : 'Review &amp; Submit Booking Request →' ?></span>
+                                                <span>Review &amp; Submit Booking Request →</span>
                                             </button>
                                         </div>
                                         <span id="packageInclusionsCount" hidden></span>
                                         <div class="booking-submit-feedback" id="bookingSubmitFeedback" aria-live="polite" style="display: none;"></div>
                                     </div>
-                                    <?php if ($bookingSubmissionLocked): ?>
-                                        <div class="text-center mt-2">
-                                            <a class="booking-submit-support__link small text-primary" href="client-my-bookings.php">View Current Booking</a>
-                                        </div>
-                                    <?php endif; ?>
                                 </div>
                             </section>
                         </form>
+                        <?php endif; ?>
                     </div>
                 </main>
 
@@ -495,11 +544,13 @@ $packageCatalogJson = json_encode(
     <?= emarioh_render_vendor_runtime_assets(true); ?>
     <script src="assets/js/auth-api.js"></script>
     <script src="assets/js/logout-confirmation.js?v=20260706c"></script>
-    <script>
-        window.EmariohServerPackageCatalog = <?= $packageCatalogJson ?>;
-    </script>
-    <script src="assets/js/package-catalog.js?v=<?= time() ?>"></script>
-    <script src="assets/js/pages/client-bookings-page.js?v=<?= time() ?>"></script>
+    <?php if (!$bookingReviewLocked): ?>
+        <script>
+            window.EmariohServerPackageCatalog = <?= $packageCatalogJson ?>;
+        </script>
+        <script src="assets/js/package-catalog.js?v=<?= time() ?>"></script>
+        <script src="assets/js/pages/client-bookings-page.js?v=<?= time() ?>"></script>
+    <?php endif; ?>
 </body>
 </html>
 

@@ -329,6 +329,10 @@
     font-size: 0.68rem;
 }
 
+.client-mobile-notification-button {
+    display: none;
+}
+
 @media (max-width: 1199.98px) {
     .client-dashboard-page .dashboard-frame {
         grid-template-columns: 1fr;
@@ -349,6 +353,11 @@
     }
 
     .client-dashboard-page .dashboard-topbar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 0.65rem;
         padding-left: 1rem;
         padding-right: 1rem;
     }
@@ -363,7 +372,77 @@
     }
 
     .client-dashboard-page .topbar-leading {
-        width: 100%;
+        width: auto;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .client-dashboard-page .topbar-trailing,
+    .client-dashboard-page .booking-topbar-controls {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    .client-dashboard-page .client-mobile-notification-button {
+        position: relative;
+        z-index: 2;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 2.3rem;
+        height: 2.3rem;
+        border: 1px solid rgba(95, 71, 53, 0.14);
+        border-radius: 999px;
+        background: #fffdf9;
+        box-shadow: 0 8px 22px rgba(48, 37, 28, 0.09);
+        color: #234b3d;
+        font-size: 0.96rem;
+        line-height: 1;
+        text-decoration: none;
+    }
+
+    .client-dashboard-page .dashboard-topbar > .client-mobile-notification-button {
+        margin-left: auto;
+    }
+
+    .client-dashboard-page .client-mobile-notification-button.is-active {
+        background: #234b3d;
+        color: #fff8ec;
+    }
+
+    .client-dashboard-page .client-mobile-notification-badge {
+        position: absolute;
+        top: -0.2rem;
+        right: -0.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.1rem;
+        height: 1.1rem;
+        padding: 0 0.25rem;
+        border: 2px solid #fffdf9;
+        border-radius: 999px;
+        background: #d5ae4b;
+        color: #1f3b2f;
+        font-size: 0.56rem;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+    .client-dashboard-home .dashboard-main {
+        position: relative;
+    }
+
+    .client-dashboard-page .client-mobile-notification-button--floating {
+        position: absolute;
+        top: max(0.85rem, env(safe-area-inset-top));
+        right: 1rem;
+        z-index: 25;
     }
 
     .client-dashboard-page .client-mobile-bottom-nav {
@@ -373,8 +452,8 @@
         left: 0;
         z-index: 30;
         display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 0.24rem;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 0.35rem;
         width: 100%;
         padding:
             0.72rem
@@ -391,10 +470,10 @@
         display: grid;
         justify-items: center;
         gap: 0.24rem;
-        padding: 0.42rem 0.14rem;
+        padding: 0.45rem 0.2rem;
         border-radius: 0.9rem;
         color: #6d665f;
-        font-size: 0.62rem;
+        font-size: 0.66rem;
         font-weight: 700;
         line-height: 1.1;
         text-decoration: none;
@@ -432,7 +511,13 @@
     }
 
     .client-dashboard-page .client-mobile-bottom-nav__item {
-        font-size: 0.58rem;
+        font-size: 0.62rem;
+    }
+
+    .client-dashboard-page .client-mobile-notification-button {
+        width: 2.15rem;
+        height: 2.15rem;
+        font-size: 0.9rem;
     }
 
     .client-dashboard-page .client-booking-notification {

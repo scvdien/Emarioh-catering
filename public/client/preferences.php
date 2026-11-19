@@ -22,8 +22,8 @@ $clientAlternateContact = trim((string) ($clientProfile['alternate_contact'] ?? 
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
     <link rel="stylesheet" href="assets/css/pages/admin-settings.css?v=20260418w">
-    <link rel="stylesheet" href="assets/css/pages/client-preferences.css?v=20260903a">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/pages/client-preferences.css?v=20261119a">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20261119b">
 </head>
 <body class="dashboard-page admin-settings-page client-dashboard-page client-settings-page" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">

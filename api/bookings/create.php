@@ -9,18 +9,6 @@ $db = emarioh_db();
 $currentUser = emarioh_require_role('client');
 $data = emarioh_request_data();
 
-$unpaidBlockingBooking = emarioh_find_client_unpaid_active_booking($db, (int) $currentUser['id']);
-
-if ($unpaidBlockingBooking !== null) {
-    emarioh_fail(
-        emarioh_client_unpaid_booking_block_message($unpaidBlockingBooking),
-        409,
-        [
-            'blocking_booking' => emarioh_client_unpaid_booking_payload($unpaidBlockingBooking),
-        ]
-    );
-}
-
 $blockingBooking = emarioh_find_client_active_upcoming_booking($db, (int) $currentUser['id']);
 
 if ($blockingBooking !== null) {

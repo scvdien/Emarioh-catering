@@ -68,8 +68,8 @@ function emarioh_render_client_notification_items(array $notifications, callable
     <title>Emarioh Catering Services Client Notifications</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260714f">
-    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20260418d">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20261119a">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20261119a">
     <link rel="stylesheet" href="assets/css/pages/client-notifications.css?v=20260903a">
 </head>
 <body class="dashboard-page client-dashboard-page client-notifications-page client-page--sticky-topbar" data-auth-guard="client">
@@ -120,6 +120,7 @@ function emarioh_render_client_notification_items(array $notifications, callable
                             <h1 class="topbar-copy__title">Notifications</h1>
                         </div>
                     </div>
+                    <?= emarioh_render_client_mobile_notification_button($db, (int) $currentUser['id'], true) ?>
                 </header>
 
                 <main class="dashboard-content client-dashboard-content">

@@ -176,9 +176,9 @@ $hasPublicContactDetails = $publicContactServiceArea !== ''
             </nav>
 
             <div class="public-header__actions">
-                <a class="public-header__social public-header__social--contact" href="login.php" aria-label="Open client login">
+                <a class="public-header__social public-header__social--contact" href="login.php" aria-label="Sign in">
                     <i class="bi bi-person-circle" aria-hidden="true"></i>
-                    <span>Client Login</span>
+                    <span>Sign In</span>
                 </a>
                 <button class="public-menu-toggle" type="button" aria-expanded="false" aria-controls="publicMobileNav" aria-label="Open navigation menu">
                     <i class="bi bi-list"></i>
@@ -194,7 +194,7 @@ $hasPublicContactDetails = $publicContactServiceArea !== ''
                 <a href="#packages">Packages</a>
                 <a href="#gallery">Gallery</a>
                 <a href="#contact">Contact</a>
-                <a href="login.php">Client Login</a>
+                <a href="login.php">Sign In</a>
                 <a href="registration.php">Book an Event</a>
             </div>
         </div>

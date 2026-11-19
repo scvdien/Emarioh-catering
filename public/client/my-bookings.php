@@ -124,7 +124,7 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
     <title>Emarioh Catering Services Client My Bookings</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/pages/client-bookings.css?v=20260903a">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20261119a">
 </head>
 <body class="dashboard-page client-dashboard-page client-my-bookings-page client-page--sticky-topbar" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -182,6 +182,7 @@ function emarioh_render_client_booking_rows(array $bookings, string $emptyText, 
                                 <option value="booking-rejected-tab">Rejected</option>
                             </select>
                         </label>
+                        <?= emarioh_render_client_mobile_notification_button($db, (int) $currentUser['id']) ?>
                     </div>
                 </header>
 

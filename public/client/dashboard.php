@@ -58,8 +58,8 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
     <title>Emarioh Catering Services Client Dashboard</title>
     <?= emarioh_render_vendor_head_assets(); ?>
     <link rel="stylesheet" href="assets/css/index.css?v=20260410f">
-    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20261011c">
-    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20260710a">
+    <link rel="stylesheet" href="assets/css/pages/client-dashboard.css?v=20261119a">
+    <link rel="stylesheet" href="assets/css/client-sidebar-parity.css?v=20261119a">
 </head>
 <body class="dashboard-page client-dashboard-page client-dashboard-home" data-auth-guard="client">
     <div class="dashboard-shell container-fluid">
@@ -130,6 +130,7 @@ $clientHeroCardStyle = $clientHeroImageUrl !== ''
             </aside>
 
             <div class="dashboard-main">
+                <?= emarioh_render_client_mobile_notification_button($db, (int) $currentUser['id'], false, 'client-mobile-notification-button--floating') ?>
                 <main class="dashboard-content client-dashboard-content">
                     <section class="dashboard-primary">
                         <section class="surface-card client-hero-card"<?= $clientHeroCardStyle !== '' ? ' style="' . $escape($clientHeroCardStyle) . '"' : '' ?>>
